@@ -24,6 +24,10 @@ type Config struct {
 		SECRET           string
 		SESSION_DURATION int
 	}
+	USERS struct {
+		USERNAME_MIN_CHARACTERS int
+		USERNAME_MAX_CHARACTERS int
+	}
 }
 
 var config *Config
@@ -31,8 +35,6 @@ var db *gorm.DB
 var router *gin.Engine
 
 func main() {
-	log.Println("starting server")
-
 	setupConfig()
 	setupDatabase()
 	setupRouter()
@@ -42,6 +44,7 @@ func main() {
 }
 
 func setupRouter() {
+	gin.SetMode(gin.ReleaseMode)
 	router = gin.New()
 
 	router.Use(cors.New(cors.Config{

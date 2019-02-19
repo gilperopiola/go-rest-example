@@ -12,5 +12,9 @@
     "jwt": {
         "secret": "a0#3ndl2",
         "session_duration": 14
+    },
+    "users": {
+        "username_min_characters": 4,
+        "username_max_characters": 15
     }
 }

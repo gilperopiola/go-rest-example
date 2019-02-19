@@ -14,6 +14,12 @@ import (
 func SignUp(c *gin.Context) {
 	var user User
 	c.BindJSON(&user)
+
+	if err := user.ValidateSignUp(); err != nil {
+		c.JSON(400, err.Error())
+		return
+	}
+
 	user.Password = hash(user.Email, user.Password)
 
 	if err := db.Create(&user).Error; err != nil {
@@ -30,6 +36,11 @@ func SignUp(c *gin.Context) {
 func LogIn(c *gin.Context) {
 	var user User
 	c.BindJSON(&user)
+
+	if err := user.ValidateLogIn(); err != nil {
+		c.JSON(400, err.Error())
+		return
+	}
 
 	var dbUser User
 	db.Where("username = ?", user.Username).First(&dbUser)
