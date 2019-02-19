@@ -1,0 +1,16 @@
+{
+    "port": "8000",
+    "debug": true,
+    "database": {
+        "type": "mysql",
+        "username": "root",
+        "password": "",
+        "hostname": "localhost",
+        "port": "3306",
+        "schema": "go-rest-example"
+    },
+    "jwt": {
+        "secret": "a0#3ndl2",
+        "session_duration": 14
+    }
+}
