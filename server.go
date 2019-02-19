@@ -60,6 +60,14 @@ func setupRouter() {
 		public.POST("/SignUp", SignUp)
 		public.POST("/LogIn", LogIn)
 	}
+
+	user := router.Group("/User")
+	{
+		user.POST("", CreateUser)
+		user.GET("/:id", ReadUser)
+		user.PUT("/:id", UpdateUser)
+	}
+	router.GET("/Users", ReadUsers)
 }
 
 func setupConfig() {

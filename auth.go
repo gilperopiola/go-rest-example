@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/sha1"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"time"
 
@@ -15,12 +16,13 @@ func SignUp(c *gin.Context) {
 	var user User
 	c.BindJSON(&user)
 
-	if err := user.ValidateSignUp(); err != nil {
+	if err := user.Validate(); err != nil {
 		c.JSON(400, err.Error())
 		return
 	}
 
 	user.Password = hash(user.Email, user.Password)
+	user.Active = true
 
 	if err := db.Create(&user).Error; err != nil {
 		c.JSON(400, beautifyDatabaseError(err))
@@ -77,4 +79,13 @@ func hash(salt string, data string) string {
 	hasher := sha1.New()
 	hasher.Write([]byte(salt + data))
 	return base64.URLEncoding.EncodeToString(hasher.Sum(nil))
+}
+
+//validators
+
+func (user *User) ValidateLogIn() error {
+	if len(user.Username) == 0 || len(user.Password) == 0 {
+		return errors.New("both fields required")
+	}
+	return nil
 }

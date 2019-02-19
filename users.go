@@ -2,12 +2,16 @@ package main
 
 import (
 	"errors"
+	"strconv"
 	"strings"
 	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 type UserActions interface {
-	ValidateSignUp() error
+	Validate() error
+
 	ValidateLogIn() error
 }
 
@@ -17,13 +21,93 @@ type User struct {
 	Email       string    `json:"email" gorm:"unique;not null"`
 	Password    string    `json:"password,omitempty" gorm:"not null"`
 	Admin       bool      `json:"admin" gorm:"default: 0"`
-	Active      bool      `json:"active" gorm:"default: 1"`
+	Active      bool      `json:"active"`
 	DateCreated time.Time `json:"date_created" gorm:"default: current_timestamp"`
 
-	Token string `json:"token" gorm:"-"`
+	Token string `json:"token,omitempty" gorm:"-"`
 }
 
-func (user *User) ValidateSignUp() error {
+func CreateUser(c *gin.Context) {
+	var user User
+	c.BindJSON(&user)
+
+	if err := user.Validate(); err != nil {
+		c.JSON(400, err.Error())
+		return
+	}
+
+	user.Password = hash(user.Email, user.Password)
+
+	if err := db.Create(&user).Error; err != nil {
+		c.JSON(400, beautifyDatabaseError(err))
+		return
+	}
+
+	user.Password = ""
+	c.JSON(200, user)
+}
+
+func ReadUser(c *gin.Context) {
+	id := c.Param("id")
+
+	var user User
+	if err := db.First(&user, id).Error; err != nil {
+		c.JSON(400, err.Error())
+		return
+	}
+
+	user.Password = ""
+	c.JSON(200, user)
+}
+
+func ReadUsers(c *gin.Context) {
+	var users []User
+
+	id, username, email, limit, offset, sortField, sortDir := getReadUsersParameters(c)
+
+	tempDB := db
+
+	if id > 0 {
+		tempDB = tempDB.Where("id = ?", id)
+	}
+
+	tempDB = tempDB.Where("username LIKE ? AND email LIKE ?", username, email)
+
+	if sortField != "" && (sortDir == "ASC" || sortDir == "DESC") {
+		tempDB = tempDB.Order(sortField + " " + sortDir)
+	}
+
+	tempDB.Limit(limit).Offset(offset).Find(&users)
+
+	for key := range users {
+		users[key].Password = ""
+	}
+
+	c.JSON(200, users)
+}
+
+func UpdateUser(c *gin.Context) {
+	id := c.Param("id")
+
+	var user User
+	if err := db.First(&user, id).Error; err != nil {
+		c.JSON(400, err.Error())
+		return
+	}
+
+	c.BindJSON(&user)
+	if err := db.Save(&user).Error; err != nil {
+		c.JSON(400, beautifyDatabaseError(err))
+		return
+	}
+
+	user.Password = ""
+	c.JSON(200, user)
+}
+
+//extra
+
+func (user *User) Validate() error {
 	if len(user.Username) == 0 || len(user.Email) == 0 || len(user.Password) == 0 {
 		return errors.New("all fields required")
 	}
@@ -39,9 +123,13 @@ func (user *User) ValidateSignUp() error {
 	return nil
 }
 
-func (user *User) ValidateLogIn() error {
-	if len(user.Username) == 0 || len(user.Password) == 0 {
-		return errors.New("both fields required")
-	}
-	return nil
+func getReadUsersParameters(c *gin.Context) (int, string, string, string, string, string, string) {
+	id, _ := strconv.Atoi(c.Query("ID"))
+	username := "%" + c.Query("Username") + "%"
+	email := "%" + c.Query("Email") + "%"
+	limit := c.Query("Limit")
+	offset := c.Query("Offset")
+	sortField := c.Query("SortField")
+	sortDir := c.Query("SortDir")
+	return id, username, email, limit, offset, sortField, sortDir
 }
