@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -11,7 +12,6 @@ import (
 
 type UserActions interface {
 	Validate() error
-
 	ValidateLogIn() error
 }
 
@@ -28,39 +28,59 @@ type User struct {
 }
 
 func CreateUser(c *gin.Context) {
+	role, _ := c.Get("Role")
+
+	if role != "Admin" {
+		c.JSON(http.StatusBadRequest, "must be admin")
+		return
+	}
+
 	var user User
 	c.BindJSON(&user)
 
 	if err := user.Validate(); err != nil {
-		c.JSON(400, err.Error())
+		c.JSON(http.StatusBadRequest, err.Error())
 		return
 	}
 
 	user.Password = hash(user.Email, user.Password)
 
 	if err := db.Create(&user).Error; err != nil {
-		c.JSON(400, beautifyDatabaseError(err))
+		c.JSON(http.StatusBadRequest, beautifyDatabaseError(err))
 		return
 	}
 
 	user.Password = ""
-	c.JSON(200, user)
+	c.JSON(http.StatusOK, user)
 }
 
 func ReadUser(c *gin.Context) {
-	id := c.Param("id")
+	role, _ := c.Get("Role")
 
+	if role != "Admin" {
+		c.JSON(400, "must be admin")
+		return
+	}
+
+	id := c.Param("id")
 	var user User
 	if err := db.First(&user, id).Error; err != nil {
-		c.JSON(400, err.Error())
+		c.JSON(http.StatusBadRequest, err.Error())
 		return
 	}
 
 	user.Password = ""
-	c.JSON(200, user)
+	c.JSON(http.StatusOK, user)
 }
 
 func ReadUsers(c *gin.Context) {
+	role, _ := c.Get("Role")
+
+	if role != "Admin" {
+		c.JSON(http.StatusBadRequest, "must be admin")
+		return
+	}
+
 	var users []User
 
 	id, username, email, limit, offset, sortField, sortDir := getReadUsersParameters(c)
@@ -83,26 +103,32 @@ func ReadUsers(c *gin.Context) {
 		users[key].Password = ""
 	}
 
-	c.JSON(200, users)
+	c.JSON(http.StatusOK, users)
 }
 
 func UpdateUser(c *gin.Context) {
-	id := c.Param("id")
+	role, _ := c.Get("Role")
 
+	if role != "Admin" {
+		c.JSON(400, "must be admin")
+		return
+	}
+
+	id := c.Param("id")
 	var user User
 	if err := db.First(&user, id).Error; err != nil {
-		c.JSON(400, err.Error())
+		c.JSON(http.StatusBadRequest, err.Error())
 		return
 	}
 
 	c.BindJSON(&user)
 	if err := db.Save(&user).Error; err != nil {
-		c.JSON(400, beautifyDatabaseError(err))
+		c.JSON(http.StatusBadRequest, beautifyDatabaseError(err))
 		return
 	}
 
 	user.Password = ""
-	c.JSON(200, user)
+	c.JSON(http.StatusOK, user)
 }
 
 //extra
@@ -120,6 +146,13 @@ func (user *User) Validate() error {
 		return errors.New("email format invalid")
 	}
 
+	return nil
+}
+
+func (user *User) ValidateLogIn() error {
+	if len(user.Username) == 0 || len(user.Password) == 0 {
+		return errors.New("both fields required")
+	}
 	return nil
 }
 

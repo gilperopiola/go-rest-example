@@ -14,7 +14,7 @@ import (
 
 //CreateUser
 
-func makeCreateUserTestRequest(username, email, password string, admin, active bool) *httptest.ResponseRecorder {
+func makeCreateUserTestRequest(token, username, email, password string, admin, active bool) *httptest.ResponseRecorder {
 	w := httptest.NewRecorder()
 	body := `{
 		"username": "` + username + `",
@@ -24,6 +24,7 @@ func makeCreateUserTestRequest(username, email, password string, admin, active b
 		"active": ` + strconv.FormatBool(active) + `
 	}`
 	req, _ := http.NewRequest("POST", "/User", bytes.NewReader([]byte(body)))
+	req.Header.Set("Authorization", token)
 	router.ServeHTTP(w, req)
 	return w
 }
@@ -31,7 +32,9 @@ func makeCreateUserTestRequest(username, email, password string, admin, active b
 func TestCreateUserEndpoint(t *testing.T) {
 	setupTesting()
 
-	w := makeCreateUserTestRequest("gilperopiola", "ferra.main@gmail.com", "password", true, true)
+	token := generateTestingAdminToken()
+
+	w := makeCreateUserTestRequest(token, "gilperopiola", "ferra.main@gmail.com", "password", true, true)
 	var user User
 	json.Unmarshal(w.Body.Bytes(), &user)
 	assert.Equal(t, 200, w.Code)
@@ -46,19 +49,21 @@ func TestCreateUserEndpoint(t *testing.T) {
 func TestCreateUserInvalid(t *testing.T) {
 	setupTesting()
 
-	w := makeCreateUserTestRequest("", "", "", false, false)
+	token := generateTestingAdminToken()
+
+	w := makeCreateUserTestRequest(token, "", "", "", false, false)
 	var user User
 	json.Unmarshal(w.Body.Bytes(), &user)
 	assert.Equal(t, 400, w.Code)
 	assert.True(t, strings.Contains(w.Body.String(), "all fields required"))
 
-	w = makeCreateUserTestRequest("gilperopiola", "ferra.main@gmail.com", "password", false, true)
-	w = makeCreateUserTestRequest("gilperopiola", "ferra.main@gmail.com", "password", false, true)
+	w = makeCreateUserTestRequest(token, "gilperopiola", "ferra.main@gmail.com", "password", false, true)
+	w = makeCreateUserTestRequest(token, "gilperopiola", "ferra.main@gmail.com", "password", false, true)
 	json.Unmarshal(w.Body.Bytes(), &user)
 	assert.Equal(t, 400, w.Code)
 	assert.True(t, strings.Contains(w.Body.String(), "username already in use"))
 
-	w = makeCreateUserTestRequest("gilperopiola2", "ferra.main@gmail.com", "password", false, true)
+	w = makeCreateUserTestRequest(token, "gilperopiola2", "ferra.main@gmail.com", "password", false, true)
 	json.Unmarshal(w.Body.Bytes(), &user)
 	assert.Equal(t, 400, w.Code)
 	assert.True(t, strings.Contains(w.Body.String(), "email already in use"))
@@ -66,9 +71,10 @@ func TestCreateUserInvalid(t *testing.T) {
 
 //ReadUser
 
-func makeReadUserTestRequest(id int) *httptest.ResponseRecorder {
+func makeReadUserTestRequest(token string, id int) *httptest.ResponseRecorder {
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/User/"+strconv.Itoa(id), nil)
+	req.Header.Set("Authorization", token)
 	router.ServeHTTP(w, req)
 	return w
 }
@@ -76,11 +82,13 @@ func makeReadUserTestRequest(id int) *httptest.ResponseRecorder {
 func TestReadUserEndpoint(t *testing.T) {
 	setupTesting()
 
-	w := makeCreateUserTestRequest("gilperopiola", "ferra.main@gmail.com", "password", true, true)
+	token := generateTestingAdminToken()
+
+	w := makeCreateUserTestRequest(token, "gilperopiola", "ferra.main@gmail.com", "password", true, true)
 	var admin User
 	json.Unmarshal(w.Body.Bytes(), &admin)
 
-	w = makeReadUserTestRequest(int(admin.ID))
+	w = makeReadUserTestRequest(token, int(admin.ID))
 	var user User
 	json.Unmarshal(w.Body.Bytes(), &user)
 	assert.Equal(t, 200, w.Code)
@@ -95,21 +103,24 @@ func TestReadUserEndpoint(t *testing.T) {
 func TestReadUserInvalid(t *testing.T) {
 	setupTesting()
 
-	w := makeCreateUserTestRequest("gilperopiola", "ferra.main@gmail.com", "password", true, true)
+	token := generateTestingAdminToken()
+
+	w := makeCreateUserTestRequest(token, "gilperopiola", "ferra.main@gmail.com", "password", true, true)
 	var admin User
 	json.Unmarshal(w.Body.Bytes(), &admin)
 
-	w = makeReadUserTestRequest(int(admin.ID + 99))
+	w = makeReadUserTestRequest(token, int(admin.ID+99))
 	assert.Equal(t, 400, w.Code)
 	assert.True(t, strings.Contains(w.Body.String(), "record not found"))
 }
 
 //ReadUsers
 
-func makeReadUsersTestRequest(id int, username, email string, limit, offset int, sortField, sortDir string) *httptest.ResponseRecorder {
+func makeReadUsersTestRequest(token string, id int, username, email string, limit, offset int, sortField, sortDir string) *httptest.ResponseRecorder {
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/Users?ID="+strconv.Itoa(id)+"&Username="+username+"&Email="+email+
 		"&Limit="+strconv.Itoa(limit)+"&Offset="+strconv.Itoa(offset)+"&SortField="+sortField+"&SortDir="+sortDir, nil)
+	req.Header.Set("Authorization", token)
 	router.ServeHTTP(w, req)
 	return w
 }
@@ -117,15 +128,17 @@ func makeReadUsersTestRequest(id int, username, email string, limit, offset int,
 func TestReadUsersEndpoint(t *testing.T) {
 	setupTesting()
 
-	w := makeCreateUserTestRequest("gilperopiola", "ferra.main@gmail.com", "password", true, true)
+	token := generateTestingAdminToken()
+
+	w := makeCreateUserTestRequest(token, "gilperopiola", "ferra.main@gmail.com", "password", true, true)
 	var admin User
 	json.Unmarshal(w.Body.Bytes(), &admin)
 
-	makeCreateUserTestRequest("gilperopiola2", "ferra.main2@gmail.com", "password", false, true)
-	makeCreateUserTestRequest("franco2", "franco@hotmail.com", "password", false, true)
-	makeCreateUserTestRequest("asdqwe", "qweasd@gmail.com", "password", false, true)
+	makeCreateUserTestRequest(token, "gilperopiola2", "ferra.main2@gmail.com", "password", false, true)
+	makeCreateUserTestRequest(token, "franco2", "franco@hotmail.com", "password", false, true)
+	makeCreateUserTestRequest(token, "asdqwe", "qweasd@gmail.com", "password", false, true)
 
-	w = makeReadUsersTestRequest(int(admin.ID), "", "", 100, 0, "", "")
+	w = makeReadUsersTestRequest(token, int(admin.ID), "", "", 100, 0, "", "")
 	var users []User
 	json.Unmarshal(w.Body.Bytes(), &users)
 	assert.Equal(t, 200, w.Code)
@@ -134,7 +147,7 @@ func TestReadUsersEndpoint(t *testing.T) {
 	assert.Equal(t, "gilperopiola", users[0].Username)
 	assert.Equal(t, "ferra.main@gmail.com", users[0].Email)
 
-	w = makeReadUsersTestRequest(0, "gilpero", "", 1, 0, "ID", "DESC")
+	w = makeReadUsersTestRequest(token, 0, "gilpero", "", 1, 0, "ID", "DESC")
 	json.Unmarshal(w.Body.Bytes(), &users)
 	assert.Equal(t, 200, w.Code)
 	assert.Equal(t, 1, len(users))
@@ -142,7 +155,7 @@ func TestReadUsersEndpoint(t *testing.T) {
 	assert.Equal(t, "gilperopiola2", users[0].Username)
 	assert.Equal(t, "ferra.main2@gmail.com", users[0].Email)
 
-	w = makeReadUsersTestRequest(0, "", "", 100, 2, "", "")
+	w = makeReadUsersTestRequest(token, 0, "", "", 100, 2, "", "")
 	json.Unmarshal(w.Body.Bytes(), &users)
 	assert.Equal(t, 200, w.Code)
 	assert.Equal(t, 2, len(users))
@@ -150,7 +163,7 @@ func TestReadUsersEndpoint(t *testing.T) {
 
 //UpdateUser
 
-func makeUpdateUserTestRequest(id int, username, email, password string, admin, active bool) *httptest.ResponseRecorder {
+func makeUpdateUserTestRequest(token string, id int, username, email, password string, admin, active bool) *httptest.ResponseRecorder {
 	w := httptest.NewRecorder()
 	body := `{
 		"username": "` + username + `",
@@ -160,6 +173,7 @@ func makeUpdateUserTestRequest(id int, username, email, password string, admin, 
 		"active": ` + strconv.FormatBool(active) + `
 	}`
 	req, _ := http.NewRequest("PUT", "/User/"+strconv.Itoa(id), bytes.NewReader([]byte(body)))
+	req.Header.Set("Authorization", token)
 	router.ServeHTTP(w, req)
 	return w
 }
@@ -167,11 +181,13 @@ func makeUpdateUserTestRequest(id int, username, email, password string, admin, 
 func TestUpdateUserEndpoint(t *testing.T) {
 	setupTesting()
 
-	w := makeCreateUserTestRequest("gilperopiola", "ferra.main@gmail.com", "password", true, true)
+	token := generateTestingAdminToken()
+
+	w := makeCreateUserTestRequest(token, "gilperopiola", "ferra.main@gmail.com", "password", true, true)
 	var admin User
 	json.Unmarshal(w.Body.Bytes(), &admin)
 
-	w = makeUpdateUserTestRequest(int(admin.ID), "gilperopiola2", "ferra.main2@gmail.com", "", false, false)
+	w = makeUpdateUserTestRequest(token, int(admin.ID), "gilperopiola2", "ferra.main2@gmail.com", "", false, false)
 	var user User
 	json.Unmarshal(w.Body.Bytes(), &user)
 	assert.Equal(t, 200, w.Code)
@@ -185,23 +201,25 @@ func TestUpdateUserEndpoint(t *testing.T) {
 func TestUpdateUserInvalid(t *testing.T) {
 	setupTesting()
 
-	w := makeUpdateUserTestRequest(0, "", "", "", false, false)
+	token := generateTestingAdminToken()
+
+	w := makeUpdateUserTestRequest(token, 0, "", "", "", false, false)
 	var user User
 	json.Unmarshal(w.Body.Bytes(), &user)
 	assert.Equal(t, 400, w.Code)
 	assert.True(t, strings.Contains(w.Body.String(), "record not found"))
 
-	w = makeCreateUserTestRequest("gilperopiola", "ferra.main@gmail.com", "password", true, true)
+	w = makeCreateUserTestRequest(token, "gilperopiola", "ferra.main@gmail.com", "password", true, true)
 	var admin User
 	json.Unmarshal(w.Body.Bytes(), &admin)
-	makeCreateUserTestRequest("gilperopiola2", "ferra.main2@gmail.com", "password", true, true)
+	makeCreateUserTestRequest(token, "gilperopiola2", "ferra.main2@gmail.com", "password", true, true)
 
-	w = makeUpdateUserTestRequest(int(admin.ID), "gilperopiola2", "ferra.main2@gmail.com", "", true, true)
+	w = makeUpdateUserTestRequest(token, int(admin.ID), "gilperopiola2", "ferra.main2@gmail.com", "", true, true)
 	json.Unmarshal(w.Body.Bytes(), &user)
 	assert.Equal(t, 400, w.Code)
 	assert.True(t, strings.Contains(w.Body.String(), "username already in use"))
 
-	w = makeUpdateUserTestRequest(int(admin.ID), "gilperopiola3", "ferra.main2@gmail.com", "", true, true)
+	w = makeUpdateUserTestRequest(token, int(admin.ID), "gilperopiola3", "ferra.main2@gmail.com", "", true, true)
 	json.Unmarshal(w.Body.Bytes(), &user)
 	assert.Equal(t, 400, w.Code)
 	assert.True(t, strings.Contains(w.Body.String(), "email already in use"))

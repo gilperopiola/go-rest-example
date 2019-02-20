@@ -61,13 +61,13 @@ func setupRouter() {
 		public.POST("/LogIn", LogIn)
 	}
 
-	user := router.Group("/User")
+	user := router.Group("/User", validateToken())
 	{
 		user.POST("", CreateUser)
 		user.GET("/:id", ReadUser)
 		user.PUT("/:id", UpdateUser)
 	}
-	router.GET("/Users", ReadUsers)
+	router.GET("/Users", validateToken(), ReadUsers)
 }
 
 func setupConfig() {
