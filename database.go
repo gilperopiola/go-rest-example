@@ -22,10 +22,14 @@ func setupDatabase() {
 
 func deleteAllRecords() {
 	db.Delete(User{})
+	db.Delete(Movie{})
+	db.Delete(Director{})
 }
 
 func runMigrations() {
 	db.AutoMigrate(&User{})
+	db.AutoMigrate(&Movie{})
+	db.AutoMigrate(&Director{})
 }
 
 func beautifyDatabaseError(err error) string {

@@ -40,6 +40,7 @@ func main() {
 	setupRouter()
 
 	defer db.Close()
+	log.Println("server started")
 	router.Run(":" + config.PORT)
 }
 
@@ -61,13 +62,30 @@ func setupRouter() {
 		public.POST("/LogIn", LogIn)
 	}
 
-	user := router.Group("/User", validateToken())
+	user := router.Group("/User", validateToken("Admin"))
 	{
 		user.POST("", CreateUser)
 		user.GET("/:id", ReadUser)
 		user.PUT("/:id", UpdateUser)
 	}
-	router.GET("/Users", validateToken(), ReadUsers)
+	router.GET("/Users", validateToken("Admin"), ReadUsers)
+
+	movie := router.Group("/Movie", validateToken("Admin"))
+	{
+		movie.POST("", CreateMovie)
+		movie.GET("/:id", ReadMovie)
+		movie.PUT("/:id", UpdateMovie)
+	}
+	router.GET("/Movies", validateToken("Admin"), ReadMovies)
+
+	director := router.Group("/Director", validateToken("Admin"))
+	{
+		director.POST("", CreateDirector)
+		director.GET("/:id", ReadDirector)
+		director.PUT("/:id", UpdateDirector)
+	}
+	router.GET("/Directors", validateToken("Admin"), ReadDirectors)
+
 }
 
 func setupConfig() {

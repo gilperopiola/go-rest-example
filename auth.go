@@ -61,7 +61,7 @@ func LogIn(c *gin.Context) {
 	c.JSON(http.StatusOK, dbUser)
 }
 
-func validateToken() gin.HandlerFunc {
+func validateToken(requiredRole string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tokenString := c.Request.Header.Get("Authorization")
 
@@ -81,6 +81,12 @@ func validateToken() gin.HandlerFunc {
 		}
 
 		if claims, ok := token.Claims.(*jwt.StandardClaims); ok && token.Valid {
+			if claims.Subject != requiredRole {
+				c.JSON(http.StatusUnauthorized, "authentication error")
+				c.Abort()
+				return
+			}
+			
 			c.Set("ID", claims.Id)
 			c.Set("Email", claims.Audience)
 			c.Set("Role", claims.Subject)
@@ -110,11 +116,11 @@ func generateToken(user User) string {
 	return tokenString
 }
 
-func generateTestingAdminToken() string {
+func generateTestingToken(role string) string {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
 		Id:        "1",
-		Audience:  "test@admin.com",
-		Subject:   "Admin",
+		Audience:  "test@test.com",
+		Subject:   role,
 		IssuedAt:  time.Now().Unix(),
 		ExpiresAt: time.Now().Add(time.Minute).Unix(),
 	})

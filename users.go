@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -28,15 +29,10 @@ type User struct {
 }
 
 func CreateUser(c *gin.Context) {
-	role, _ := c.Get("Role")
-
-	if role != "Admin" {
-		c.JSON(http.StatusBadRequest, "must be admin")
-		return
-	}
-
 	var user User
 	c.BindJSON(&user)
+
+	log.Println(user)
 
 	if err := user.Validate(); err != nil {
 		c.JSON(http.StatusBadRequest, err.Error())
@@ -55,13 +51,6 @@ func CreateUser(c *gin.Context) {
 }
 
 func ReadUser(c *gin.Context) {
-	role, _ := c.Get("Role")
-
-	if role != "Admin" {
-		c.JSON(400, "must be admin")
-		return
-	}
-
 	id := c.Param("id")
 	var user User
 	if err := db.First(&user, id).Error; err != nil {
@@ -74,13 +63,6 @@ func ReadUser(c *gin.Context) {
 }
 
 func ReadUsers(c *gin.Context) {
-	role, _ := c.Get("Role")
-
-	if role != "Admin" {
-		c.JSON(http.StatusBadRequest, "must be admin")
-		return
-	}
-
 	var users []User
 
 	id, username, email, limit, offset, sortField, sortDir := getReadUsersParameters(c)
@@ -107,13 +89,6 @@ func ReadUsers(c *gin.Context) {
 }
 
 func UpdateUser(c *gin.Context) {
-	role, _ := c.Get("Role")
-
-	if role != "Admin" {
-		c.JSON(400, "must be admin")
-		return
-	}
-
 	id := c.Param("id")
 	var user User
 	if err := db.First(&user, id).Error; err != nil {
