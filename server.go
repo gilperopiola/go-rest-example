@@ -38,12 +38,13 @@ var router *gin.Engine
 
 func main() {
 	setupConfig()
+	log.Println(config)
+
 	setupDatabase()
 	setupRouter()
 
 	defer db.Close()
 	log.Println("server started")
-	log.Println(config)
 	router.Run(":" + config.PORT)
 }
 
