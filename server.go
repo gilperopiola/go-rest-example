@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -38,14 +39,12 @@ var router *gin.Engine
 
 func main() {
 	setupConfig()
-	log.Println(config)
-
 	setupDatabase()
 	setupRouter()
 
 	defer db.Close()
 	log.Println("server started")
-	router.Run(":" + config.PORT)
+	router.Run(":" + os.Getenv("PORT"))
 }
 
 func setupRouter() {
