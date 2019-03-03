@@ -43,6 +43,7 @@ func main() {
 
 	defer db.Close()
 	log.Println("server started")
+	log.Println(config)
 	router.Run(":" + config.PORT)
 }
 
