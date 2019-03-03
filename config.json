@@ -1,13 +1,12 @@
 {
-    "port": "8000",
-    "debug": true,
+    "debug": false,
     "database": {
         "type": "mysql",
-        "username": "root",
-        "password": "",
-        "hostname": "localhost",
+        "username": "b83a97c317b7be",
+        "password": "09d4194a",
+        "hostname": "us-cdbr-iron-east-03.cleardb.net",
         "port": "3306",
-        "schema": "go-rest-example",
+        "schema": "heroku_2bec7511bfa574e",
         "purge": true
     },
     "jwt": {
