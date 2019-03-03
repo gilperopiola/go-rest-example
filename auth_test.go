@@ -15,7 +15,7 @@ func setupTesting() (string, string) {
 	setupConfig()
 	setupRouter()
 	setupDatabase()
-	deleteAllRecords()
+	purgeDatabase()
 
 	return generateTestingToken("User"), generateTestingToken("Admin")
 }

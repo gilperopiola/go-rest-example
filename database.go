@@ -17,19 +17,25 @@ func setupDatabase() {
 		log.Fatalf("error connecting to database: %v", err)
 	}
 
-	runMigrations()
+	if config.DATABASE.PURGE {
+		purgeDatabase()
+	}
+
+	migrateDatabase()
 }
 
-func deleteAllRecords() {
+func purgeDatabase() {
 	db.Delete(User{})
 	db.Delete(Movie{})
 	db.Delete(Director{})
+	db.Delete(Actor{})
 }
 
-func runMigrations() {
+func migrateDatabase() {
 	db.AutoMigrate(&User{})
 	db.AutoMigrate(&Movie{})
 	db.AutoMigrate(&Director{})
+	db.AutoMigrate(&Actor{})
 }
 
 func beautifyDatabaseError(err error) string {

@@ -166,7 +166,7 @@ func makeCreateUserTestRequest(token, username, email, password string, admin, a
 		"admin": ` + strconv.FormatBool(admin) + `,
 		"active": ` + strconv.FormatBool(active) + `
 	}`
-	req, _ := http.NewRequest("POST", "/User", bytes.NewReader([]byte(body)))
+	req, _ := http.NewRequest("POST", "/Admin/User", bytes.NewReader([]byte(body)))
 	req.Header.Set("Authorization", token)
 	router.ServeHTTP(w, req)
 	return w
@@ -174,7 +174,7 @@ func makeCreateUserTestRequest(token, username, email, password string, admin, a
 
 func makeReadUserTestRequest(token string, id int) *httptest.ResponseRecorder {
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/User/"+strconv.Itoa(id), nil)
+	req, _ := http.NewRequest("GET", "/Admin/User/"+strconv.Itoa(id), nil)
 	req.Header.Set("Authorization", token)
 	router.ServeHTTP(w, req)
 	return w
@@ -182,7 +182,7 @@ func makeReadUserTestRequest(token string, id int) *httptest.ResponseRecorder {
 
 func makeReadUsersTestRequest(token string, id int, username, email string, limit, offset int, sortField, sortDir string) *httptest.ResponseRecorder {
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/Users?ID="+strconv.Itoa(id)+"&Username="+username+"&Email="+email+
+	req, _ := http.NewRequest("GET", "/Admin/Users?ID="+strconv.Itoa(id)+"&Username="+username+"&Email="+email+
 		"&Limit="+strconv.Itoa(limit)+"&Offset="+strconv.Itoa(offset)+"&SortField="+sortField+"&SortDir="+sortDir, nil)
 	req.Header.Set("Authorization", token)
 	router.ServeHTTP(w, req)
@@ -198,7 +198,7 @@ func makeUpdateUserTestRequest(token string, id int, username, email, password s
 		"admin": ` + strconv.FormatBool(admin) + `,
 		"active": ` + strconv.FormatBool(active) + `
 	}`
-	req, _ := http.NewRequest("PUT", "/User/"+strconv.Itoa(id), bytes.NewReader([]byte(body)))
+	req, _ := http.NewRequest("PUT", "/Admin/User/"+strconv.Itoa(id), bytes.NewReader([]byte(body)))
 	req.Header.Set("Authorization", token)
 	router.ServeHTTP(w, req)
 	return w

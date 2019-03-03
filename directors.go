@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -11,7 +10,7 @@ import (
 )
 
 type DirectorActions interface {
-	GetMovies() *[]Movie
+	GetMovies() []*Movie
 
 	Validate() error
 }
@@ -22,7 +21,7 @@ type Director struct {
 	Active      bool      `json:"active" gorm:"default: 1"`
 	DateCreated time.Time `json:"date_created" gorm:"default: current_timestamp"`
 
-	Movies *[]Movie `json:"movies,omitempty" gorm:"-"`
+	Movies []*Movie `json:"movies,omitempty" gorm:"-"`
 }
 
 func CreateDirector(c *gin.Context) {
@@ -39,7 +38,7 @@ func CreateDirector(c *gin.Context) {
 		return
 	}
 
-	director.Movies = &[]Movie{}
+	director.Movies = []*Movie{}
 	c.JSON(http.StatusOK, director)
 }
 
@@ -75,7 +74,6 @@ func ReadDirectors(c *gin.Context) {
 	tempDB.Limit(limit).Offset(offset).Find(&directors)
 
 	for key := range directors {
-		log.Printf("%v", directors[key])
 		directors[key].Movies = directors[key].GetMovies()
 	}
 
@@ -101,15 +99,15 @@ func UpdateDirector(c *gin.Context) {
 }
 
 //extra
-func (director *Director) GetMovies() *[]Movie {
-	var movies []Movie
+func (director *Director) GetMovies() []*Movie {
+	var movies []*Movie
 	db.Where("director_id = ?", director.ID).Find(&movies)
 
 	for key := range movies {
 		movies[key].DirectorID = 0
 	}
 
-	return &movies
+	return movies
 }
 
 func (director *Director) Validate() error {

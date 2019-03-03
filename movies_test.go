@@ -164,7 +164,7 @@ func makeCreateMovieTestRequest(token, name string, active bool, directorID int)
 		"active": ` + strconv.FormatBool(active) + `,
 		"director_id": ` + strconv.Itoa(directorID) + `
 	}`
-	req, _ := http.NewRequest("POST", "/Movie", bytes.NewReader([]byte(body)))
+	req, _ := http.NewRequest("POST", "/Admin/Movie", bytes.NewReader([]byte(body)))
 	req.Header.Set("Authorization", token)
 	router.ServeHTTP(w, req)
 	return w
@@ -172,7 +172,7 @@ func makeCreateMovieTestRequest(token, name string, active bool, directorID int)
 
 func makeReadMovieTestRequest(token string, id int) *httptest.ResponseRecorder {
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/Movie/"+strconv.Itoa(id), nil)
+	req, _ := http.NewRequest("GET", "/Admin/Movie/"+strconv.Itoa(id), nil)
 	req.Header.Set("Authorization", token)
 	router.ServeHTTP(w, req)
 	return w
@@ -180,7 +180,7 @@ func makeReadMovieTestRequest(token string, id int) *httptest.ResponseRecorder {
 
 func makeReadMoviesTestRequest(token string, id int, name string, limit, offset int, sortField, sortDir string) *httptest.ResponseRecorder {
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/Movies?ID="+strconv.Itoa(id)+"&Name="+name+
+	req, _ := http.NewRequest("GET", "/Admin/Movies?ID="+strconv.Itoa(id)+"&Name="+name+
 		"&Limit="+strconv.Itoa(limit)+"&Offset="+strconv.Itoa(offset)+"&SortField="+sortField+"&SortDir="+sortDir, nil)
 	req.Header.Set("Authorization", token)
 	router.ServeHTTP(w, req)
@@ -194,7 +194,7 @@ func makeUpdateMovieTestRequest(token string, id int, name string, active bool, 
 		"active": ` + strconv.FormatBool(active) + `,
 		"director_id": ` + strconv.Itoa(directorID) + `
 	}`
-	req, _ := http.NewRequest("PUT", "/Movie/"+strconv.Itoa(id), bytes.NewReader([]byte(body)))
+	req, _ := http.NewRequest("PUT", "/Admin/Movie/"+strconv.Itoa(id), bytes.NewReader([]byte(body)))
 	req.Header.Set("Authorization", token)
 	router.ServeHTTP(w, req)
 	return w

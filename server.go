@@ -19,6 +19,8 @@ type Config struct {
 		HOSTNAME string
 		PORT     string
 		SCHEMA   string
+
+		PURGE bool
 	}
 	JWT struct {
 		SECRET           string
@@ -62,30 +64,45 @@ func setupRouter() {
 		public.POST("/LogIn", LogIn)
 	}
 
-	user := router.Group("/User", validateToken("Admin"))
+	user := router.Group("/User", validateToken("User"))
 	{
-		user.POST("", CreateUser)
-		user.GET("/:id", ReadUser)
-		user.PUT("/:id", UpdateUser)
+		user.GET("/Self", GetSelf)
 	}
-	router.GET("/Users", validateToken("Admin"), ReadUsers)
 
-	movie := router.Group("/Movie", validateToken("Admin"))
+	admin := router.Group("/Admin", validateToken("Admin"))
 	{
-		movie.POST("", CreateMovie)
-		movie.GET("/:id", ReadMovie)
-		movie.PUT("/:id", UpdateMovie)
-	}
-	router.GET("/Movies", validateToken("Admin"), ReadMovies)
+		user := admin.Group("/User")
+		{
+			user.POST("", CreateUser)
+			user.GET("/:id", ReadUser)
+			user.PUT("/:id", UpdateUser)
+		}
+		admin.GET("/Users", ReadUsers)
 
-	director := router.Group("/Director", validateToken("Admin"))
-	{
-		director.POST("", CreateDirector)
-		director.GET("/:id", ReadDirector)
-		director.PUT("/:id", UpdateDirector)
-	}
-	router.GET("/Directors", validateToken("Admin"), ReadDirectors)
+		movie := admin.Group("/Movie")
+		{
+			movie.POST("", CreateMovie)
+			movie.GET("/:id", ReadMovie)
+			movie.PUT("/:id", UpdateMovie)
+		}
+		admin.GET("/Movies", ReadMovies)
 
+		director := admin.Group("/Director")
+		{
+			director.POST("", CreateDirector)
+			director.GET("/:id", ReadDirector)
+			director.PUT("/:id", UpdateDirector)
+		}
+		admin.GET("/Directors", ReadDirectors)
+
+		actor := admin.Group("/Actor")
+		{
+			actor.POST("", CreateActor)
+			actor.GET("/:id", ReadActor)
+			actor.PUT("/:id", UpdateActor)
+		}
+		admin.GET("/Actors", ReadActors)
+	}
 }
 
 func setupConfig() {

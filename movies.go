@@ -12,6 +12,7 @@ import (
 
 type MovieActions interface {
 	GetDirector() *Director
+	GetActors() []*Actor
 
 	Validate() error
 }
@@ -25,7 +26,8 @@ type Movie struct {
 	Active      bool      `json:"active" gorm:"default: 1"`
 	DateCreated time.Time `json:"date_created" gorm:"default: current_timestamp"`
 
-	Director *Director `json:"director,omitempty" gorm:"-"`
+	Director *Director `json:"director,omitempty" db:"-"`
+	Actors   []*Actor  `json:"actors" gorm:"many2many:movie_actors" db:"-"`
 }
 
 func CreateMovie(c *gin.Context) {
@@ -44,6 +46,7 @@ func CreateMovie(c *gin.Context) {
 
 	movie.Director = movie.GetDirector()
 	movie.DirectorID = 0
+	movie.Actors = movie.GetActors()
 	c.JSON(http.StatusOK, movie)
 }
 
@@ -57,6 +60,7 @@ func ReadMovie(c *gin.Context) {
 
 	movie.Director = movie.GetDirector()
 	movie.DirectorID = 0
+	movie.Actors = movie.GetActors()
 	c.JSON(http.StatusOK, movie)
 }
 
@@ -82,6 +86,7 @@ func ReadMovies(c *gin.Context) {
 	for key := range movies {
 		movies[key].Director = movies[key].GetDirector()
 		movies[key].DirectorID = 0
+		movies[key].Actors = movies[key].GetActors()
 	}
 
 	c.JSON(http.StatusOK, movies)
@@ -105,7 +110,7 @@ func UpdateMovie(c *gin.Context) {
 
 	movie.Director = movie.GetDirector()
 	movie.DirectorID = 0
-
+	movie.Actors = movie.GetActors()
 	c.JSON(http.StatusOK, movie)
 }
 
@@ -114,6 +119,12 @@ func (movie *Movie) GetDirector() *Director {
 	var director Director
 	db.Where("id = ?", movie.DirectorID).Find(&director)
 	return &director
+}
+
+func (movie *Movie) GetActors() []*Actor {
+	var actors []*Actor
+	db.Model(&movie).Association("Actors").Find(&actors)
+	return actors
 }
 
 func (movie *Movie) Validate() error {

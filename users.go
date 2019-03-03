@@ -106,6 +106,18 @@ func UpdateUser(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
+func GetSelf(c *gin.Context) {
+	id, _ := c.Get("ID")
+	var user User
+	if err := db.First(&user, id).Error; err != nil {
+		c.JSON(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	user.Password = ""
+	c.JSON(http.StatusOK, user)
+}
+
 //extra
 
 func (user *User) Validate() error {

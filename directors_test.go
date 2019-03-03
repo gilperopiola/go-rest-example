@@ -147,7 +147,7 @@ func makeCreateDirectorTestRequest(token, name string, active bool) *httptest.Re
 		"name": "` + name + `",
 		"active": ` + strconv.FormatBool(active) + `
 	}`
-	req, _ := http.NewRequest("POST", "/Director", bytes.NewReader([]byte(body)))
+	req, _ := http.NewRequest("POST", "/Admin/Director", bytes.NewReader([]byte(body)))
 	req.Header.Set("Authorization", token)
 	router.ServeHTTP(w, req)
 	return w
@@ -155,7 +155,7 @@ func makeCreateDirectorTestRequest(token, name string, active bool) *httptest.Re
 
 func makeReadDirectorTestRequest(token string, id int) *httptest.ResponseRecorder {
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/Director/"+strconv.Itoa(id), nil)
+	req, _ := http.NewRequest("GET", "/Admin/Director/"+strconv.Itoa(id), nil)
 	req.Header.Set("Authorization", token)
 	router.ServeHTTP(w, req)
 	return w
@@ -163,7 +163,7 @@ func makeReadDirectorTestRequest(token string, id int) *httptest.ResponseRecorde
 
 func makeReadDirectorsTestRequest(token string, id int, name string, limit, offset int, sortField, sortDir string) *httptest.ResponseRecorder {
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/Directors?ID="+strconv.Itoa(id)+"&Name="+name+
+	req, _ := http.NewRequest("GET", "/Admin/Directors?ID="+strconv.Itoa(id)+"&Name="+name+
 		"&Limit="+strconv.Itoa(limit)+"&Offset="+strconv.Itoa(offset)+"&SortField="+sortField+"&SortDir="+sortDir, nil)
 	req.Header.Set("Authorization", token)
 	router.ServeHTTP(w, req)
@@ -176,7 +176,7 @@ func makeUpdateDirectorTestRequest(token string, id int, name string, active boo
 		"name": "` + name + `",
 		"active": ` + strconv.FormatBool(active) + `
 	}`
-	req, _ := http.NewRequest("PUT", "/Director/"+strconv.Itoa(id), bytes.NewReader([]byte(body)))
+	req, _ := http.NewRequest("PUT", "/Admin/Director/"+strconv.Itoa(id), bytes.NewReader([]byte(body)))
 	req.Header.Set("Authorization", token)
 	router.ServeHTTP(w, req)
 	return w
