@@ -7,7 +7,7 @@
         "hostname": "us-cdbr-iron-east-03.cleardb.net",
         "port": "3306",
         "schema": "heroku_2bec7511bfa574e",
-        "purge": true
+        "purge": false
     },
     "jwt": {
         "secret": "a0#3ndl2",

@@ -48,7 +48,7 @@ func main() {
 }
 
 func setupRouter() {
-	gin.SetMode(gin.ReleaseMode)
+	gin.SetMode(gin.DebugMode)
 	router = gin.New()
 
 	router.Use(cors.New(cors.Config{
@@ -107,7 +107,7 @@ func setupRouter() {
 }
 
 func setupConfig() {
-	viper.SetConfigName("config") //config filename without the .JSON or .YAML extension
+	viper.SetConfigName("config_dev") //config filename without the .JSON or .YAML extension
 	viper.AddConfigPath(".")
 
 	if err := viper.ReadInConfig(); err != nil {
@@ -117,4 +117,6 @@ func setupConfig() {
 	if err := viper.Unmarshal(&config); err != nil {
 		log.Fatalf("error unmarshaling config: %v", err)
 	}
+
+	os.Setenv("PORT", config.PORT)
 }

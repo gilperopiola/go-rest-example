@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"strconv"
 	"strings"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -29,6 +30,7 @@ func purgeDatabase() {
 	db.Delete(Movie{})
 	db.Delete(Director{})
 	db.Delete(Actor{})
+	db.Exec("DELETE FROM movie_actors")
 }
 
 func migrateDatabase() {
@@ -36,6 +38,26 @@ func migrateDatabase() {
 	db.AutoMigrate(&Movie{})
 	db.AutoMigrate(&Director{})
 	db.AutoMigrate(&Actor{})
+}
+
+func loadTestingData() {
+	for i := 1; i <= 3; i++ {
+		db.Create(&User{
+			Username: "username " + strconv.Itoa(i),
+			Email:    "email " + strconv.Itoa(i),
+			Password: "password " + strconv.Itoa(i),
+		})
+
+		db.Create(&Movie{
+			Name:   "name " + strconv.Itoa(i),
+			Year:   i,
+			Rating: float32(i),
+			Director: &Director{
+				Name: "name " + strconv.Itoa(i),
+			},
+			Actors: []*Actor{{Name: "name " + strconv.Itoa(i) + "a"}, {Name: "name " + strconv.Itoa(i) + "b"}},
+		})
+	}
 }
 
 func beautifyDatabaseError(err error) string {

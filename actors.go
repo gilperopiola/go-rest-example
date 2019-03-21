@@ -39,7 +39,7 @@ func CreateActor(c *gin.Context) {
 		return
 	}
 
-	actor.Movies = []*Movie{}
+	actor.Movies = actor.GetMovies()
 	c.JSON(http.StatusOK, actor)
 }
 

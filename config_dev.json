@@ -8,7 +8,7 @@
         "hostname": "localhost",
         "port": "3306",
         "schema": "go-rest-example",
-        "purge": true
+        "purge": false
     },
     "jwt": {
         "secret": "a0#3ndl2",
