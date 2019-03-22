@@ -6,195 +6,125 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strconv"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
 //CreateMovie
-
-func TestCreateMovieEndpoint(t *testing.T) {
+func TestCreateMovie(t *testing.T) {
 	_, adminToken := setupTesting()
 
-	var director Director
-	success := makeCreateDirectorTestRequest(adminToken, "Wes Anderson", true)
-	json.Unmarshal(success.Body.Bytes(), &director)
+	director := database.GetTestingDirectors()[0]
+	movieInput := Movie{Name: "name", Year: 1, Rating: 1, Active: true, DirectorID: int(director.ID)}
+	movieOutput := Movie{}
 
-	var movie Movie
-	success = makeCreateMovieTestRequest(adminToken, "Moonrise Kingdom", true, int(director.ID))
-	json.Unmarshal(success.Body.Bytes(), &movie)
-	assert.Equal(t, http.StatusOK, success.Code)
-	assert.NotEmpty(t, movie.ID)
-	assert.Equal(t, "Moonrise Kingdom", movie.Name)
-	assert.True(t, movie.Active)
-	assert.NotEmpty(t, movie.DateCreated)
-}
+	response := makeMovieTestRequest(adminToken, "POST", "/Admin/Movie", &movieInput)
+	json.Unmarshal(response.Body.Bytes(), &movieOutput)
+	assert.Equal(t, http.StatusOK, response.Code)
 
-func TestCreateMovieInvalid(t *testing.T) {
-	_, adminToken := setupTesting()
+	assert.Equal(t, movieInput.Name, movieOutput.Name)
+	assert.Equal(t, movieInput.Year, movieOutput.Year)
+	assert.Equal(t, movieInput.Rating, movieOutput.Rating)
+	assert.Equal(t, movieInput.Active, movieOutput.Active)
+	assert.Equal(t, director, movieOutput.Director)
 
-	var director Director
-	success := makeCreateDirectorTestRequest(adminToken, "Wes Anderson", true)
-	json.Unmarshal(success.Body.Bytes(), &director)
+	//errors
 
-	makeCreateMovieTestRequest(adminToken, "Moonrise Kingdom", true, int(director.ID))
-	empty := makeCreateMovieTestRequest(adminToken, "", false, int(director.ID))
-	noDirector := makeCreateMovieTestRequest(adminToken, "Movie", false, 0)
-
-	assert.Equal(t, http.StatusBadRequest, empty.Code)
-	assert.True(t, strings.Contains(empty.Body.String(), "name and director required"))
-
-	assert.Equal(t, http.StatusBadRequest, noDirector.Code)
-	assert.True(t, strings.Contains(noDirector.Body.String(), "name and director required"))
+	movieInput = Movie{}
+	response = makeMovieTestRequest(adminToken, "POST", "/Admin/Movie", &movieInput)
+	assert.Equal(t, http.StatusBadRequest, response.Code)
 }
 
 //ReadMovie
-
-func TestReadMovieEndpoint(t *testing.T) {
+func TestReadMovie(t *testing.T) {
 	_, adminToken := setupTesting()
 
-	var director Director
-	success := makeCreateDirectorTestRequest(adminToken, "Wes Anderson", true)
-	json.Unmarshal(success.Body.Bytes(), &director)
+	movie := database.GetTestingMovies()[0]
 
-	var movie Movie
-	success = makeCreateMovieTestRequest(adminToken, "Moonrise Kingdom", true, int(director.ID))
-	json.Unmarshal(success.Body.Bytes(), &movie)
+	movieInput := Movie{}
+	movieOutput := Movie{}
 
-	success = makeReadMovieTestRequest(adminToken, int(movie.ID))
-	json.Unmarshal(success.Body.Bytes(), &movie)
-	assert.Equal(t, http.StatusOK, success.Code)
-	assert.NotEmpty(t, movie.ID)
-	assert.Equal(t, "Moonrise Kingdom", movie.Name)
-	assert.True(t, movie.Active)
-	assert.NotEmpty(t, movie.DateCreated)
-}
+	response := makeMovieTestRequest(adminToken, "GET", "/Admin/Movie/"+strconv.Itoa(int(movie.ID)), &movieInput)
+	json.Unmarshal(response.Body.Bytes(), &movieOutput)
+	assert.Equal(t, http.StatusOK, response.Code)
 
-func TestReadMovieInvalid(t *testing.T) {
-	_, adminToken := setupTesting()
+	assert.Equal(t, movie.Name, movieOutput.Name)
+	assert.Equal(t, movie.Year, movieOutput.Year)
+	assert.Equal(t, movie.Rating, movieOutput.Rating)
+	assert.Equal(t, movie.Active, movieOutput.Active)
+	assert.Equal(t, movie.GetDirector(), movieOutput.Director)
 
-	notFound := makeReadMovieTestRequest(adminToken, 1)
-	assert.Equal(t, http.StatusBadRequest, notFound.Code)
-	assert.True(t, strings.Contains(notFound.Body.String(), "record not found"))
+	//errors
+
+	movieInput = Movie{}
+	response = makeMovieTestRequest(adminToken, "GET", "/Admin/Movie/0", &movieInput)
+	assert.Equal(t, http.StatusBadRequest, response.Code)
 }
 
 //ReadMovies
-
-func TestReadMoviesEndpoint(t *testing.T) {
+func TestReadMovies(t *testing.T) {
 	_, adminToken := setupTesting()
 
-	var director Director
-	success := makeCreateDirectorTestRequest(adminToken, "Wes Anderson", true)
-	json.Unmarshal(success.Body.Bytes(), &director)
+	movies := database.GetTestingMovies()
+	movieInput := Movie{Name: "name"}
+	moviesOutput := []Movie{}
 
-	makeCreateMovieTestRequest(adminToken, "Moonrise Kingdom", true, int(director.ID))
-	makeCreateMovieTestRequest(adminToken, "Moonrise Kingdom 2", true, int(director.ID))
-	makeCreateMovieTestRequest(adminToken, "Bridge of Spies", true, int(director.ID))
-	makeCreateMovieTestRequest(adminToken, "Alice in Wonderland", true, int(director.ID))
+	response := makeReadMoviesTestRequest(adminToken, &movieInput, 2, 1, "year", "DESC")
+	json.Unmarshal(response.Body.Bytes(), &moviesOutput)
+	assert.Equal(t, http.StatusOK, response.Code)
 
-	var movies []Movie
-	success = makeReadMoviesTestRequest(adminToken, 0, "Moonrise", 1, 0, "ID", "DESC")
-	json.Unmarshal(success.Body.Bytes(), &movies)
-	assert.Equal(t, http.StatusOK, success.Code)
-	assert.Equal(t, 1, len(movies))
-	assert.NotEmpty(t, movies[0].ID)
-	assert.Equal(t, "Moonrise Kingdom 2", movies[0].Name)
-
-	success = makeReadMoviesTestRequest(adminToken, int(movies[0].ID), "", 100, 0, "", "")
-	json.Unmarshal(success.Body.Bytes(), &movies)
-	assert.Equal(t, http.StatusOK, success.Code)
-	assert.Equal(t, 1, len(movies))
-	assert.NotEmpty(t, movies[0].ID)
-	assert.Equal(t, "Moonrise Kingdom 2", movies[0].Name)
-
-	success = makeReadMoviesTestRequest(adminToken, 0, "", 2, 2, "Name", "DESC")
-	json.Unmarshal(success.Body.Bytes(), &movies)
-	assert.Equal(t, http.StatusOK, success.Code)
-	assert.Equal(t, 2, len(movies))
-	assert.Equal(t, "Bridge of Spies", movies[0].Name)
-	assert.Equal(t, "Alice in Wonderland", movies[1].Name)
+	assert.Equal(t, 2, len(moviesOutput))
+	assert.Equal(t, movies[0].Name, moviesOutput[1].Name)
+	assert.Equal(t, movies[1].Name, moviesOutput[0].Name)
 }
 
 //UpdateMovie
-
 func TestUpdateMovieEndpoint(t *testing.T) {
 	_, adminToken := setupTesting()
 
-	var director Director
-	success := makeCreateDirectorTestRequest(adminToken, "Wes Anderson", true)
-	json.Unmarshal(success.Body.Bytes(), &director)
-	var director2 Director
-	success = makeCreateDirectorTestRequest(adminToken, "Steven Spielberg", true)
-	json.Unmarshal(success.Body.Bytes(), &director2)
+	movies := database.GetTestingMovies()
+	movieInput := Movie{Name: "name", Year: 2, Rating: 2, Active: false, DirectorID: int(movies[0].GetDirector().ID + 1)}
+	movieOutput := Movie{}
 
-	var movie Movie
-	success = makeCreateMovieTestRequest(adminToken, "Moonrise Kingdom", true, int(director.ID))
-	json.Unmarshal(success.Body.Bytes(), &movie)
+	response := makeMovieTestRequest(adminToken, "PUT", "/Admin/Movie/"+strconv.Itoa(int(movies[0].ID)), &movieInput)
+	json.Unmarshal(response.Body.Bytes(), &movieOutput)
+	assert.Equal(t, http.StatusOK, response.Code)
 
-	success = makeUpdateMovieTestRequest(adminToken, int(movie.ID), "Bridge of Spies", false, int(director2.ID))
-	json.Unmarshal(success.Body.Bytes(), &movie)
-	assert.Equal(t, http.StatusOK, success.Code)
-	assert.NotEmpty(t, movie.ID)
-	assert.Equal(t, "Bridge of Spies", movie.Name)
-	assert.False(t, movie.Active)
-	assert.Equal(t, "Steven Spielberg", movie.Director.Name)
-}
+	assert.Equal(t, movieInput.Name, movieOutput.Name)
+	assert.Equal(t, movieInput.Year, movieOutput.Year)
+	assert.Equal(t, movieInput.Rating, movieOutput.Rating)
+	assert.Equal(t, movieInput.Active, movieOutput.Active)
+	assert.Equal(t, movieInput.GetDirector(), movieOutput.Director)
 
-func TestUpdateMovieInvalid(t *testing.T) {
-	_, adminToken := setupTesting()
+	//errors
 
-	var director Director
-	success := makeCreateDirectorTestRequest(adminToken, "Wes Anderson", true)
-	json.Unmarshal(success.Body.Bytes(), &director)
+	movieInput = Movie{ID: movies[2].ID + 1}
+	response = makeMovieTestRequest(adminToken, "PUT", "/Admin/Movie/"+strconv.Itoa(int(movieInput.ID)), &movieInput)
+	assert.Equal(t, http.StatusBadRequest, response.Code)
 
-	var movie Movie
-	notFound := makeUpdateMovieTestRequest(adminToken, 0, "", false, int(director.ID))
-	json.Unmarshal(notFound.Body.Bytes(), &movie)
-	assert.Equal(t, http.StatusBadRequest, notFound.Code)
-	assert.True(t, strings.Contains(notFound.Body.String(), "record not found"))
+	movieInput = Movie{ID: movies[0].ID, Name: movies[1].Name}
+	response = makeMovieTestRequest(adminToken, "PUT", "/Admin/Movie/"+strconv.Itoa(int(movieInput.ID)), &movieInput)
+	assert.Equal(t, http.StatusBadRequest, response.Code)
 }
 
 //Helpers
-
-func makeCreateMovieTestRequest(token, name string, active bool, directorID int) *httptest.ResponseRecorder {
+func makeMovieTestRequest(token, method, url string, movie *Movie) *httptest.ResponseRecorder {
 	w := httptest.NewRecorder()
-	body := `{
-		"name": "` + name + `",
-		"active": ` + strconv.FormatBool(active) + `,
-		"director_id": ` + strconv.Itoa(directorID) + `
-	}`
-	req, _ := http.NewRequest("POST", "/Admin/Movie", bytes.NewReader([]byte(body)))
+	body := movie.GetJSONBody()
+	req, _ := http.NewRequest(method, url, bytes.NewReader([]byte(body)))
 	req.Header.Set("Authorization", token)
 	router.ServeHTTP(w, req)
 	return w
 }
 
-func makeReadMovieTestRequest(token string, id int) *httptest.ResponseRecorder {
+func makeReadMoviesTestRequest(token string, movie *Movie, limit, offset int, sortField, sortDir string) *httptest.ResponseRecorder {
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/Admin/Movie/"+strconv.Itoa(id), nil)
-	req.Header.Set("Authorization", token)
-	router.ServeHTTP(w, req)
-	return w
-}
 
-func makeReadMoviesTestRequest(token string, id int, name string, limit, offset int, sortField, sortDir string) *httptest.ResponseRecorder {
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/Admin/Movies?ID="+strconv.Itoa(id)+"&Name="+name+
-		"&Limit="+strconv.Itoa(limit)+"&Offset="+strconv.Itoa(offset)+"&SortField="+sortField+"&SortDir="+sortDir, nil)
-	req.Header.Set("Authorization", token)
-	router.ServeHTTP(w, req)
-	return w
-}
+	url := strconv.Itoa(int(movie.ID)) + "&Name=" + movie.Name + "&Limit=" + strconv.Itoa(limit) + "&Offset=" + strconv.Itoa(offset) +
+		"&SortField=" + sortField + "&SortDir=" + sortDir
 
-func makeUpdateMovieTestRequest(token string, id int, name string, active bool, directorID int) *httptest.ResponseRecorder {
-	w := httptest.NewRecorder()
-	body := `{
-		"name": "` + name + `",
-		"active": ` + strconv.FormatBool(active) + `,
-		"director_id": ` + strconv.Itoa(directorID) + `
-	}`
-	req, _ := http.NewRequest("PUT", "/Admin/Movie/"+strconv.Itoa(id), bytes.NewReader([]byte(body)))
+	req, _ := http.NewRequest("GET", "/Admin/Movies?ID="+url, nil)
 	req.Header.Set("Authorization", token)
 	router.ServeHTTP(w, req)
 	return w

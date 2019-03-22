@@ -2,10 +2,8 @@ package main
 
 import (
 	"errors"
-	"log"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -14,6 +12,8 @@ import (
 type UserActions interface {
 	Validate() error
 	ValidateLogIn() error
+
+	GetJSONBody() string
 }
 
 type User struct {
@@ -32,8 +32,6 @@ func CreateUser(c *gin.Context) {
 	var user User
 	c.BindJSON(&user)
 
-	log.Println(user)
-
 	if err := user.Validate(); err != nil {
 		c.JSON(http.StatusBadRequest, err.Error())
 		return
@@ -41,8 +39,8 @@ func CreateUser(c *gin.Context) {
 
 	user.Password = hash(user.Email, user.Password)
 
-	if err := db.Create(&user).Error; err != nil {
-		c.JSON(http.StatusBadRequest, beautifyDatabaseError(err))
+	if err := database.Create(&user).Error; err != nil {
+		c.JSON(http.StatusBadRequest, database.BeautifyError(err))
 		return
 	}
 
@@ -53,7 +51,7 @@ func CreateUser(c *gin.Context) {
 func ReadUser(c *gin.Context) {
 	id := c.Param("id")
 	var user User
-	if err := db.First(&user, id).Error; err != nil {
+	if err := database.First(&user, id).Error; err != nil {
 		c.JSON(http.StatusBadRequest, err.Error())
 		return
 	}
@@ -67,19 +65,19 @@ func ReadUsers(c *gin.Context) {
 
 	id, username, email, limit, offset, sortField, sortDir := getReadUsersParameters(c)
 
-	tempDB := db
+	tempDatabase := database
 
 	if id > 0 {
-		tempDB = tempDB.Where("id = ?", id)
+		tempDatabase.DB = tempDatabase.Where("id = ?", id)
 	}
 
-	tempDB = tempDB.Where("username LIKE ? AND email LIKE ?", username, email)
+	tempDatabase.DB = tempDatabase.Where("username LIKE ? AND email LIKE ?", username, email)
 
 	if sortField != "" && (sortDir == "ASC" || sortDir == "DESC") {
-		tempDB = tempDB.Order(sortField + " " + sortDir)
+		tempDatabase.DB = tempDatabase.Order(sortField + " " + sortDir)
 	}
 
-	tempDB.Limit(limit).Offset(offset).Find(&users)
+	tempDatabase.Limit(limit).Offset(offset).Find(&users)
 
 	for key := range users {
 		users[key].Password = ""
@@ -91,14 +89,14 @@ func ReadUsers(c *gin.Context) {
 func UpdateUser(c *gin.Context) {
 	id := c.Param("id")
 	var user User
-	if err := db.First(&user, id).Error; err != nil {
+	if err := database.First(&user, id).Error; err != nil {
 		c.JSON(http.StatusBadRequest, err.Error())
 		return
 	}
 
 	c.BindJSON(&user)
-	if err := db.Save(&user).Error; err != nil {
-		c.JSON(http.StatusBadRequest, beautifyDatabaseError(err))
+	if err := database.Save(&user).Error; err != nil {
+		c.JSON(http.StatusBadRequest, database.BeautifyError(err))
 		return
 	}
 
@@ -109,7 +107,7 @@ func UpdateUser(c *gin.Context) {
 func GetSelf(c *gin.Context) {
 	id, _ := c.Get("ID")
 	var user User
-	if err := db.First(&user, id).Error; err != nil {
+	if err := database.First(&user, id).Error; err != nil {
 		c.JSON(http.StatusBadRequest, err.Error())
 		return
 	}
@@ -129,10 +127,6 @@ func (user *User) Validate() error {
 		return errors.New("username must have between " + string(config.USERS.USERNAME_MIN_CHARACTERS) + " and " + string(config.USERS.USERNAME_MAX_CHARACTERS) + " characters")
 	}
 
-	if !strings.Contains(user.Email, "@") {
-		return errors.New("email format invalid")
-	}
-
 	return nil
 }
 
@@ -141,6 +135,18 @@ func (user *User) ValidateLogIn() error {
 		return errors.New("both fields required")
 	}
 	return nil
+}
+
+func (user *User) GetJSONBody() string {
+	body := `{
+		"username": "` + user.Username + `",
+		"email": "` + user.Email + `",
+		"password": "` + user.Password + `",
+		"admin": ` + strconv.FormatBool(user.Admin) + `,
+		"active": ` + strconv.FormatBool(user.Active) + `
+	}`
+
+	return body
 }
 
 func getReadUsersParameters(c *gin.Context) (int, string, string, string, string, string, string) {

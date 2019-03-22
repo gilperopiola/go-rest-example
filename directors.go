@@ -13,6 +13,7 @@ type DirectorActions interface {
 	GetMovies() []*Movie
 
 	Validate() error
+	GetJSONBody() string
 }
 
 type Director struct {
@@ -33,8 +34,8 @@ func CreateDirector(c *gin.Context) {
 		return
 	}
 
-	if err := db.Create(&director).Error; err != nil {
-		c.JSON(http.StatusBadRequest, beautifyDatabaseError(err))
+	if err := database.Create(&director).Error; err != nil {
+		c.JSON(http.StatusBadRequest, database.BeautifyError(err))
 		return
 	}
 
@@ -45,7 +46,7 @@ func CreateDirector(c *gin.Context) {
 func ReadDirector(c *gin.Context) {
 	id := c.Param("id")
 	var director Director
-	if err := db.First(&director, id).Error; err != nil {
+	if err := database.First(&director, id).Error; err != nil {
 		c.JSON(http.StatusBadRequest, err.Error())
 		return
 	}
@@ -59,19 +60,19 @@ func ReadDirectors(c *gin.Context) {
 
 	id, name, limit, offset, sortField, sortDir := getReadDirectorsParameters(c)
 
-	tempDB := db
+	tempDatabase := database
 
 	if id > 0 {
-		tempDB = tempDB.Where("id = ?", id)
+		tempDatabase.DB = tempDatabase.Where("id = ?", id)
 	}
 
-	tempDB = tempDB.Where("name LIKE ?", name)
+	tempDatabase.DB = tempDatabase.Where("name LIKE ?", name)
 
 	if sortField != "" && (sortDir == "ASC" || sortDir == "DESC") {
-		tempDB = tempDB.Order(sortField + " " + sortDir)
+		tempDatabase.DB = tempDatabase.Order(sortField + " " + sortDir)
 	}
 
-	tempDB.Limit(limit).Offset(offset).Find(&directors)
+	tempDatabase.Limit(limit).Offset(offset).Find(&directors)
 
 	for key := range directors {
 		directors[key].Movies = directors[key].GetMovies()
@@ -83,14 +84,14 @@ func ReadDirectors(c *gin.Context) {
 func UpdateDirector(c *gin.Context) {
 	id := c.Param("id")
 	var director Director
-	if err := db.First(&director, id).Error; err != nil {
+	if err := database.First(&director, id).Error; err != nil {
 		c.JSON(http.StatusBadRequest, err.Error())
 		return
 	}
 
 	c.BindJSON(&director)
-	if err := db.Save(&director).Error; err != nil {
-		c.JSON(http.StatusBadRequest, beautifyDatabaseError(err))
+	if err := database.Save(&director).Error; err != nil {
+		c.JSON(http.StatusBadRequest, database.BeautifyError(err))
 		return
 	}
 
@@ -101,7 +102,7 @@ func UpdateDirector(c *gin.Context) {
 //extra
 func (director *Director) GetMovies() []*Movie {
 	var movies []*Movie
-	db.Where("director_id = ?", director.ID).Find(&movies)
+	database.Where("director_id = ?", director.ID).Find(&movies)
 
 	for key := range movies {
 		movies[key].DirectorID = 0
@@ -115,6 +116,15 @@ func (director *Director) Validate() error {
 		return errors.New("name required")
 	}
 	return nil
+}
+
+func (director *Director) GetJSONBody() string {
+	body := `{
+		"name": "` + director.Name + `",
+		"active": ` + strconv.FormatBool(director.Active) + `
+	}`
+
+	return body
 }
 
 func getReadDirectorsParameters(c *gin.Context) (int, string, string, string, string, string) {

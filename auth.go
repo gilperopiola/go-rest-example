@@ -24,8 +24,8 @@ func SignUp(c *gin.Context) {
 	user.Password = hash(user.Email, user.Password)
 	user.Active = true
 
-	if err := db.Create(&user).Error; err != nil {
-		c.JSON(http.StatusBadRequest, beautifyDatabaseError(err))
+	if err := database.Create(&user).Error; err != nil {
+		c.JSON(http.StatusBadRequest, database.BeautifyError(err))
 		return
 	}
 
@@ -44,21 +44,21 @@ func LogIn(c *gin.Context) {
 		return
 	}
 
-	var dbUser User
-	db.Where("username = ?", user.Username).First(&dbUser)
-	if dbUser.ID == 0 {
+	var databaseUser User
+	database.Where("username = ?", user.Username).First(&databaseUser)
+	if databaseUser.ID == 0 {
 		c.JSON(http.StatusBadRequest, "wrong username")
 		return
 	}
 
-	if dbUser.Password != hash(dbUser.Email, user.Password) {
+	if databaseUser.Password != hash(databaseUser.Email, user.Password) {
 		c.JSON(http.StatusBadRequest, "wrong password")
 		return
 	}
 
-	dbUser.Token = generateToken(dbUser)
-	dbUser.Password = ""
-	c.JSON(http.StatusOK, dbUser)
+	databaseUser.Token = generateToken(databaseUser)
+	databaseUser.Password = ""
+	c.JSON(http.StatusOK, databaseUser)
 }
 
 func validateToken(requiredRole string) gin.HandlerFunc {
@@ -86,7 +86,7 @@ func validateToken(requiredRole string) gin.HandlerFunc {
 				c.Abort()
 				return
 			}
-			
+
 			c.Set("ID", claims.Id)
 			c.Set("Email", claims.Audience)
 			c.Set("Role", claims.Subject)

@@ -12,11 +12,11 @@ import (
 )
 
 func setupTesting() (string, string) {
-	setupConfig()
-	setupRouter()
-	setupDatabase()
-	purgeDatabase()
-	loadTestingData()
+	config.Setup()
+	router.Setup()
+	database.Setup()
+	database.Purge()
+	database.LoadTestingData()
 
 	return generateTestingToken("User"), generateTestingToken("Admin")
 }

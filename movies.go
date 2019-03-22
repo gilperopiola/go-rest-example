@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -15,19 +16,20 @@ type MovieActions interface {
 	GetActors() []*Actor
 
 	Validate() error
+	GetJSONBody() string
 }
 
 type Movie struct {
 	ID          uint      `json:"id" gorm:"auto_increment;unique;not null"`
-	Name        string    `json:"name" gorm:"not null"`
+	Name        string    `json:"name" gorm:"unique;not null"`
 	Year        int       `json:"year"`
 	Rating      float32   `json:"rating" gorm:"default: 0"`
 	DirectorID  int       `json:"director_id,omitempty"`
 	Active      bool      `json:"active" gorm:"default: 1"`
 	DateCreated time.Time `json:"date_created" gorm:"default: current_timestamp"`
 
-	Director *Director `json:"director,omitempty" db:"-"`
-	Actors   []*Actor  `json:"actors" gorm:"many2many:movie_actors" db:"-"`
+	Director *Director `json:"director,omitempty" database:"-"`
+	Actors   []*Actor  `json:"actors" gorm:"many2many:movie_actors" database:"-"`
 }
 
 func CreateMovie(c *gin.Context) {
@@ -39,8 +41,8 @@ func CreateMovie(c *gin.Context) {
 		return
 	}
 
-	if err := db.Create(&movie).Error; err != nil {
-		c.JSON(http.StatusBadRequest, beautifyDatabaseError(err))
+	if err := database.Create(&movie).Error; err != nil {
+		c.JSON(http.StatusBadRequest, database.BeautifyError(err))
 		return
 	}
 
@@ -53,7 +55,7 @@ func CreateMovie(c *gin.Context) {
 func ReadMovie(c *gin.Context) {
 	id := c.Param("id")
 	var movie Movie
-	if err := db.First(&movie, id).Error; err != nil {
+	if err := database.First(&movie, id).Error; err != nil {
 		c.JSON(http.StatusBadRequest, err.Error())
 		return
 	}
@@ -69,19 +71,19 @@ func ReadMovies(c *gin.Context) {
 
 	id, name, limit, offset, sortField, sortDir := getReadMoviesParameters(c)
 
-	tempDB := db
+	tempDatabase := database
 
 	if id > 0 {
-		tempDB = tempDB.Where("id = ?", id)
+		tempDatabase.DB = tempDatabase.Where("id = ?", id)
 	}
 
-	tempDB = tempDB.Where("name LIKE ?", name)
+	tempDatabase.DB = tempDatabase.Where("name LIKE ?", name)
 
 	if sortField != "" && (sortDir == "ASC" || sortDir == "DESC") {
-		tempDB = tempDB.Order(sortField + " " + sortDir)
+		tempDatabase.DB = tempDatabase.Order(sortField + " " + sortDir)
 	}
 
-	tempDB.Limit(limit).Offset(offset).Find(&movies)
+	tempDatabase.Limit(limit).Offset(offset).Find(&movies)
 
 	for key := range movies {
 		movies[key].Director = movies[key].GetDirector()
@@ -96,15 +98,17 @@ func UpdateMovie(c *gin.Context) {
 	id := c.Param("id")
 	var movie Movie
 
-	if err := db.First(&movie, id).Error; err != nil {
+	if err := database.First(&movie, id).Error; err != nil {
 		c.JSON(http.StatusBadRequest, err.Error())
 		return
 	}
 
+	log.Printf("%v", movie)
+
 	c.BindJSON(&movie)
-	if err := db.Save(&movie).Error; err != nil {
+	if err := database.Save(&movie).Error; err != nil {
 		log.Println(err.Error())
-		c.JSON(http.StatusBadRequest, beautifyDatabaseError(err))
+		c.JSON(http.StatusBadRequest, database.BeautifyError(err))
 		return
 	}
 
@@ -117,13 +121,13 @@ func UpdateMovie(c *gin.Context) {
 //extra
 func (movie *Movie) GetDirector() *Director {
 	var director Director
-	db.Where("id = ?", movie.DirectorID).Find(&director)
+	database.Where("id = ?", movie.DirectorID).Find(&director)
 	return &director
 }
 
 func (movie *Movie) GetActors() []*Actor {
 	var actors []*Actor
-	db.Model(&movie).Association("Actors").Find(&actors)
+	database.Model(&movie).Association("Actors").Find(&actors)
 	return actors
 }
 
@@ -135,12 +139,20 @@ func (movie *Movie) Validate() error {
 	return nil
 }
 
-func getReadMoviesParameters(c *gin.Context) (int, string, string, string, string, string) {
-	id, _ := strconv.Atoi(c.Query("ID"))
-	name := "%" + c.Query("Name") + "%"
-	limit := c.Query("Limit")
-	offset := c.Query("Offset")
-	sortField := c.Query("SortField")
-	sortDir := c.Query("SortDir")
-	return id, name, limit, offset, sortField, sortDir
+func (movie *Movie) GetJSONBody() string {
+	body := `{
+		"name": "` + movie.Name + `",
+		"year": ` + strconv.Itoa(movie.Year) + `,
+		"rating": ` + fmt.Sprintf("%f", movie.Rating) + `,
+		"active": ` + strconv.FormatBool(movie.Active) + `,
+		"director_id": ` + strconv.Itoa(movie.DirectorID) + `
+	}`
+
+	return body
+}
+
+func getReadMoviesParameters(c *gin.Context) (id int, name string, limit, offset, sortField, sortDir string) {
+	id, _ = strconv.Atoi(c.Query("ID"))
+	name = "%" + c.Query("Name") + "%"
+	return id, name, c.Query("Limit"), c.Query("Offset"), c.Query("SortField"), c.Query("SortDir")
 }

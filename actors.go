@@ -14,6 +14,7 @@ type ActorActions interface {
 	GetMovies() []*Movie
 
 	Validate() error
+	GetJSONBody() string
 }
 
 type Actor struct {
@@ -22,7 +23,7 @@ type Actor struct {
 	Active      bool      `json:"active" gorm:"default: 1"`
 	DateCreated time.Time `json:"date_created" gorm:"default: current_timestamp"`
 
-	Movies []*Movie `json:"movies,omitempty" gorm:"many2many:movie_actors" db:"-"`
+	Movies []*Movie `json:"movies,omitempty" gorm:"many2many:movie_actors" database:"-"`
 }
 
 func CreateActor(c *gin.Context) {
@@ -34,8 +35,8 @@ func CreateActor(c *gin.Context) {
 		return
 	}
 
-	if err := db.Create(&actor).Error; err != nil {
-		c.JSON(http.StatusBadRequest, beautifyDatabaseError(err))
+	if err := database.Create(&actor).Error; err != nil {
+		c.JSON(http.StatusBadRequest, database.BeautifyError(err))
 		return
 	}
 
@@ -46,7 +47,7 @@ func CreateActor(c *gin.Context) {
 func ReadActor(c *gin.Context) {
 	id := c.Param("id")
 	var actor Actor
-	if err := db.First(&actor, id).Error; err != nil {
+	if err := database.First(&actor, id).Error; err != nil {
 		c.JSON(http.StatusBadRequest, err.Error())
 		return
 	}
@@ -60,19 +61,19 @@ func ReadActors(c *gin.Context) {
 
 	id, name, limit, offset, sortField, sortDir := getReadActorsParameters(c)
 
-	tempDB := db
+	tempDatabase := database
 
 	if id > 0 {
-		tempDB = tempDB.Where("id = ?", id)
+		tempDatabase.DB = tempDatabase.Where("id = ?", id)
 	}
 
-	tempDB = tempDB.Where("name LIKE ?", name)
+	tempDatabase.DB = tempDatabase.Where("name LIKE ?", name)
 
 	if sortField != "" && (sortDir == "ASC" || sortDir == "DESC") {
-		tempDB = tempDB.Order(sortField + " " + sortDir)
+		tempDatabase.DB = tempDatabase.Order(sortField + " " + sortDir)
 	}
 
-	tempDB.Limit(limit).Offset(offset).Find(&actors)
+	tempDatabase.Limit(limit).Offset(offset).Find(&actors)
 
 	for key := range actors {
 		actors[key].Movies = actors[key].GetMovies()
@@ -85,15 +86,15 @@ func UpdateActor(c *gin.Context) {
 	id := c.Param("id")
 	var actor Actor
 
-	if err := db.First(&actor, id).Error; err != nil {
+	if err := database.First(&actor, id).Error; err != nil {
 		c.JSON(http.StatusBadRequest, err.Error())
 		return
 	}
 
 	c.BindJSON(&actor)
-	if err := db.Save(&actor).Error; err != nil {
+	if err := database.Save(&actor).Error; err != nil {
 		log.Println(err.Error())
-		c.JSON(http.StatusBadRequest, beautifyDatabaseError(err))
+		c.JSON(http.StatusBadRequest, database.BeautifyError(err))
 		return
 	}
 
@@ -104,7 +105,7 @@ func UpdateActor(c *gin.Context) {
 //extra
 func (actor *Actor) GetMovies() []*Movie {
 	var movies []*Movie
-	db.Model(&actor).Association("Movies").Find(&movies)
+	database.Model(&actor).Association("Movies").Find(&movies)
 	return movies
 }
 
@@ -113,6 +114,15 @@ func (actor *Actor) Validate() error {
 		return errors.New("name required")
 	}
 	return nil
+}
+
+func (actor *Actor) GetJSONBody() string {
+	body := `{
+		"name": "` + actor.Name + `",
+		"active": ` + strconv.FormatBool(actor.Active) + `
+	}`
+
+	return body
 }
 
 func getReadActorsParameters(c *gin.Context) (int, string, string, string, string, string) {
