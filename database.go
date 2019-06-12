@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"strconv"
-	"strings"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
@@ -87,28 +86,28 @@ func (database *MyDatabase) GetTestingUsers() []*User {
 func (database *MyDatabase) GetTestingMovies() []*Movie {
 	var movies []*Movie
 	database.Find(&movies)
+	for _, movie := range movies {
+		movie.Fill()
+		movie.FillAssociations()
+	}
 	return movies
 }
 
 func (database *MyDatabase) GetTestingDirectors() []*Director {
 	var directors []*Director
 	database.Find(&directors)
+	for _, director := range directors {
+		director.FillAssociations()
+	}
 	return directors
 }
 
 func (database *MyDatabase) GetTestingActors() []*Actor {
 	var actors []*Actor
 	database.Find(&actors)
-	return actors
-}
-
-func (database *MyDatabase) BeautifyError(err error) string {
-	s := err.Error()
-
-	if strings.Contains(s, "Duplicate entry") {
-		duplicateField := strings.Split(s, "'")[3]
-		return duplicateField + " already in use"
+	for _, actor := range actors {
+		actor.Fill()
+		actor.FillAssociations()
 	}
-
-	return s
+	return actors
 }

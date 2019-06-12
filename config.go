@@ -28,14 +28,10 @@ type MyConfig struct {
 		SECRET           string
 		SESSION_DURATION int
 	}
-	USERS struct {
-		USERNAME_MIN_CHARACTERS int
-		USERNAME_MAX_CHARACTERS int
-	}
 }
 
 func (config *MyConfig) Setup() {
-	viper.SetConfigName("config_dev") //config filename without the .JSON or .YAML extension
+	viper.SetConfigName("config") //config filename without the .JSON or .YAML extension
 	viper.AddConfigPath(".")
 
 	if err := viper.ReadInConfig(); err != nil {

@@ -11,27 +11,42 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-//SignUp takes {username, email, password}, creates a user and returns it
+type Auth struct {
+	Email          string
+	Password       string
+	RepeatPassword string
+	Code           string
+	Token          string
+}
+
+//SignUp takes {email, password, repeatPassword}. It creates a user and returns it.
 func SignUp(c *gin.Context) {
-	var user User
-	c.BindJSON(&user)
+	var auth Auth
+	c.BindJSON(&auth)
 
-	if err := user.Validate(); err != nil {
-		c.JSON(http.StatusBadRequest, err.Error())
+	if auth.Email == "" || auth.Password == "" || auth.RepeatPassword == "" {
+		c.JSON(http.StatusBadRequest, "all fields required")
 		return
 	}
 
-	user.Password = hash(user.Email, user.Password)
-	user.Active = true
-
-	if err := database.Create(&user).Error; err != nil {
-		c.JSON(http.StatusBadRequest, database.BeautifyError(err))
+	if auth.Password != auth.RepeatPassword {
+		c.JSON(http.StatusBadRequest, "passwords don't match")
 		return
 	}
 
-	user.Token = generateToken(user)
-	user.Password = ""
-	c.JSON(http.StatusOK, user)
+	hashedPassword := hash(auth.Email, auth.Password)
+
+	user := &User{
+		Email:    auth.Email,
+		Password: hashedPassword,
+	}
+
+	if err := user.Create(); err != nil {
+		c.JSON(http.StatusBadRequest, beautifyError(err))
+		return
+	}
+
+	c.JSON(http.StatusOK, nil)
 }
 
 //LogIn takes {username, password}, checks if the user exists and returns it
