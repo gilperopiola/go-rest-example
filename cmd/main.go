@@ -6,17 +6,19 @@ import (
 
 	"github.com/gilperopiola/go-rest-example/pkg/codec"
 	cfg "github.com/gilperopiola/go-rest-example/pkg/config"
-	repository "github.com/gilperopiola/go-rest-example/pkg/repository"
+	"github.com/gilperopiola/go-rest-example/pkg/repository"
 	service_v1 "github.com/gilperopiola/go-rest-example/pkg/service"
-	transport "github.com/gilperopiola/go-rest-example/pkg/transport"
+	"github.com/gilperopiola/go-rest-example/pkg/transport"
 )
 
-var config cfg.Config
-var database repository.Database
-var service service_v1.ServiceHandler
-var router transport.Router
-
 func main() {
+
+	// Create dependencies
+	var config cfg.Config
+	var database repository.Database
+	var service service_v1.Service
+	var router transport.Router
+
 	// Set up configuration
 	config.Setup()
 
@@ -25,13 +27,15 @@ func main() {
 	defer database.Close()
 
 	// Set up repository
-	repository := repository.RepositoryHandler{Database: &database}
+	repository := repository.Repository{
+		Database: &database,
+	}
 
 	// Set up codec
-	codec := codec.CodecHandler{}
+	codec := codec.Codec{}
 
 	// Set up service
-	service = service_v1.ServiceHandler{
+	service = service_v1.Service{
 		Database:   &database,
 		Repository: &repository,
 		Codec:      &codec,
@@ -39,9 +43,11 @@ func main() {
 
 	// Set up endpoints & router
 	endpointsHandler := transport.EndpointsHandler{
-		Database: &database,
-		Service:  &service,
+		Database:     &database,
+		Service:      &service,
+		ErrorsMapper: &transport.ErrorsMapper{},
 	}
+
 	router.Setup(endpointsHandler)
 
 	// Start server

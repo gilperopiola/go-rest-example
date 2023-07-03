@@ -1,7 +1,6 @@
 package transport
 
 import (
-	"errors"
 	"net/http"
 
 	"github.com/gilperopiola/go-rest-example/pkg/entities"
@@ -17,29 +16,33 @@ type Endpoints interface {
 }
 
 type EndpointsHandler struct {
-	Database *repository.Database
-	Service  *service.ServiceHandler
+	Database     *repository.Database
+	Service      *service.Service
+	ErrorsMapper *ErrorsMapper
 }
 
 // Signup creates a new user and returns it
 func (e EndpointsHandler) Signup(c *gin.Context) {
+
+	// Bind request
 	var signupRequest entities.SignupRequest
 	c.BindJSON(&signupRequest)
 
+	// Validate request
 	if err := signupRequest.Validate(); err != nil {
-		c.JSON(http.StatusBadRequest, err)
+		c.JSON(e.ErrorsMapper.Map(err))
 		return
 	}
 
-	if err := e.Service.Signup(signupRequest); err != nil {
-		if errors.Is(err, entities.ErrUsernameOrEmailAlreadyInUse) {
-			c.JSON(http.StatusBadRequest, err)
-		}
-		c.JSON(http.StatusInternalServerError, err)
+	// Perform action
+	response, err := e.Service.Signup(signupRequest)
+	if err != nil {
+		c.JSON(e.ErrorsMapper.Map(err))
 		return
 	}
 
-	c.JSON(http.StatusOK, nil)
+	// Return OK
+	c.JSON(http.StatusOK, HTTPResponse{Success: true, Content: response})
 }
 
 // Login takes {username, password}, checks if the user exists and returns it

@@ -1,14 +1,10 @@
 package entities
 
-import (
-	"errors"
-)
-
 type SignupRequest struct {
-	Email          string
-	Username       string
-	Password       string
-	RepeatPassword string
+	Email          string `json:"email"`
+	Username       string `json:"username"`
+	Password       string `json:"password"`
+	RepeatPassword string `json:"repeat_password"`
 }
 
 type LoginRequest struct {
@@ -20,11 +16,11 @@ type LoginRequest struct {
 
 func (req *SignupRequest) Validate() error {
 	if req.Email == "" || req.Password == "" || req.RepeatPassword == "" {
-		return errors.New("all fields required")
+		return ErrAllFieldsRequired
 	}
 
 	if req.Password != req.RepeatPassword {
-		return errors.New("passwords don't match")
+		return ErrPasswordsDontMatch
 	}
 
 	return nil

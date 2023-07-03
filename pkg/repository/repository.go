@@ -1,24 +1,38 @@
 package repository
 
-import models "github.com/gilperopiola/go-rest-example/pkg/models"
+import (
+	"errors"
+	"fmt"
 
-type Repository interface {
-	CreateUser(user *models.User) error
+	models "github.com/gilperopiola/go-rest-example/pkg/models"
+	"github.com/jinzhu/gorm"
+)
+
+type Repositorier interface {
+	CreateUser(user models.User) (models.User, error)
 	UserExists(email, username string) bool
 }
 
-type RepositoryHandler struct {
+type Repository struct {
 	Database *Database
 }
 
-func (r *RepositoryHandler) CreateUser(user *models.User) error {
-	if err := r.Database.DB.Create(user).Error; err != nil {
-		return err
+func (r *Repository) CreateUser(user models.User) (models.User, error) {
+	if err := r.Database.DB.Create(&user).Error; err != nil {
+		return models.User{}, fmt.Errorf("%w:%w", ErrCreatingUser, err)
 	}
 
-	return nil
+	return user, nil
 }
 
-func (r *RepositoryHandler) UserExists(email, username string) bool {
-	return false
+func (r *Repository) UserExists(email, username string) bool {
+	var user models.User
+
+	if err := r.Database.DB.Where("email = ? OR username = ?", email, username).First(&user).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return false
+		}
+	}
+
+	return true
 }
