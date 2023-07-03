@@ -1,6 +1,8 @@
-package main
+package utils
 
 import (
+	"crypto/sha1"
+	"encoding/base64"
 	"strconv"
 	"strings"
 )
@@ -23,4 +25,10 @@ func beautifyError(err error) string {
 	}
 
 	return s
+}
+
+func Hash(salt string, data string) string {
+	hasher := sha1.New()
+	hasher.Write([]byte(salt + data))
+	return base64.URLEncoding.EncodeToString(hasher.Sum(nil))
 }

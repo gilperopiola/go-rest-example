@@ -1,20 +1,17 @@
 {
     "debug": false,
+    "port": 8040,
     "database": {
         "type": "mysql",
-        "username": "b83a97c317b7be",
-        "password": "09d4194a",
-        "hostname": "us-cdbr-iron-east-03.cleardb.net",
+        "username": "root",
+        "password": "",
+        "hostname": "127.0.0.1",
         "port": "3306",
-        "schema": "heroku_2bec7511bfa574e",
+        "schema": "go-rest-example-db",
         "purge": false
     },
     "jwt": {
         "secret": "a0#3ndl2",
-        "session_duration": 14
-    },
-    "users": {
-        "username_min_characters": 4,
-        "username_max_characters": 15
+        "session_duration_seconds": 14
     }
 }
