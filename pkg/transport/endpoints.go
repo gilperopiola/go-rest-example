@@ -10,20 +10,19 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type Endpoints interface {
+type Endpointser interface {
 	Signup(c *gin.Context)
 	Login(c *gin.Context)
 }
 
-type EndpointsHandler struct {
-	Database     *repository.Database
-	Service      *service.Service
-	ErrorsMapper *ErrorsMapper
+type Endpoints struct {
+	Database     repository.Databaser
+	Service      service.Servicer
+	ErrorsMapper ErrorsMapperer
 }
 
 // Signup creates a new user and returns it
-func (e EndpointsHandler) Signup(c *gin.Context) {
-
+func (e Endpoints) Signup(c *gin.Context) {
 	// Bind request
 	var signupRequest entities.SignupRequest
 	c.BindJSON(&signupRequest)
@@ -35,18 +34,21 @@ func (e EndpointsHandler) Signup(c *gin.Context) {
 	}
 
 	// Perform action
-	response, err := e.Service.Signup(signupRequest)
+	signupResponse, err := e.Service.Signup(signupRequest)
 	if err != nil {
 		c.JSON(e.ErrorsMapper.Map(err))
 		return
 	}
 
 	// Return OK
-	c.JSON(http.StatusOK, HTTPResponse{Success: true, Content: response})
+	c.JSON(http.StatusOK, HTTPResponse{
+		Success: true,
+		Content: signupResponse,
+	})
 }
 
 // Login takes {username, password}, checks if the user exists and returns it
-func (e EndpointsHandler) Login(c *gin.Context) {
+func (e Endpoints) Login(c *gin.Context) {
 	c.JSON(http.StatusOK, nil)
 
 	//	var user models.User

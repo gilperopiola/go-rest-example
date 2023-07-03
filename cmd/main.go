@@ -28,7 +28,7 @@ func main() {
 
 	// Set up repository
 	repository := repository.Repository{
-		Database: &database,
+		Database: database,
 	}
 
 	// Set up codec
@@ -42,7 +42,7 @@ func main() {
 	}
 
 	// Set up endpoints & router
-	endpointsHandler := transport.EndpointsHandler{
+	endpointsHandler := transport.Endpoints{
 		Database:     &database,
 		Service:      &service,
 		ErrorsMapper: &transport.ErrorsMapper{},

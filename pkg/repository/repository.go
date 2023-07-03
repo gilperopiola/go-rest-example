@@ -14,7 +14,7 @@ type Repositorier interface {
 }
 
 type Repository struct {
-	Database *Database
+	Database Database
 }
 
 func (r *Repository) CreateUser(user models.User) (models.User, error) {

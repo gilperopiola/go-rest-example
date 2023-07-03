@@ -13,7 +13,7 @@ type Router struct {
 	*gin.Engine
 }
 
-func (router *Router) Setup(endpoints Endpoints) {
+func (router *Router) Setup(endpoints Endpointser) {
 	gin.SetMode(gin.DebugMode)
 	router.Engine = gin.New()
 

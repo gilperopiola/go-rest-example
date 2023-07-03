@@ -12,18 +12,17 @@ import (
 )
 
 type Databaser interface {
-	Setup(config config.Config)
+	Setup(config config.DatabaseConfig)
 	Purge()
 	Migrate()
+	Close()
 
 	LoadTestingData()
 	GetTestingUsers() []*models.User
-
-	BeautifyError(error) string
 }
 
 type Database struct {
-	*gorm.DB
+	DB *gorm.DB
 }
 
 func (database *Database) Setup(config config.DatabaseConfig) {
@@ -40,16 +39,20 @@ func (database *Database) Setup(config config.DatabaseConfig) {
 }
 
 func (database *Database) Purge() {
-	database.Delete(models.User{})
+	database.DB.Delete(models.User{})
 }
 
 func (database *Database) Migrate() {
-	database.AutoMigrate(&models.User{})
+	database.DB.AutoMigrate(&models.User{})
+}
+
+func (database *Database) Close() {
+	database.DB.Close()
 }
 
 func (database *Database) LoadTestingData() {
 	for i := 1; i <= 3; i++ {
-		database.Create(&models.User{
+		database.DB.Create(&models.User{
 			Username: "testing username " + strconv.Itoa(i),
 			Email:    "testing email " + strconv.Itoa(i),
 			Password: "testing password " + strconv.Itoa(i),
@@ -59,6 +62,6 @@ func (database *Database) LoadTestingData() {
 
 func (database *Database) GetTestingUsers() []*models.User {
 	var users []*models.User
-	database.Find(&users)
+	database.DB.Find(&users)
 	return users
 }
