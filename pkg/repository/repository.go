@@ -4,11 +4,12 @@ import (
 	"errors"
 	"fmt"
 
-	models "github.com/gilperopiola/go-rest-example/pkg/models"
+	"github.com/gilperopiola/go-rest-example/pkg/models"
+
 	"github.com/jinzhu/gorm"
 )
 
-type Repositorier interface {
+type RepositoryIFace interface {
 	CreateUser(user models.User) (models.User, error)
 	UserExists(email, username string) bool
 }

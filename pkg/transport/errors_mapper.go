@@ -7,7 +7,7 @@ import (
 	"github.com/gilperopiola/go-rest-example/pkg/entities"
 )
 
-type ErrorsMapperer interface {
+type ErrorsMapperIface interface {
 	Map(err error) (status int, response HTTPResponse)
 }
 

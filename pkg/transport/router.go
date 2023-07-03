@@ -5,7 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type Routerer interface {
+type RouterIFace interface {
 	Setup()
 }
 
@@ -13,7 +13,7 @@ type Router struct {
 	*gin.Engine
 }
 
-func (router *Router) Setup(endpoints Endpointser) {
+func (router *Router) Setup(endpoints EndpointsIface) {
 	gin.SetMode(gin.DebugMode)
 	router.Engine = gin.New()
 

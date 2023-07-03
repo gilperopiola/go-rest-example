@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-type Configurer interface {
+type ConfigIFace interface {
 	Setup()
 }
 

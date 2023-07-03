@@ -10,15 +10,14 @@ import (
 	"github.com/gilperopiola/go-rest-example/pkg/utils"
 )
 
-type Servicer interface {
+type ServiceIFace interface {
 	Signup(signupRequest entities.SignupRequest) (entities.SignupResponse, error)
 	Login(loginRequest entities.LoginRequest) error
 }
 
 type Service struct {
-	Database   repository.Databaser
-	Repository repository.Repositorier
-	Codec      codec.Codecer
+	Repository repository.RepositoryIFace
+	Codec      codec.CodecIFace
 }
 
 func (s *Service) Signup(signupRequest entities.SignupRequest) (entities.SignupResponse, error) {

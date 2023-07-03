@@ -5,18 +5,17 @@ import (
 	"os"
 
 	"github.com/gilperopiola/go-rest-example/pkg/codec"
-	cfg "github.com/gilperopiola/go-rest-example/pkg/config"
+	"github.com/gilperopiola/go-rest-example/pkg/config"
 	"github.com/gilperopiola/go-rest-example/pkg/repository"
-	service_v1 "github.com/gilperopiola/go-rest-example/pkg/service"
+	"github.com/gilperopiola/go-rest-example/pkg/service"
 	"github.com/gilperopiola/go-rest-example/pkg/transport"
 )
 
 func main() {
 
 	// Create dependencies
-	var config cfg.Config
+	var config config.Config
 	var database repository.Database
-	var service service_v1.Service
 	var router transport.Router
 
 	// Set up configuration
@@ -35,15 +34,13 @@ func main() {
 	codec := codec.Codec{}
 
 	// Set up service
-	service = service_v1.Service{
-		Database:   &database,
+	service := service.Service{
 		Repository: &repository,
 		Codec:      &codec,
 	}
 
 	// Set up endpoints & router
 	endpointsHandler := transport.Endpoints{
-		Database:     &database,
 		Service:      &service,
 		ErrorsMapper: &transport.ErrorsMapper{},
 	}

@@ -1,9 +1,5 @@
 package entities
 
-import (
-	"regexp"
-)
-
 type SignupRequest struct {
 	Email          string `json:"email"`
 	Username       string `json:"username"`
@@ -14,23 +10,4 @@ type SignupRequest struct {
 type LoginRequest struct {
 	EmailOrUsername string
 	Password        string
-}
-
-/* ----------------------------- */
-
-func (req *SignupRequest) Validate() error {
-	if req.Email == "" || req.Username == "" || req.Password == "" || req.RepeatPassword == "" {
-		return ErrAllFieldsRequired
-	}
-
-	if req.Password != req.RepeatPassword {
-		return ErrPasswordsDontMatch
-	}
-
-	matched, err := regexp.MatchString(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`, req.Email)
-	if err != nil || !matched {
-		return ErrInvalidEmailFormat
-	}
-
-	return nil
 }

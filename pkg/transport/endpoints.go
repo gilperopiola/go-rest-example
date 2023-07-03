@@ -4,21 +4,19 @@ import (
 	"net/http"
 
 	"github.com/gilperopiola/go-rest-example/pkg/entities"
-	repository "github.com/gilperopiola/go-rest-example/pkg/repository"
 	"github.com/gilperopiola/go-rest-example/pkg/service"
 
 	"github.com/gin-gonic/gin"
 )
 
-type Endpointser interface {
+type EndpointsIface interface {
 	Signup(c *gin.Context)
 	Login(c *gin.Context)
 }
 
 type Endpoints struct {
-	Database     repository.Databaser
-	Service      service.Servicer
-	ErrorsMapper ErrorsMapperer
+	Service      service.ServiceIFace
+	ErrorsMapper ErrorsMapperIface
 }
 
 // Signup creates a new user and returns it

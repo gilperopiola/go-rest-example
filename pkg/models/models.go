@@ -7,8 +7,8 @@ type User struct {
 	Username  string
 	Email     string
 	Password  string
-	Deleted   bool
 	IsAdmin   bool
+	Deleted   bool
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
