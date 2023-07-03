@@ -1,6 +1,7 @@
 package transport
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gilperopiola/go-rest-example/pkg/entities"
@@ -31,6 +32,9 @@ func (e EndpointsHandler) Signup(c *gin.Context) {
 	}
 
 	if err := e.Service.Signup(signupRequest); err != nil {
+		if errors.Is(err, entities.ErrUsernameOrEmailAlreadyInUse) {
+			c.JSON(http.StatusBadRequest, err)
+		}
 		c.JSON(http.StatusInternalServerError, err)
 		return
 	}

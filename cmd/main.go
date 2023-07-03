@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/gilperopiola/go-rest-example/pkg/codec"
 	cfg "github.com/gilperopiola/go-rest-example/pkg/config"
 	repository "github.com/gilperopiola/go-rest-example/pkg/repository"
 	service_v1 "github.com/gilperopiola/go-rest-example/pkg/service"
@@ -23,8 +24,18 @@ func main() {
 	database.Setup(config.DATABASE)
 	defer database.Close()
 
+	// Set up repository
+	repository := repository.RepositoryHandler{Database: &database}
+
+	// Set up codec
+	codec := codec.CodecHandler{}
+
 	// Set up service
-	service = service_v1.ServiceHandler{Database: &database}
+	service = service_v1.ServiceHandler{
+		Database:   &database,
+		Repository: &repository,
+		Codec:      &codec,
+	}
 
 	// Set up endpoints & router
 	endpointsHandler := transport.EndpointsHandler{

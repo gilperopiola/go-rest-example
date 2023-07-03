@@ -1,8 +1,8 @@
 package service
 
 import (
+	"github.com/gilperopiola/go-rest-example/pkg/codec"
 	"github.com/gilperopiola/go-rest-example/pkg/entities"
-	"github.com/gilperopiola/go-rest-example/pkg/models"
 	"github.com/gilperopiola/go-rest-example/pkg/repository"
 	"github.com/gilperopiola/go-rest-example/pkg/utils"
 )
@@ -13,18 +13,26 @@ type Service interface {
 }
 
 type ServiceHandler struct {
-	Database *repository.Database
+	Database   *repository.Database
+	Repository *repository.RepositoryHandler
+	Codec      *codec.CodecHandler
 }
 
 func (s *ServiceHandler) Signup(signupRequest entities.SignupRequest) error {
-	hashedPassword := utils.Hash(signupRequest.Email, signupRequest.Password)
 
-	user := &models.User{
-		Email:    signupRequest.Email,
-		Password: hashedPassword,
+	// Validations
+	if s.Repository.UserExists(signupRequest.Email, signupRequest.Username) {
+		return entities.ErrUsernameOrEmailAlreadyInUse
 	}
 
-	if err := s.Database.DB.Create(user).Error; err != nil {
+	// Actions
+	hashedPassword := utils.Hash(signupRequest.Email, signupRequest.Password)
+
+	// Transformations
+	user := s.Codec.FromSignupRequestToUserModel(signupRequest, hashedPassword)
+
+	// Database
+	if err := s.Repository.CreateUser(&user); err != nil {
 		return err
 	}
 
