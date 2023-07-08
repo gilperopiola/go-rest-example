@@ -12,6 +12,7 @@ type Repository struct {
 
 type RepositoryIFace interface {
 	CreateUser(user models.User) (models.User, error)
+	UpdateUser(user models.User) (models.User, error)
 	GetUser(user models.User) (models.User, error)
 	UserExists(email, username string) bool
 }
@@ -23,5 +24,6 @@ var (
 
 	// User errors
 	ErrCreatingUser = errors.New("error creating user")
+	ErrUpdatingUser = errors.New("error updating user")
 	ErrGettingUser  = errors.New("error getting user")
 )

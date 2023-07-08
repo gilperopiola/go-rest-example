@@ -24,8 +24,9 @@ func (router *Router) Setup(endpoints EndpointsIface, jwtConfig config.JWTConfig
 	public.POST("/login", endpoints.Login)
 
 	// Private endpoints
-	user := router.Group("/users", auth.ValidateToken(jwtConfig))
-	user.GET("/:user_id", endpoints.GetUser)
+	users := router.Group("/users", auth.ValidateToken(jwtConfig))
+	users.GET("/:user_id", endpoints.GetUser)
+	users.PATCH("/:user_id", endpoints.UpdateUser)
 }
 
 func getCORSConfig() gin.HandlerFunc {

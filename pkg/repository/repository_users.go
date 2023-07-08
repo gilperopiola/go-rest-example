@@ -17,6 +17,14 @@ func (r *Repository) CreateUser(user models.User) (models.User, error) {
 	return user, nil
 }
 
+func (r *Repository) UpdateUser(user models.User) (models.User, error) {
+	if err := r.Database.DB.Model(&user).Update(&user).Error; err != nil {
+		return models.User{}, utils.JoinErrors(ErrUpdatingUser, err)
+	}
+
+	return user, nil
+}
+
 func (r *Repository) UserExists(email, username string) bool {
 	var user models.User
 

@@ -64,3 +64,29 @@ func (req *GetUserRequest) Validate() error {
 
 	return nil
 }
+
+func (request *UpdateUserRequest) Validate() error {
+
+	// Empty fields
+	if request.ID == 0 || (request.Email == "" && request.Username == "") {
+		return ErrAllFieldsRequired
+	}
+
+	// Valid email format
+	if request.Email != "" {
+		matched, err := regexp.MatchString(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`, request.Email)
+		if err != nil || !matched {
+			return ErrInvalidEmailFormat
+		}
+	}
+
+	// Valid username length
+	if request.Username != "" {
+		if len(request.Username) < USERNAME_MIN_LENGTH || len(request.Username) > USERNAME_MAX_LENGTH {
+			return ErrInvalidUsernameLength
+		}
+	}
+
+	// Return OK
+	return nil
+}

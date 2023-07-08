@@ -19,4 +19,5 @@ type EndpointsIface interface {
 
 	// Users
 	GetUser(c *gin.Context)
+	UpdateUser(c *gin.Context)
 }

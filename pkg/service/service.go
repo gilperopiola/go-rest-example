@@ -18,6 +18,7 @@ type ServiceIFace interface {
 	Signup(signupRequest entities.SignupRequest) (entities.SignupResponse, error)
 	Login(userCredentials entities.UserCredentials) (entities.LoginResponse, error)
 	GetUser(getUserRequest entities.GetUserRequest) (entities.GetUserResponse, error)
+	UpdateUser(updateUserRequest entities.UpdateUserRequest) (entities.UpdateUserResponse, error)
 }
 
 func NewService(repository repository.RepositoryIFace, codec codec.CodecIFace, config config.Config, errorsMapper ErrorsMapperIface) *Service {

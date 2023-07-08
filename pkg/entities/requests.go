@@ -15,3 +15,9 @@ type LoginRequest struct {
 type GetUserRequest struct {
 	ID int `json:"id"`
 }
+
+type UpdateUserRequest struct {
+	ID       int    `json:"id"`
+	Username string `json:"username"`
+	Email    string `json:"email"`
+}
