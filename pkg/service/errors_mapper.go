@@ -2,10 +2,10 @@ package service
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/gilperopiola/go-rest-example/pkg/entities"
 	"github.com/gilperopiola/go-rest-example/pkg/repository"
+	"github.com/gilperopiola/go-rest-example/pkg/utils"
 )
 
 type ErrorsMapperIface interface {
@@ -16,18 +16,17 @@ type ErrorsMapper struct{}
 
 func (e ErrorsMapper) Map(err error) error {
 
-	// Signup
+	// Signup, Login & Users
 	if errors.Is(err, repository.ErrCreatingUser) {
-		return fmt.Errorf("%w:%w", entities.ErrCreatingUser, err)
+		return utils.JoinErrors(entities.ErrCreatingUser, err)
 	}
 
-	// Login
 	if errors.Is(err, repository.ErrGettingUser) {
-		return fmt.Errorf("%w:%w", entities.ErrUserNotFound, err)
+		return utils.JoinErrors(entities.ErrUserNotFound, err)
 	}
 
 	if errors.Is(err, repository.ErrUnknown) {
-		return fmt.Errorf("%w:%w", entities.ErrUserNotFound, err)
+		return utils.JoinErrors(entities.ErrUserNotFound, err)
 	}
 
 	// Default to the original error

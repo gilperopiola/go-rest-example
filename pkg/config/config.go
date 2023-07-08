@@ -7,10 +7,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-type ConfigIFace interface {
-	Setup()
-}
-
 type Config struct {
 	PORT     string
 	DATABASE DatabaseConfig
@@ -32,6 +28,10 @@ type DatabaseConfig struct {
 type JWTConfig struct {
 	SECRET                string
 	SESSION_DURATION_DAYS int
+}
+
+type ConfigIFace interface {
+	Setup()
 }
 
 /* ------------------- */

@@ -10,15 +10,15 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
+type Database struct {
+	DB *gorm.DB
+}
+
 type DatabaseIFace interface {
 	Setup(config config.DatabaseConfig)
 	Purge()
 	Migrate()
 	Close()
-}
-
-type Database struct {
-	DB *gorm.DB
 }
 
 func (database *Database) Setup(config config.DatabaseConfig) {

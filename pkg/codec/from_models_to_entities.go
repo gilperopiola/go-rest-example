@@ -5,7 +5,7 @@ import (
 	"github.com/gilperopiola/go-rest-example/pkg/models"
 )
 
-func (codec *Codec) FromUserModelToUserCredentials(model models.User) entities.UserCredentials {
+func (codec *Codec) FromUserModelToUserCredentialsEntities(model models.User) entities.UserCredentials {
 	return entities.UserCredentials{
 		Email:    model.Email,
 		Username: model.Username,

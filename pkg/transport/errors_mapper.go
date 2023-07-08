@@ -8,12 +8,12 @@ import (
 	"github.com/gilperopiola/go-rest-example/pkg/utils"
 )
 
+type ErrorsMapper struct{}
+
 type ErrorsMapperIface interface {
 	Map(err error) (status int, response HTTPResponse)
 	MapWithType(errType, err error) (status int, response HTTPResponse)
 }
-
-type ErrorsMapper struct{}
 
 func (e ErrorsMapper) MapWithType(errType, err error) (status int, response HTTPResponse) {
 	return e.Map(utils.JoinErrors(errType, err))
