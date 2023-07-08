@@ -30,8 +30,8 @@ type DatabaseConfig struct {
 }
 
 type JWTConfig struct {
-	SECRET                   string
-	SESSION_DURATION_SECONDS int
+	SECRET                string
+	SESSION_DURATION_DAYS int
 }
 
 /* ------------------- */
@@ -50,6 +50,8 @@ func (config *Config) Setup() {
 
 	os.Setenv("PORT", config.PORT)
 }
+
+/* ------------------- */
 
 func (config *DatabaseConfig) GetConnectionString() string {
 	return config.USERNAME + ":" + config.PASSWORD + "@tcp(" + config.HOSTNAME + ":" +

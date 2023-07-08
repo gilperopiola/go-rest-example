@@ -8,6 +8,10 @@ type SignupRequest struct {
 }
 
 type LoginRequest struct {
-	EmailOrUsername string
-	Password        string
+	UsernameOrEmail string `json:"username_or_email"`
+	Password        string `json:"password"`
+}
+
+type GetUserRequest struct {
+	ID int `json:"id"`
 }

@@ -27,6 +27,10 @@ func (database *Database) Setup(config config.DatabaseConfig) {
 		log.Fatalf("error connecting to database: %v", err)
 	}
 
+	if config.DEBUG {
+		database.DB.LogMode(true)
+	}
+
 	if config.PURGE {
 		database.Purge()
 	}

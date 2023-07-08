@@ -18,3 +18,11 @@ func (codec *Codec) FromSignupRequestToUserModel(request entities.SignupRequest,
 		UpdatedAt: time.Now(),
 	}
 }
+
+func (codec *Codec) FromUserCredentialsToUserModel(userCredentials entities.UserCredentials) models.User {
+	return models.User{
+		Email:    userCredentials.Email,
+		Username: userCredentials.Username,
+		Password: userCredentials.Password,
+	}
+}
