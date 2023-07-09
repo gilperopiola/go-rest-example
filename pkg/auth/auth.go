@@ -60,6 +60,7 @@ func ValidateToken(config config.JWTConfig) gin.HandlerFunc {
 	}
 }
 
+// decodeToken decodes a JWT token string into a *jwt.Token
 func decodeToken(tokenString, jwtSecret string) (*jwt.Token, error) {
 	if len(tokenString) < 40 {
 		return &jwt.Token{}, nil
@@ -74,6 +75,5 @@ func decodeToken(tokenString, jwtSecret string) (*jwt.Token, error) {
 
 func getTokenString(c *gin.Context) string {
 	tokenString := c.Request.Header.Get("Authorization")
-	tokenString = strings.TrimPrefix(tokenString, "Bearer ")
-	return tokenString
+	return strings.TrimPrefix(tokenString, "Bearer ")
 }

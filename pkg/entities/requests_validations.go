@@ -12,6 +12,7 @@ const (
 	USERNAME_MAX_LENGTH = 32
 	PASSWORD_MIN_LENGTH = 8
 	PASSWORD_MAX_LENGTH = 64
+	VALID_EMAIL_REGEX   = `^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`
 )
 
 func (request *SignupRequest) Validate() error {
@@ -27,7 +28,7 @@ func (request *SignupRequest) Validate() error {
 	}
 
 	// Valid email format
-	matched, err := regexp.MatchString(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`, request.Email)
+	matched, err := regexp.MatchString(VALID_EMAIL_REGEX, request.Email)
 	if err != nil || !matched {
 		return ErrInvalidEmailFormat
 	}
@@ -74,7 +75,7 @@ func (request *UpdateUserRequest) Validate() error {
 
 	// Valid email format
 	if request.Email != "" {
-		matched, err := regexp.MatchString(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`, request.Email)
+		matched, err := regexp.MatchString(VALID_EMAIL_REGEX, request.Email)
 		if err != nil || !matched {
 			return ErrInvalidEmailFormat
 		}

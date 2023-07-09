@@ -33,7 +33,7 @@ func getCORSConfig() gin.HandlerFunc {
 	return cors.New(cors.Config{
 		AllowAllOrigins:  true,
 		AllowCredentials: true,
-		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Authentication", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Authentication", "Authorization", "Content-Type"},
 	})
