@@ -25,8 +25,9 @@ func (s *Service) Login(userCredentials entities.UserCredentials) (entities.Logi
 	// Transform user model to entity
 	userEntity := s.Codec.FromUserModelToEntities(user)
 
-	// Generate and return token
-	return entities.LoginResponse{
-		Token: auth.GenerateToken(userEntity, s.Config.JWT.SESSION_DURATION_DAYS, s.Config.JWT.SECRET),
-	}, nil
+	// Generate JWT token
+	token := auth.GenerateToken(userEntity, s.Config.JWT.SESSION_DURATION_DAYS, s.Config.JWT.SECRET)
+
+	// Return OK
+	return entities.LoginResponse{Token: token}, nil
 }

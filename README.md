@@ -1,6 +1,6 @@
 # go-rest-example
 
-I made this project on 2018-2019, now on 2023 I refactored the sh!t out of it as it was basic as fvck. Still needs some luv <3
+I made this project on 2018-2019, now on 2023 I refactored the sh!t out of it as it was basic as fvck. Still needs some luv <3.
 
 ## Architecture
 
