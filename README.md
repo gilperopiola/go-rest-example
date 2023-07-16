@@ -30,7 +30,7 @@ Here's a brief overview of the project's structure:
 
 ## Running the application
 
-To get started with this project, clone the repository and install the necessary dependencies. Then, you can run the application using the command `go run cmd/main.go`.
+To get started with this project, clone the repository and install the necessary dependencies. Configure the server on the `config.json` file, and finally run the application using the command `go run cmd/main.go`.
 
 ## License
 

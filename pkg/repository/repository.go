@@ -17,12 +17,20 @@ type RepositoryIFace interface {
 	UserExists(email, username string) bool
 }
 
+func NewRepository(database Database) Repository {
+	return Repository{Database: database}
+}
+
+/* ------------------- */
+
 var (
 
 	// General errors
+
 	ErrUnknown = errors.New("error unknown")
 
 	// User errors
+
 	ErrCreatingUser = errors.New("error creating user")
 	ErrUpdatingUser = errors.New("error updating user")
 	ErrGettingUser  = errors.New("error getting user")

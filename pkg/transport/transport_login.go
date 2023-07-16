@@ -3,6 +3,7 @@ package transport
 import (
 	"github.com/gilperopiola/go-rest-example/pkg/entities"
 	"github.com/gilperopiola/go-rest-example/pkg/utils"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -17,7 +18,7 @@ func (e Endpoints) Login(c *gin.Context) {
 	}
 
 	// Transform request to user credentials, checking if the input was a username or an email
-	userCredentials := loginRequest.ToUserCredentials()
+	userCredentials := e.Codec.FromLoginRequestToUserCredentials(loginRequest)
 
 	// Call service with those credentials
 	loginResponse, err := e.Service.Login(userCredentials)

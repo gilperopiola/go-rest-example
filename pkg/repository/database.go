@@ -3,8 +3,8 @@ package repository
 import (
 	"log"
 
-	config "github.com/gilperopiola/go-rest-example/pkg/config"
-	models "github.com/gilperopiola/go-rest-example/pkg/models"
+	"github.com/gilperopiola/go-rest-example/pkg/config"
+	"github.com/gilperopiola/go-rest-example/pkg/models"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
@@ -20,6 +20,14 @@ type DatabaseIFace interface {
 	Migrate()
 	Close()
 }
+
+func NewDatabase(config config.DatabaseConfig) Database {
+	var database Database
+	database.Setup(config)
+	return database
+}
+
+/* ------------------- */
 
 func (database *Database) Setup(config config.DatabaseConfig) {
 	var err error

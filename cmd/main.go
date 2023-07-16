@@ -13,24 +13,22 @@ import (
 
 func main() {
 
-	// Create dependencies
-	var config config.Config
-	var database repository.Database
-	var router transport.Router
+	log.Println("Server started")
 
-	// Config, Database, Repository, Codec
-	config.Setup()
-	database.Setup(config.DATABASE)
+	// Setup dependencies
+	var (
+		config     = config.NewConfig()
+		codec      = codec.NewCodec()
+		database   = repository.NewDatabase(config.DATABASE)
+		repository = repository.NewRepository(database)
+		service    = service.NewService(&repository, &codec, config, service.ErrorsMapper{})
+		endpoints  = transport.NewEndpoints(service, &codec, transport.ErrorsMapper{})
+		router     = transport.NewRouter(endpoints, config.JWT)
+	)
+
 	defer database.Close()
-	repository := repository.Repository{Database: database}
-	codec := codec.Codec{}
-
-	// Service, Endpoints, Router
-	service := service.NewService(&repository, &codec, config, service.ErrorsMapper{})
-	endpointsHandler := transport.Endpoints{Service: service, ErrorsMapper: &transport.ErrorsMapper{}}
-	router.Setup(endpointsHandler, config.JWT)
 
 	// Start server
-	log.Println("server started")
+	log.Println("Server running")
 	router.Run(":" + os.Getenv("PORT"))
 }

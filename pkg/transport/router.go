@@ -11,6 +11,14 @@ type Router struct {
 	*gin.Engine
 }
 
+func NewRouter(endpoints EndpointsIface, jwtConfig config.JWTConfig) Router {
+	var router Router
+	router.Setup(endpoints, jwtConfig)
+	return router
+}
+
+/* ------------------- */
+
 func (router *Router) Setup(endpoints EndpointsIface, jwtConfig config.JWTConfig) {
 
 	// Prepare router

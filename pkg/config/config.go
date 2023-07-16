@@ -34,6 +34,12 @@ type ConfigIFace interface {
 	Setup()
 }
 
+func NewConfig() Config {
+	config := Config{}
+	config.Setup()
+	return config
+}
+
 /* ------------------- */
 
 func (config *Config) Setup() {
@@ -50,8 +56,6 @@ func (config *Config) Setup() {
 
 	os.Setenv("PORT", config.PORT)
 }
-
-/* ------------------- */
 
 func (config *DatabaseConfig) GetConnectionString() string {
 	return config.USERNAME + ":" + config.PASSWORD + "@tcp(" + config.HOSTNAME + ":" +
