@@ -33,3 +33,8 @@ func (m *RepositoryMock) UserExists(email, username string) bool {
 	args := m.Called(email, username)
 	return args.Bool(0)
 }
+
+func (m *RepositoryMock) DeleteUser(id int) (models.User, error) {
+	args := m.Called(id)
+	return args.Get(0).(models.User), args.Error(1)
+}

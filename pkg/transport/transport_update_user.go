@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Login takes {username_or_email, password}, checks if the user exists and returns it
+// UpdateUser takes {username, email} and updates the user by its ID. Empty fields are not updated.
 func (e Endpoints) UpdateUser(c *gin.Context) {
 
 	// Validate and get request

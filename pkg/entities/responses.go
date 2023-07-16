@@ -14,3 +14,7 @@ type GetUserResponse struct {
 type UpdateUserResponse struct {
 	User User `json:"user"`
 }
+
+type DeleteUserResponse struct {
+	User User `json:"user"`
+}

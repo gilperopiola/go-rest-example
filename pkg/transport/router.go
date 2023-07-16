@@ -45,6 +45,7 @@ func (router *Router) SetUserEndpoints(endpoints EndpointsIface, jwtConfig confi
 	users := router.Group("/users", auth.ValidateToken(jwtConfig))
 	users.GET("/:user_id", endpoints.GetUser)
 	users.PATCH("/:user_id", endpoints.UpdateUser)
+	users.DELETE("/:user_id", endpoints.DeleteUser)
 }
 
 /* ------------------- */

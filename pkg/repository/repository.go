@@ -15,6 +15,7 @@ type RepositoryIFace interface {
 	UpdateUser(user models.User) (models.User, error)
 	GetUser(user models.User) (models.User, error)
 	UserExists(email, username string) bool
+	DeleteUser(id int) (models.User, error)
 }
 
 func NewRepository(database Database) Repository {
@@ -31,7 +32,8 @@ var (
 
 	// User errors
 
-	ErrCreatingUser = errors.New("error creating user")
-	ErrUpdatingUser = errors.New("error updating user")
-	ErrGettingUser  = errors.New("error getting user")
+	ErrCreatingUser       = errors.New("error creating user")
+	ErrUpdatingUser       = errors.New("error updating user")
+	ErrGettingUser        = errors.New("error getting user")
+	ErrUserAlreadyDeleted = errors.New("error, user already deleted")
 )

@@ -8,17 +8,19 @@ import (
 )
 
 type Service struct {
-	Repository   repository.RepositoryIFace
-	Codec        codec.CodecIFace
 	Config       config.Config
+	Codec        codec.CodecIFace
+	Repository   repository.RepositoryIFace
 	ErrorsMapper ErrorsMapperIface
 }
 
 type ServiceIFace interface {
 	Signup(signupRequest entities.SignupRequest) (entities.SignupResponse, error)
 	Login(userCredentials entities.UserCredentials) (entities.LoginResponse, error)
+
 	GetUser(getUserRequest entities.GetUserRequest) (entities.GetUserResponse, error)
 	UpdateUser(updateUserRequest entities.UpdateUserRequest) (entities.UpdateUserResponse, error)
+	DeleteUser(deleteUserRequest entities.DeleteUserRequest) (entities.DeleteUserResponse, error)
 }
 
 func NewService(repository repository.RepositoryIFace, codec codec.CodecIFace, config config.Config, errorsMapper ErrorsMapperIface) *Service {

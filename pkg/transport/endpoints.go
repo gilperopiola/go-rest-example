@@ -24,6 +24,7 @@ type EndpointsIface interface {
 
 	GetUser(c *gin.Context)
 	UpdateUser(c *gin.Context)
+	DeleteUser(c *gin.Context)
 }
 
 func NewEndpoints(service service.ServiceIFace, codec codec.CodecIFace, errorsMapper ErrorsMapperIface) Endpoints {

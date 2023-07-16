@@ -91,3 +91,13 @@ func (request *UpdateUserRequest) Validate() error {
 	// Return OK
 	return nil
 }
+
+func (req *DeleteUserRequest) Validate() error {
+
+	// Empty ID
+	if req.ID == 0 {
+		return ErrAllFieldsRequired
+	}
+
+	return nil
+}
