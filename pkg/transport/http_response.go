@@ -15,12 +15,10 @@ func returnOK(content interface{}) (status int, response HTTPResponse) {
 	}
 }
 
-func returnErrorResponseFunc(status int, err error) func() (status int, response HTTPResponse) {
-	return func() (status int, response HTTPResponse) {
-		return status, HTTPResponse{
-			Success: false,
-			Content: nil,
-			Error:   err.Error(),
-		}
+func returnErrorResponse(status int, err error) (int, HTTPResponse) {
+	return status, HTTPResponse{
+		Success: false,
+		Content: nil,
+		Error:   err.Error(),
 	}
 }

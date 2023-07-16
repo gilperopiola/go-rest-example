@@ -24,27 +24,27 @@ func (e ErrorsMapper) Map(err error) (status int, response HTTPResponse) {
 	// Generic errors
 
 	if errors.Is(err, entities.ErrUnauthorized) {
-		return returnErrorResponseFunc(http.StatusUnauthorized, err)()
+		return returnErrorResponse(http.StatusUnauthorized, err)
 	}
 
 	if errors.Is(err, entities.ErrBindingRequest) {
-		return returnErrorResponseFunc(http.StatusBadRequest, err)()
+		return returnErrorResponse(http.StatusBadRequest, err)
 	}
 
 	if errors.Is(err, entities.ErrAllFieldsRequired) {
-		return returnErrorResponseFunc(http.StatusBadRequest, err)()
+		return returnErrorResponse(http.StatusBadRequest, err)
 	}
 
 	// Signup
 
 	if errors.Is(err, entities.ErrPasswordsDontMatch) {
-		return returnErrorResponseFunc(http.StatusBadRequest, err)()
+		return returnErrorResponse(http.StatusBadRequest, err)
 	}
 
 	if errors.Is(err, entities.ErrUsernameOrEmailAlreadyInUse) {
-		return returnErrorResponseFunc(http.StatusBadRequest, err)()
+		return returnErrorResponse(http.StatusBadRequest, err)
 	}
 
 	// Default to internal server error
-	return returnErrorResponseFunc(http.StatusInternalServerError, err)()
+	return returnErrorResponse(http.StatusInternalServerError, err)
 }

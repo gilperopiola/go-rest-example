@@ -16,7 +16,7 @@ func Hash(salt string, data string) string {
 }
 
 func JoinErrors(err1, err2 error) error {
-	return fmt.Errorf("%w:%w", err1, err2)
+	return fmt.Errorf("%w: %w", err1, err2)
 }
 
 func GetIntFromContext(c *gin.Context, key string) (int, error) {

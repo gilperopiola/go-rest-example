@@ -34,7 +34,7 @@ func makeLoginRequest(c *gin.Context) (entities.LoginRequest, error) {
 
 	// Bind request
 	var loginRequest entities.LoginRequest
-	if err := c.BindJSON(&loginRequest); err != nil {
+	if err := c.ShouldBindJSON(&loginRequest); err != nil {
 		return entities.LoginRequest{}, utils.JoinErrors(entities.ErrBindingRequest, err)
 	}
 

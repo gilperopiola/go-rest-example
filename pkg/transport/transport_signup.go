@@ -32,7 +32,7 @@ func makeSignupRequest(c *gin.Context) (entities.SignupRequest, error) {
 
 	// Bind & validate request
 	var signupRequest entities.SignupRequest
-	if err := c.BindJSON(&signupRequest); err != nil {
+	if err := c.ShouldBindJSON(&signupRequest); err != nil {
 		return entities.SignupRequest{}, utils.JoinErrors(entities.ErrBindingRequest, err)
 	}
 

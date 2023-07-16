@@ -37,7 +37,7 @@ func makeUpdateUserRequest(c *gin.Context) (entities.UpdateUserRequest, error) {
 
 	// Bind request
 	var updateUserRequest entities.UpdateUserRequest
-	if err := c.BindJSON(&updateUserRequest); err != nil {
+	if err := c.ShouldBindJSON(&updateUserRequest); err != nil {
 		return entities.UpdateUserRequest{}, utils.JoinErrors(entities.ErrBindingRequest, err)
 	}
 
