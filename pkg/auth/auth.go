@@ -8,9 +8,9 @@ import (
 
 	"github.com/gilperopiola/go-rest-example/pkg/config"
 	"github.com/gilperopiola/go-rest-example/pkg/entities"
-	"github.com/gin-gonic/gin"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/gin-gonic/gin"
 )
 
 const (
@@ -39,7 +39,7 @@ func ValidateToken(config config.JWTConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		// Get token string from context
-		tokenString := getTokenString(c)
+		tokenString := getTokenStringFromHeaders(c)
 
 		// Decode string into actual *jwt.Token
 		token, err := decodeToken(tokenString, config.SECRET)
@@ -49,7 +49,7 @@ func ValidateToken(config config.JWTConfig) gin.HandlerFunc {
 			return
 		}
 
-		// Check if token is valid, set ID and Email in context
+		// Check if token is valid, then set ID and Email in context
 		if claims, ok := token.Claims.(*jwt.StandardClaims); ok && token.Valid {
 			c.Set("ID", claims.Id)
 			c.Set("Email", claims.Audience)
@@ -73,7 +73,7 @@ func decodeToken(tokenString, jwtSecret string) (*jwt.Token, error) {
 	return jwt.ParseWithClaims(tokenString, &jwt.StandardClaims{}, keyFunc)
 }
 
-func getTokenString(c *gin.Context) string {
+func getTokenStringFromHeaders(c *gin.Context) string {
 	tokenString := c.Request.Header.Get("Authorization")
 	return strings.TrimPrefix(tokenString, "Bearer ")
 }

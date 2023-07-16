@@ -1,5 +1,5 @@
 {
-    "debug": false,
+    "debug": true,
     "port": 8040,
     "database": {
         "type": "mysql",

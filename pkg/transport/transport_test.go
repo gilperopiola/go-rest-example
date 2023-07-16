@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/gilperopiola/go-rest-example/pkg/entities"
+
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
@@ -287,8 +288,5 @@ func makeTestContextWithHTTPRequest(body any) *gin.Context {
 
 func addValueAndParamToContext(context *gin.Context, ctxKey, ctxValue, paramKey, paramValue string) {
 	context.Set(ctxKey, ctxValue)
-	context.Params = append(context.Params, gin.Param{
-		Key:   paramKey,
-		Value: paramValue,
-	})
+	context.Params = append(context.Params, gin.Param{Key: paramKey, Value: paramValue})
 }

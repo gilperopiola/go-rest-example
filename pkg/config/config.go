@@ -8,7 +8,9 @@ import (
 )
 
 type Config struct {
-	PORT     string
+	PORT  string
+	DEBUG bool
+
 	DATABASE DatabaseConfig
 	JWT      JWTConfig
 }

@@ -3,6 +3,7 @@ package transport
 import (
 	"github.com/gilperopiola/go-rest-example/pkg/entities"
 	"github.com/gilperopiola/go-rest-example/pkg/utils"
+
 	"github.com/gin-gonic/gin"
 )
 

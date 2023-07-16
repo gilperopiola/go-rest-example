@@ -21,6 +21,13 @@ const (
 	INVALID_PASSWORD = "invalid_password"
 )
 
+func newTestService(mockRepository *repository.RepositoryMock) *Service {
+	codec := &codec.Codec{}
+	config := config.Config{}
+	errorsMapper := ErrorsMapper{}
+	return NewService(mockRepository, codec, config, errorsMapper)
+}
+
 func TestSignup(t *testing.T) {
 
 	makeMockRepositoryWithUserExists := func(exists bool) *repository.RepositoryMock {
@@ -64,11 +71,7 @@ func TestSignup(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 
 			// Prepare
-			codec := &codec.Codec{}
-			config := config.Config{}
-			errorsMapper := ErrorsMapper{}
-
-			service := NewService(tt.mockRepository, codec, config, errorsMapper)
+			service := newTestService(tt.mockRepository)
 
 			// Act
 			got, err := service.Signup(tt.request)
@@ -124,11 +127,7 @@ func TestLogin(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 
 			// Prepare
-			codec := &codec.Codec{}
-			config := config.Config{}
-			errorsMapper := ErrorsMapper{}
-
-			service := NewService(tt.mockRepository, codec, config, errorsMapper)
+			service := newTestService(tt.mockRepository)
 
 			// Act
 			got, err := service.Login(tt.credentials)
@@ -177,11 +176,7 @@ func TestGetUser(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 
 			// Prepare
-			codec := &codec.Codec{}
-			config := config.Config{}
-			errorsMapper := ErrorsMapper{}
-
-			service := NewService(tt.mockRepository, codec, config, errorsMapper)
+			service := newTestService(tt.mockRepository)
 
 			// Act
 			got, err := service.GetUser(tt.request)

@@ -23,7 +23,7 @@ func main() {
 		repository = repository.NewRepository(database)
 		service    = service.NewService(&repository, &codec, config, service.ErrorsMapper{})
 		endpoints  = transport.NewEndpoints(service, &codec, transport.ErrorsMapper{})
-		router     = transport.NewRouter(endpoints, config.JWT)
+		router     = transport.NewRouter(endpoints, config)
 	)
 
 	defer database.Close()
