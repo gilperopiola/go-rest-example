@@ -13,8 +13,8 @@ type Repository struct {
 type RepositoryIFace interface {
 	CreateUser(user models.User) (models.User, error)
 	UpdateUser(user models.User) (models.User, error)
-	GetUser(user models.User) (models.User, error)
-	UserExists(email, username string) bool
+	GetUser(user models.User, onlyNonDeleted bool) (models.User, error)
+	UserExists(email, username string, onlyNonDeleted bool) bool
 	DeleteUser(id int) (models.User, error)
 }
 

@@ -12,3 +12,12 @@ type User struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
+
+func (user *User) FillFields(username, email string) {
+	if username != "" {
+		user.Username = username
+	}
+	if email != "" {
+		user.Email = email
+	}
+}

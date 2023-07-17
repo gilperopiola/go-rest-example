@@ -7,27 +7,31 @@ import (
 )
 
 func (s *Service) Login(userCredentials entities.UserCredentials) (entities.LoginResponse, error) {
+	var err error
 
 	// Transform UserCredentials entity to model
-	userModel := s.Codec.FromUserCredentialsToUserModel(userCredentials)
+	userToLogin := s.Codec.FromUserCredentialsToUserModel(userCredentials)
 
 	// Get user from database
-	user, err := s.Repository.GetUser(userModel)
+	userToLogin, err = s.Repository.GetUser(userToLogin, true)
 	if err != nil {
 		return entities.LoginResponse{}, s.ErrorsMapper.Map(err)
 	}
 
 	// Check if passwords match, if not return error
-	if user.Password != utils.Hash(user.Email, userCredentials.Password) {
+	if !passwordsMatch(userToLogin.Password, userCredentials.Password, userToLogin.Email) {
 		return entities.LoginResponse{}, s.ErrorsMapper.Map(entities.ErrWrongPassword)
 	}
 
 	// Transform user model to entity
-	userEntity := s.Codec.FromUserModelToEntities(user)
+	userEntity := s.Codec.FromUserModelToEntities(userToLogin)
 
-	// Generate JWT token
-	token := auth.GenerateToken(userEntity, s.Config.JWT.SESSION_DURATION_DAYS, s.Config.JWT.SECRET)
+	// Return generated token on the response
+	return entities.LoginResponse{
+		Token: auth.GenerateToken(userEntity, s.Config.JWT.SESSION_DURATION_DAYS, s.Config.JWT.SECRET),
+	}, nil
+}
 
-	// Return OK
-	return entities.LoginResponse{Token: token}, nil
+func passwordsMatch(password, otherPassword, email string) bool {
+	return password == utils.Hash(email, otherPassword)
 }

@@ -7,18 +7,17 @@ import (
 
 func (s *Service) GetUser(getUserRequest entities.GetUserRequest) (entities.GetUserResponse, error) {
 
-	// Create userModel model for DB searching
-	userModel := models.User{ID: getUserRequest.ID}
+	// Create userToGet model for DB searching
+	userToGet := models.User{ID: getUserRequest.ID}
 
 	// Get user from database
-	userModel, err := s.Repository.GetUser(userModel)
+	userToGet, err := s.Repository.GetUser(userToGet, true)
 	if err != nil {
 		return entities.GetUserResponse{}, s.ErrorsMapper.Map(err)
 	}
 
-	// Transform user model to entity
-	userEntity := s.Codec.FromUserModelToEntities(userModel)
-
 	// Return user
-	return entities.GetUserResponse{User: userEntity}, nil
+	return entities.GetUserResponse{
+		User: s.Codec.FromUserModelToEntities(userToGet),
+	}, nil
 }

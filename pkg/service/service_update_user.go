@@ -7,37 +7,30 @@ import (
 
 func (s *Service) UpdateUser(updateUserRequest entities.UpdateUserRequest) (entities.UpdateUserResponse, error) {
 
-	// Check if username or email are available
-	if s.Repository.UserExists(updateUserRequest.Email, updateUserRequest.Username) {
+	// Check if username and/or email are available
+	if s.Repository.UserExists(updateUserRequest.Email, updateUserRequest.Username, false) {
 		return entities.UpdateUserResponse{}, s.ErrorsMapper.Map(entities.ErrUsernameOrEmailAlreadyInUse)
 	}
 
-	// If they are available, create userModel model for DB searching
-	userModel := models.User{ID: updateUserRequest.ID}
+	// If they are available, create userToUpdate model for DB searching
+	userToUpdate := models.User{ID: updateUserRequest.ID}
 
 	// Get user from database
-	userModel, err := s.Repository.GetUser(userModel)
+	userToUpdate, err := s.Repository.GetUser(userToUpdate, true)
 	if err != nil {
 		return entities.UpdateUserResponse{}, s.ErrorsMapper.Map(err)
 	}
 
 	// Replace fields
-	if updateUserRequest.Username != "" {
-		userModel.Username = updateUserRequest.Username
-	}
-
-	if updateUserRequest.Email != "" {
-		userModel.Email = updateUserRequest.Email
-	}
+	userToUpdate.FillFields(updateUserRequest.Username, updateUserRequest.Email)
 
 	// Update user on the DB
-	if userModel, err = s.Repository.UpdateUser(userModel); err != nil {
+	if userToUpdate, err = s.Repository.UpdateUser(userToUpdate); err != nil {
 		return entities.UpdateUserResponse{}, s.ErrorsMapper.Map(err)
 	}
 
-	// Transform user model to entity
-	userEntity := s.Codec.FromUserModelToEntities(userModel)
-
 	// Return user
-	return entities.UpdateUserResponse{User: userEntity}, nil
+	return entities.UpdateUserResponse{
+		User: s.Codec.FromUserModelToEntities(userToUpdate), // Transform user model to entity
+	}, nil
 }
