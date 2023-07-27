@@ -8,7 +8,7 @@ import (
 )
 
 // UpdateUser takes {username, email} and updates the user by its ID. Empty fields are not updated.
-func (e Endpoints) UpdateUser(c *gin.Context) {
+func (e Transport) UpdateUser(c *gin.Context) {
 
 	// Validate and get request
 	updateUserRequest, err := makeUpdateUserRequest(c)

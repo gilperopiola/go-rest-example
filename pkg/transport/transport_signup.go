@@ -8,7 +8,7 @@ import (
 )
 
 // Signup takes {username, email, password, repeat_password} and creates a new user
-func (e Endpoints) Signup(c *gin.Context) {
+func (e Transport) Signup(c *gin.Context) {
 
 	// Validate and get request
 	signupRequest, err := makeSignupRequest(c)

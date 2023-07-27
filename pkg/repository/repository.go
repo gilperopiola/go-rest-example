@@ -10,7 +10,7 @@ type Repository struct {
 	Database Database
 }
 
-type RepositoryIFace interface {
+type RepositoryProvider interface {
 	CreateUser(user models.User) (models.User, error)
 	UpdateUser(user models.User) (models.User, error)
 	GetUser(user models.User, onlyNonDeleted bool) (models.User, error)
@@ -18,8 +18,8 @@ type RepositoryIFace interface {
 	DeleteUser(id int) (models.User, error)
 }
 
-func NewRepository(database Database) Repository {
-	return Repository{Database: database}
+func NewRepository(database Database) *Repository {
+	return &Repository{Database: database}
 }
 
 /* ------------------- */

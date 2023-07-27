@@ -2,7 +2,6 @@ package service
 
 import (
 	"github.com/gilperopiola/go-rest-example/pkg/entities"
-	"github.com/gilperopiola/go-rest-example/pkg/models"
 )
 
 func (s *Service) UpdateUser(updateUserRequest entities.UpdateUserRequest) (entities.UpdateUserResponse, error) {
@@ -13,7 +12,7 @@ func (s *Service) UpdateUser(updateUserRequest entities.UpdateUserRequest) (enti
 	}
 
 	// If they are available, create userToUpdate model for DB searching
-	userToUpdate := models.User{ID: updateUserRequest.ID}
+	userToUpdate := s.Codec.FromUpdateUserRequestToUserModel(updateUserRequest)
 
 	// Get user from database
 	userToUpdate, err := s.Repository.GetUser(userToUpdate, true)
@@ -22,7 +21,7 @@ func (s *Service) UpdateUser(updateUserRequest entities.UpdateUserRequest) (enti
 	}
 
 	// Replace fields
-	userToUpdate.FillFields(updateUserRequest.Username, updateUserRequest.Email)
+	userToUpdate.Fill(updateUserRequest.Username, updateUserRequest.Email)
 
 	// Update user on the DB
 	if userToUpdate, err = s.Repository.UpdateUser(userToUpdate); err != nil {

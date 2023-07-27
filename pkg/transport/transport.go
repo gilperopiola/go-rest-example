@@ -7,13 +7,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type Endpoints struct {
-	Service      service.ServiceIFace
-	Codec        codec.CodecIFace
-	ErrorsMapper ErrorsMapperIface
+type Transport struct {
+	Service      service.ServiceProvider
+	Codec        codec.CodecProvider
+	ErrorsMapper ErrorsMapperProvider
 }
 
-type EndpointsIface interface {
+type TransportProvider interface {
 
 	// Auth
 
@@ -27,8 +27,8 @@ type EndpointsIface interface {
 	DeleteUser(c *gin.Context)
 }
 
-func NewEndpoints(service service.ServiceIFace, codec codec.CodecIFace, errorsMapper ErrorsMapperIface) Endpoints {
-	return Endpoints{
+func NewTransport(service service.ServiceProvider, codec codec.CodecProvider, errorsMapper ErrorsMapperProvider) Transport {
+	return Transport{
 		Service:      service,
 		Codec:        codec,
 		ErrorsMapper: errorsMapper,

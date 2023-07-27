@@ -13,7 +13,7 @@ type User struct {
 	UpdatedAt time.Time
 }
 
-func (user *User) FillFields(username, email string) {
+func (user *User) Fill(username, email string) {
 	if username != "" {
 		user.Username = username
 	}

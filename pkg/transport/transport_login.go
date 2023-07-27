@@ -8,7 +8,7 @@ import (
 )
 
 // Login takes {username_or_email, password}, checks if the user exists and returns it
-func (e Endpoints) Login(c *gin.Context) {
+func (e Transport) Login(c *gin.Context) {
 
 	// Validate and get request
 	loginRequest, err := makeLoginRequest(c)
@@ -17,11 +17,8 @@ func (e Endpoints) Login(c *gin.Context) {
 		return
 	}
 
-	// Transform request to user credentials, checking if the input was a username or an email
-	userCredentials := e.Codec.FromLoginRequestToUserCredentials(loginRequest)
-
 	// Call service with those credentials
-	loginResponse, err := e.Service.Login(userCredentials)
+	loginResponse, err := e.Service.Login(loginRequest)
 	if err != nil {
 		c.JSON(e.ErrorsMapper.Map(err))
 		return

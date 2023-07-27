@@ -15,6 +15,7 @@ const (
 	VALID_EMAIL_REGEX   = `^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`
 )
 
+// SignupRequest Validate {Email, Username, Password, RepeatPassword}
 func (request *SignupRequest) Validate() error {
 
 	// Empty fields
@@ -46,6 +47,7 @@ func (request *SignupRequest) Validate() error {
 	return nil
 }
 
+// LoginRequest Validate {UsernameOrEmail, Password}
 func (req *LoginRequest) Validate() error {
 
 	// Empty fields
@@ -66,6 +68,7 @@ func (req *GetUserRequest) Validate() error {
 	return nil
 }
 
+// UpdateUserRequest Validate {ID, Email, Username}
 func (request *UpdateUserRequest) Validate() error {
 
 	// Empty fields
@@ -92,6 +95,7 @@ func (request *UpdateUserRequest) Validate() error {
 	return nil
 }
 
+// DeleteUserRequest Validate {ID}
 func (req *DeleteUserRequest) Validate() error {
 
 	// Empty ID

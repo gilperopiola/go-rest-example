@@ -3,6 +3,7 @@ package service
 import (
 	"testing"
 
+	"github.com/gilperopiola/go-rest-example/pkg/auth"
 	"github.com/gilperopiola/go-rest-example/pkg/codec"
 	"github.com/gilperopiola/go-rest-example/pkg/config"
 	"github.com/gilperopiola/go-rest-example/pkg/entities"
@@ -23,9 +24,10 @@ const (
 
 func newTestService(mockRepository *repository.RepositoryMock) *Service {
 	codec := &codec.Codec{}
-	config := config.Config{}
+	config := &config.Config{}
+	auth := &auth.Auth{}
 	errorsMapper := ErrorsMapper{}
-	return NewService(mockRepository, codec, config, errorsMapper)
+	return NewService(mockRepository, auth, codec, config, errorsMapper)
 }
 
 func TestSignup(t *testing.T) {
@@ -98,7 +100,7 @@ func TestLogin(t *testing.T) {
 
 	tests := []struct {
 		name            string
-		credentials     entities.UserCredentials
+		request         entities.LoginRequest
 		mockRepository  *repository.RepositoryMock
 		wantTokenLength int
 		wantErr         error
@@ -111,13 +113,13 @@ func TestLogin(t *testing.T) {
 		{
 			name:           "error_mismatched_passwords",
 			mockRepository: makeMockRepositoryWithGetUser(validUser, nil),
-			credentials:    entities.UserCredentials{Password: INVALID_PASSWORD},
+			request:        entities.LoginRequest{Password: INVALID_PASSWORD},
 			wantErr:        entities.ErrWrongPassword,
 		},
 		{
 			name:            "success",
 			mockRepository:  makeMockRepositoryWithGetUser(validUser, nil),
-			credentials:     entities.UserCredentials{Password: VALID_PASSWORD},
+			request:         entities.LoginRequest{Password: VALID_PASSWORD},
 			wantErr:         nil,
 			wantTokenLength: 172,
 		},
@@ -130,7 +132,7 @@ func TestLogin(t *testing.T) {
 			service := newTestService(tt.mockRepository)
 
 			// Act
-			got, err := service.Login(tt.credentials)
+			got, err := service.Login(tt.request)
 
 			// Assert
 			assert.Equal(t, tt.wantTokenLength, len(got.Token))

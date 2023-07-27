@@ -14,7 +14,7 @@ type Database struct {
 	DB *gorm.DB
 }
 
-type DatabaseIFace interface {
+type DatabaseProvider interface {
 	Setup(config config.DatabaseConfig)
 	Purge()
 	Migrate()

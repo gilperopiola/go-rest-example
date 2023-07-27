@@ -7,20 +7,20 @@ import (
 
 type Codec struct{}
 
-type CodecIFace interface {
+type CodecProvider interface {
 
 	// From Requests to Entities or Models
 	FromSignupRequestToUserModel(request entities.SignupRequest, hashedPassword string) models.User
-	FromLoginRequestToUserCredentials(request entities.LoginRequest) entities.UserCredentials
-
-	// From Entities to Models
-	FromUserCredentialsToUserModel(userCredentials entities.UserCredentials) models.User
+	FromLoginRequestToUserModel(request entities.LoginRequest) models.User
+	FromGetUserRequestToUserModel(request entities.GetUserRequest) models.User
+	FromUpdateUserRequestToUserModel(request entities.UpdateUserRequest) models.User
 
 	// From Models to Entities
-	FromUserModelToUserCredentialsEntities(model models.User) entities.UserCredentials
 	FromUserModelToEntities(model models.User) entities.User
 }
 
-func NewCodec() Codec {
-	return Codec{}
+func NewCodec() *Codec {
+	return &Codec{}
 }
+
+/* ------------------- */

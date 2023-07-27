@@ -8,7 +8,7 @@ import (
 )
 
 // Get User gets the info of a user
-func (e Endpoints) GetUser(c *gin.Context) {
+func (e Transport) GetUser(c *gin.Context) {
 
 	// Validate and get request
 	getUserRequest, err := makeGetUserRequest(c)

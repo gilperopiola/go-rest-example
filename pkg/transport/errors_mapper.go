@@ -10,7 +10,7 @@ import (
 
 type ErrorsMapper struct{}
 
-type ErrorsMapperIface interface {
+type ErrorsMapperProvider interface {
 	Map(err error) (status int, response HTTPResponse)
 	MapWithType(errType, err error) (status int, response HTTPResponse)
 }

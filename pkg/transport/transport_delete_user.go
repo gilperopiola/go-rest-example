@@ -7,7 +7,7 @@ import (
 )
 
 // DeleteUser deletes the logged user
-func (e Endpoints) DeleteUser(c *gin.Context) {
+func (e Transport) DeleteUser(c *gin.Context) {
 
 	// Validate and get request
 	deleteUserRequest, err := makeDeleteUserRequest(c)

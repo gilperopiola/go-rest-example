@@ -24,15 +24,26 @@ func (codec *Codec) FromSignupRequestToUserModel(request entities.SignupRequest,
 	}
 }
 
-func (codec *Codec) FromLoginRequestToUserCredentials(request entities.LoginRequest) entities.UserCredentials {
-	out := entities.UserCredentials{Password: request.Password}
+func (codec *Codec) FromLoginRequestToUserModel(request entities.LoginRequest) models.User {
+	out := models.User{Password: request.Password}
+	usernameOrEmail := request.UsernameOrEmail
 
 	// If it's an email, login with email. Otherwise login with username
-	if matchesEmailFormat, _ := regexp.MatchString(VALID_EMAIL_REGEX, request.UsernameOrEmail); matchesEmailFormat {
-		out.Email = request.UsernameOrEmail
+	if matchesEmailFormat, _ := regexp.MatchString(VALID_EMAIL_REGEX, usernameOrEmail); matchesEmailFormat {
+		out.Email = usernameOrEmail
 	} else {
-		out.Username = request.UsernameOrEmail
+		out.Username = usernameOrEmail
 	}
 
 	return out
+}
+
+func (codec *Codec) FromGetUserRequestToUserModel(request entities.GetUserRequest) models.User {
+	return models.User{ID: request.ID}
+}
+
+func (codec *Codec) FromUpdateUserRequestToUserModel(request entities.UpdateUserRequest) models.User {
+	return models.User{
+		ID: request.ID,
+	}
 }

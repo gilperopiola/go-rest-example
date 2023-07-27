@@ -2,12 +2,6 @@ package entities
 
 import "time"
 
-type UserCredentials struct {
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
-
 type User struct {
 	ID        int       `json:"id,omitempty"`
 	Username  string    `json:"username,omitempty"`

@@ -12,18 +12,18 @@ type Router struct {
 	*gin.Engine
 }
 
-func NewRouter(endpoints EndpointsIface, config config.Config) Router {
+func NewRouter(transport TransportProvider, config config.ConfigProvider, auth auth.AuthProvider) Router {
 	var router Router
-	router.Setup(endpoints, config)
+	router.Setup(transport, config, auth)
 	return router
 }
 
 /* ------------------- */
 
-func (router *Router) Setup(endpoints EndpointsIface, config config.Config) {
+func (router *Router) Setup(transport TransportProvider, config config.ConfigProvider, auth auth.AuthProvider) {
 
 	// Prepare router
-	if !config.DEBUG {
+	if !config.GetDebugMode() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
@@ -31,21 +31,21 @@ func (router *Router) Setup(endpoints EndpointsIface, config config.Config) {
 	router.Use(getCORSConfig())
 
 	// Set endpoints
-	router.SetPublicEndpoints(endpoints)
-	router.SetUserEndpoints(endpoints, config.JWT)
+	router.SetPublicEndpoints(transport)
+	router.SetUserEndpoints(transport, config.GetJWT(), auth)
 }
 
-func (router *Router) SetPublicEndpoints(endpoints EndpointsIface) {
+func (router *Router) SetPublicEndpoints(transport TransportProvider) {
 	public := router.Group("/")
-	public.POST("/signup", endpoints.Signup)
-	public.POST("/login", endpoints.Login)
+	public.POST("/signup", transport.Signup)
+	public.POST("/login", transport.Login)
 }
 
-func (router *Router) SetUserEndpoints(endpoints EndpointsIface, jwtConfig config.JWTConfig) {
-	users := router.Group("/users", auth.ValidateToken(jwtConfig))
-	users.GET("/:user_id", endpoints.GetUser)
-	users.PATCH("/:user_id", endpoints.UpdateUser)
-	users.DELETE("/:user_id", endpoints.DeleteUser)
+func (router *Router) SetUserEndpoints(transport TransportProvider, jwtConfig config.JWTConfig, auth auth.AuthProvider) {
+	users := router.Group("/users", auth.ValidateToken())
+	users.GET("/:user_id", transport.GetUser)
+	users.PATCH("/:user_id", transport.UpdateUser)
+	users.DELETE("/:user_id", transport.DeleteUser)
 }
 
 /* ------------------- */
