@@ -34,3 +34,32 @@ func NewTransport(service service.ServiceProvider, codec codec.CodecProvider, er
 		ErrorsMapper: errorsMapper,
 	}
 }
+
+/* ----------------- */
+
+type RequestProvider interface {
+	Validate() error
+}
+
+type Request RequestProvider
+type Response interface{}
+
+func HandleRequest[T Request, R Response](t Transport, c *gin.Context, makeRequest func(*gin.Context) (T, error), serviceCall func(T) (R, error)) {
+
+	// Make, validate and get request
+	request, err := makeRequest(c)
+	if err != nil {
+		c.JSON(t.ErrorsMapper.Map(err))
+		return
+	}
+
+	// Call service with that request
+	response, err := serviceCall(request)
+	if err != nil {
+		c.JSON(t.ErrorsMapper.Map(err))
+		return
+	}
+
+	// Return OK
+	c.JSON(returnOK(response))
+}

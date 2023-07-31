@@ -16,7 +16,7 @@ const (
 )
 
 // SignupRequest Validate {Email, Username, Password, RepeatPassword}
-func (request *SignupRequest) Validate() error {
+func (request SignupRequest) Validate() error {
 
 	// Empty fields
 	if request.Email == "" || request.Username == "" || request.Password == "" || request.RepeatPassword == "" {
@@ -48,7 +48,7 @@ func (request *SignupRequest) Validate() error {
 }
 
 // LoginRequest Validate {UsernameOrEmail, Password}
-func (req *LoginRequest) Validate() error {
+func (req LoginRequest) Validate() error {
 
 	// Empty fields
 	if req.UsernameOrEmail == "" || req.Password == "" {
@@ -58,7 +58,7 @@ func (req *LoginRequest) Validate() error {
 	return nil
 }
 
-func (req *GetUserRequest) Validate() error {
+func (req GetUserRequest) Validate() error {
 
 	// Empty ID
 	if req.ID == 0 {
@@ -69,7 +69,7 @@ func (req *GetUserRequest) Validate() error {
 }
 
 // UpdateUserRequest Validate {ID, Email, Username}
-func (request *UpdateUserRequest) Validate() error {
+func (request UpdateUserRequest) Validate() error {
 
 	// Empty fields
 	if request.ID == 0 || (request.Email == "" && request.Username == "") {
@@ -96,7 +96,7 @@ func (request *UpdateUserRequest) Validate() error {
 }
 
 // DeleteUserRequest Validate {ID}
-func (req *DeleteUserRequest) Validate() error {
+func (req DeleteUserRequest) Validate() error {
 
 	// Empty ID
 	if req.ID == 0 {

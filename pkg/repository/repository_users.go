@@ -70,6 +70,7 @@ func (r *Repository) GetUser(user models.User, onlyNonDeleted bool) (models.User
 func (r *Repository) DeleteUser(id int) (user models.User, err error) {
 
 	// First, retrieve the user
+	user.ID = id
 	if user, err = r.GetUser(user, false); err != nil {
 		return models.User{}, err
 	}
