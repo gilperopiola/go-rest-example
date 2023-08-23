@@ -9,7 +9,7 @@ type Codec struct{}
 
 type CodecProvider interface {
 
-	// From Requests to Entities or Models
+	// From Requests to Models
 	FromSignupRequestToUserModel(request entities.SignupRequest, hashedPassword string) models.User
 	FromLoginRequestToUserModel(request entities.LoginRequest) models.User
 	FromGetUserRequestToUserModel(request entities.GetUserRequest) models.User

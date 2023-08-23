@@ -2,6 +2,7 @@ package transport
 
 import (
 	"github.com/gilperopiola/go-rest-example/pkg/codec"
+	"github.com/gilperopiola/go-rest-example/pkg/entities"
 	"github.com/gilperopiola/go-rest-example/pkg/service"
 
 	"github.com/gin-gonic/gin"
@@ -37,14 +38,29 @@ func NewTransport(service service.ServiceProvider, codec codec.CodecProvider, er
 
 /* ----------------- */
 
-type RequestProvider interface {
-	Validate() error
+type Request interface {
+	entities.SignupRequest |
+		entities.LoginRequest |
+		entities.GetUserRequest |
+		entities.UpdateUserRequest |
+		entities.DeleteUserRequest
+}
+type Response interface {
+	entities.SignupResponse |
+		entities.LoginResponse |
+		entities.GetUserResponse |
+		entities.UpdateUserResponse |
+		entities.DeleteUserResponse
 }
 
-type Request RequestProvider
-type Response interface{}
-
-func HandleRequest[T Request, R Response](t Transport, c *gin.Context, makeRequest func(*gin.Context) (T, error), serviceCall func(T) (R, error)) {
+// HandleRequest takes:
+//
+//   - a transport and a gin context
+//   - a function that makes a request from the gin context
+//   - a function that calls the service with that request
+//
+// It returns a response with the result of the service call.
+func HandleRequest[req Request, resp Response](t Transport, c *gin.Context, makeRequest func(*gin.Context) (req, error), serviceCall func(req) (resp, error)) {
 
 	// Make, validate and get request
 	request, err := makeRequest(c)

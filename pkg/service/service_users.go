@@ -38,7 +38,7 @@ func (s *Service) UpdateUser(updateUserRequest entities.UpdateUserRequest) (enti
 	}
 
 	// Replace fields
-	userToUpdate.Fill(updateUserRequest.Username, updateUserRequest.Email)
+	userToUpdate.OverwriteFields(updateUserRequest.Username, updateUserRequest.Email)
 
 	// Update user on the DB
 	if userToUpdate, err = s.Repository.UpdateUser(userToUpdate); err != nil {

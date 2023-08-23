@@ -43,7 +43,7 @@ func makeLoginRequest(c *gin.Context) (entities.LoginRequest, error) {
 func makeGetUserRequest(c *gin.Context) (entities.GetUserRequest, error) {
 
 	// Get info from context and URL, check if user IDs match
-	userToGetID, err := getAndValidateRequestUserIDs(c)
+	userToGetID, err := getUserIDFromContext(c)
 	if err != nil {
 		return entities.GetUserRequest{}, err
 	}
@@ -62,7 +62,7 @@ func makeGetUserRequest(c *gin.Context) (entities.GetUserRequest, error) {
 func makeUpdateUserRequest(c *gin.Context) (entities.UpdateUserRequest, error) {
 
 	// Validate and get User ID
-	userToUpdateID, err := getAndValidateRequestUserIDs(c)
+	userToUpdateID, err := getUserIDFromContext(c)
 	if err != nil {
 		return entities.UpdateUserRequest{}, err
 	}
@@ -88,7 +88,7 @@ func makeUpdateUserRequest(c *gin.Context) (entities.UpdateUserRequest, error) {
 func makeDeleteUserRequest(c *gin.Context) (entities.DeleteUserRequest, error) {
 
 	// Get info from context and URL, check if user IDs match
-	userToDeleteID, err := getAndValidateRequestUserIDs(c)
+	userToDeleteID, err := getUserIDFromContext(c)
 	if err != nil {
 		return entities.DeleteUserRequest{}, err
 	}
@@ -106,7 +106,7 @@ func makeDeleteUserRequest(c *gin.Context) (entities.DeleteUserRequest, error) {
 
 /* ----------------- */
 
-func getAndValidateRequestUserIDs(c *gin.Context) (int, error) {
+func getUserIDFromContext(c *gin.Context) (int, error) {
 
 	// Get logged user ID
 	loggedUserID, err := utils.GetIntFromContext(c, "ID")

@@ -42,7 +42,7 @@ func (s *Service) Login(loginRequest entities.LoginRequest) (entities.LoginRespo
 	}
 
 	// Check if passwords match, if not return error
-	if !passwordsMatch(userToLogin.Password, loginRequest.Password, userToLogin.Email) {
+	if !userToLogin.PasswordMatches(loginRequest.Password) {
 		return entities.LoginResponse{}, s.ErrorsMapper.Map(entities.ErrWrongPassword)
 	}
 
@@ -51,8 +51,4 @@ func (s *Service) Login(loginRequest entities.LoginRequest) (entities.LoginRespo
 
 	// Return generated token on the response
 	return entities.LoginResponse{Token: s.Auth.GenerateToken(userEntity)}, nil
-}
-
-func passwordsMatch(password, otherPassword, email string) bool {
-	return password == utils.Hash(email, otherPassword)
 }

@@ -1,6 +1,10 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"github.com/gilperopiola/go-rest-example/pkg/utils"
+)
 
 type User struct {
 	ID        int
@@ -13,11 +17,15 @@ type User struct {
 	UpdatedAt time.Time
 }
 
-func (user *User) Fill(username, email string) {
+func (user *User) OverwriteFields(username, email string) {
 	if username != "" {
 		user.Username = username
 	}
 	if email != "" {
 		user.Email = email
 	}
+}
+
+func (user *User) PasswordMatches(password string) bool {
+	return user.Password == utils.Hash(user.Email, password)
 }
