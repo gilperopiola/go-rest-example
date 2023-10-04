@@ -1,37 +1,87 @@
-# go-rest-example
+# Go REST Example
 
-I made this project on 2018-2019, now on 2023 I refactored the sh!t out of it as it was basic as fvck. Still needs some luv <3.
+**Hey kiddo!** If you're reading this, take a few seconds to be mindful of your body and your surroundings, feeling your breath as it enters and exits your lungs. We are now out of the auto-pilot state we were in, and are fully ready to continue.
 
-## Architecture
+This repository is just a template or example of a **medium-sized microservice** that exposes a simple yet elegant and extensible **HTTP REST API**.
 
-Here's a brief overview of the project's structure:
+Using Gin, it provides a clean and layered architecture complete with User Management, JWT Authentication, MySQL Storage, Easy Configuration and much more.
 
-- `cmd/main.go`: This is the main file that initializes all dependencies and starts the application.
+Go's best practices and standards are followed most of the time, using techniques as Dependency Injection and Table Driven Tests and applying the holy proverbs 🙏.
 
-- `pkg/auth`: This package contains the code needed for user authentication.
+## Table of Contents
 
-- `pkg/codec`: This package is responsible for transforming between entities and models.
+- [Prerequisites](#prerequisites)
+- [Installation and Usage](#installation-and-usage)
+- [Project Architecture](#project-architecture)
+- [Contributing and License](#contributing-and-license)
 
-- `pkg/config`: This package manages the application's configuration.
+## Prerequisites
 
-- `pkg/entities`: This package defines the data structures used in the transport/services layers.
+- Go 1.x
+- A suitable database (MySQL, PostgreSQL, etc)
+- Having a keyboard idk
 
-- `pkg/models`: This package defines the data structures used for the database.
+## Installation and Usage
 
-- `pkg/repository`: This package contains all the database code, including setup and queries.
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/gilperopiola/go-rest-example.git
+   ```
 
-- `pkg/service`: This package contains all the business logic code. It accepts and returns entities.
+2. Navigate to the project directory:
+   ```bash
+   cd go-rest-example
+   ```
 
-- `pkg/transport`: This package manages the different endpoints and handles requests/responses.
+3. Install the required dependencies:
+   ```bash
+   go mod download
+   ```
 
-- `pkg/utils`: This package contains utility functions used across the application.
+4. Set up your database and update the `config.json` file as you see fit.
 
-- `config.json`: This file holds the JSON configuration for the application.
+5. Build the project:
+   ```bash
+   go build -o go-rest-example
+   ```
 
-## Running the application
+6. Run the built binary:
+    ```bash
+    ./go-rest-example
+    ```
 
-To get started with this project, clone the repository and install the necessary dependencies. Configure the server on the `config.json` file, and finally run the application using the command `go run cmd/main.go`.
+This will start the server and you'll hopefully be able to hit the endpoints.
 
-## License
+## Project Architecture
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+| Package | Description |
+|---------|-------------|
+| **cmd** | Contains the main application entry point. |
+| **pkg > auth** | Handles authentication logic. |
+| **pkg > codec** | Responsible for encoding and decoding tasks. |
+| **pkg > entities** | Defines various entities and custom errors. |
+| **pkg > repository** | Manages database connections and operations. |
+| **pkg > service** | Contains the core business logic. |
+| **pkg > transport** | Sets up routes and manages the transport layer. |
+| **pkg > utils** | Houses utility functions used across the project. |
+
+## Contributing and License
+
+### Contributing
+
+We welcome contributions! If you find a bug or want to add a new feature, feel free to create an issue or submit a pull request.
+
+1. Fork the repository.
+2. Create a new branch for your changes.
+3. Make your changes and commit them.
+4. Push your changes to your fork.
+5. Submit a pull request.
+
+### License
+
+This project is licensed under the MIT License. See the `LICENSE` file for more details.
+
+---
+
+# 🐿️
+
