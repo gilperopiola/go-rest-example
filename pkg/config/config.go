@@ -55,7 +55,7 @@ var (
 	defaultDatabasePort     = "3306"
 	defaultDatabaseSchema   = "go-rest-example-db"
 	defaultDatabasePurge    = false
-	defaultDatabaseDebug    = true
+	defaultDatabaseDebug    = false
 
 	defaultJWTSecret              = "a0#3ndl2"
 	defaultJWTSessionDurationDays = 14

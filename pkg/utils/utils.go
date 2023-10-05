@@ -47,10 +47,10 @@ func GetIntFromContext(c *gin.Context, key string) (int, error) {
 	return valueInt, nil
 }
 
-func GetIntFromURLParams(c *gin.Context, key string) (int, error) {
+func GetIntFromContextParams(params gin.Params, key string) (int, error) {
 
 	// Get from params
-	value, ok := c.Params.Get(key)
+	value, ok := params.Get(key)
 	if !ok {
 		return 0, fmt.Errorf("error getting %s from URL params", key)
 	}
