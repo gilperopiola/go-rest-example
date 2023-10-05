@@ -2,10 +2,33 @@ package service
 
 import (
 	"github.com/gilperopiola/go-rest-example/pkg/entities"
+	"github.com/gilperopiola/go-rest-example/pkg/utils"
 )
 
+// CreateUser is an admins only endpoint
 func (s *Service) CreateUser(createUserRequest entities.CreateUserRequest) (entities.CreateUserResponse, error) {
-	return entities.CreateUserResponse{}, nil
+
+	// Validate user doesn't exist
+	if s.Repository.UserExists(createUserRequest.Email, createUserRequest.Username, false) {
+		return entities.CreateUserResponse{}, s.ErrorsMapper.Map(entities.ErrUsernameOrEmailAlreadyInUse)
+	}
+
+	// Hash password
+	hashedPassword := utils.Hash(createUserRequest.Email, createUserRequest.Password)
+
+	// Transform request to model
+	userToCreate := s.Codec.FromCreateUserRequestToUserModel(createUserRequest, hashedPassword)
+
+	// Create user model on the database
+	createdUser, err := s.Repository.CreateUser(userToCreate)
+	if err != nil {
+		return entities.CreateUserResponse{}, s.ErrorsMapper.Map(err)
+	}
+
+	// Return response
+	return entities.CreateUserResponse{
+		User: s.Codec.FromUserModelToEntities(createdUser), // Transform user to entities
+	}, nil
 }
 
 func (s *Service) GetUser(getUserRequest entities.GetUserRequest) (entities.GetUserResponse, error) {

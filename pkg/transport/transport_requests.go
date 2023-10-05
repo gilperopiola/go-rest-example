@@ -41,8 +41,21 @@ func makeLoginRequest(c *gin.Context) (entities.LoginRequest, error) {
 }
 
 func makeCreateUserRequest(c *gin.Context) (entities.CreateUserRequest, error) {
-	return entities.CreateUserRequest{}, nil
+
+	// Bind & validate request
+	var createUserRequest entities.CreateUserRequest
+	if err := c.ShouldBindJSON(&createUserRequest); err != nil {
+		return entities.CreateUserRequest{}, utils.JoinErrors(entities.ErrBindingRequest, err)
+	}
+
+	if err := createUserRequest.Validate(); err != nil {
+		return entities.CreateUserRequest{}, err
+	}
+
+	// Return request
+	return createUserRequest, nil
 }
+
 func makeGetUserRequest(c *gin.Context) (entities.GetUserRequest, error) {
 
 	// Get info from context and URL, check if user IDs match

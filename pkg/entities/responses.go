@@ -1,16 +1,19 @@
 package entities
 
-// Here are the output responses that are used in the transport/service layer.
-// They are generated on the service layer, and then passed to the transport layer.
+// These are the responses that the service layer returns to the transport layer
 
+// - Auth
 type SignupResponse struct {
 	User User `json:"user"`
 }
+
 type LoginResponse struct {
 	Token string `json:"token"`
 }
 
+// - Users
 type CreateUserResponse struct {
+	User User `json:"user"`
 }
 
 type GetUserResponse struct {

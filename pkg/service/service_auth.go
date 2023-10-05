@@ -50,6 +50,12 @@ func (s *Service) Login(loginRequest entities.LoginRequest) (entities.LoginRespo
 	// Transform user model to entity
 	userEntity := s.Codec.FromUserModelToEntities(userToLogin)
 
+	// Set the appropriate role
+	authRole := auth.UserRole
+	if userEntity.IsAdmin {
+		authRole = auth.AdminRole
+	}
+
 	// Return generated token on the response
-	return entities.LoginResponse{Token: s.Auth.GenerateToken(userEntity, auth.UserRole)}, nil
+	return entities.LoginResponse{Token: s.Auth.GenerateToken(userEntity, authRole)}, nil
 }
