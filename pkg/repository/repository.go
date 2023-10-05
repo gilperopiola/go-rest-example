@@ -4,7 +4,6 @@ import (
 	"errors"
 
 	"github.com/gilperopiola/go-rest-example/pkg/models"
-	"github.com/jinzhu/gorm"
 )
 
 type Repository struct {
@@ -36,6 +35,5 @@ var (
 	ErrCreatingUser       = errors.New("error creating user")
 	ErrUpdatingUser       = errors.New("error updating user")
 	ErrGettingUser        = errors.New("error getting user")
-	ErrUserNotFound       = gorm.ErrRecordNotFound
 	ErrUserAlreadyDeleted = errors.New("error, user already deleted")
 )
