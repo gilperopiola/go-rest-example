@@ -4,10 +4,17 @@ import (
 	"crypto/sha1"
 	"encoding/base64"
 	"fmt"
+	"os"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
+
+// General utils
+
+func JoinErrors(err1, err2 error) error {
+	return fmt.Errorf("%s: %w", err1.Error(), err2)
+}
 
 func Hash(salt string, data string) string {
 	hasher := sha1.New()
@@ -15,9 +22,7 @@ func Hash(salt string, data string) string {
 	return base64.URLEncoding.EncodeToString(hasher.Sum(nil))
 }
 
-func JoinErrors(err1, err2 error) error {
-	return fmt.Errorf("%w: %w", err1, err2)
-}
+// API / Gin Utils
 
 func GetIntFromContext(c *gin.Context, key string) (int, error) {
 
@@ -57,4 +62,33 @@ func GetIntFromURLParams(c *gin.Context, key string) (int, error) {
 	}
 
 	return valueInt, nil
+}
+
+// Environment utils
+
+func GetEnv(key, fallback string) string {
+	if value, exists := os.LookupEnv(key); exists {
+		return value
+	}
+	return fallback
+}
+
+func GetEnvBool(key string, fallback bool) bool {
+	value, exists := os.LookupEnv(key)
+	if !exists {
+		return fallback
+	}
+	return value == "true" || value == "1"
+}
+
+func GetEnvInt(key string, fallback int) int {
+	value, exists := os.LookupEnv(key)
+	if !exists {
+		return fallback
+	}
+	intValue, err := strconv.Atoi(value)
+	if err != nil {
+		return fallback
+	}
+	return intValue
 }

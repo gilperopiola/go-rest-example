@@ -10,6 +10,9 @@ type LoginResponse struct {
 	Token string `json:"token"`
 }
 
+type CreateUserResponse struct {
+}
+
 type GetUserResponse struct {
 	User User `json:"user"`
 }

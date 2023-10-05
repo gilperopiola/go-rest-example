@@ -10,7 +10,7 @@ type Repository struct {
 	Database Database
 }
 
-type RepositoryProvider interface {
+type RepositoryInterface interface {
 	CreateUser(user models.User) (models.User, error)
 	UpdateUser(user models.User) (models.User, error)
 	GetUser(user models.User, onlyNonDeleted bool) (models.User, error)

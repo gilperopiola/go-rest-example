@@ -16,6 +16,10 @@ func (t Transport) Login(c *gin.Context) {
 
 /* Users */
 
+func (t Transport) CreateUser(c *gin.Context) {
+	HandleRequest(t, c, makeCreateUserRequest, t.Service.CreateUser)
+}
+
 func (t Transport) GetUser(c *gin.Context) {
 	HandleRequest(t, c, makeGetUserRequest, t.Service.GetUser)
 }

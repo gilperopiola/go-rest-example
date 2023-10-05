@@ -1,27 +1,16 @@
 package config
 
 import (
-	"log"
-	"os"
-
-	"github.com/spf13/viper"
+	"github.com/gilperopiola/go-rest-example/pkg/utils"
 )
 
-type Config struct {
-	PORT  string
-	DEBUG bool
-
-	DATABASE DatabaseConfig
-	JWT      JWTConfig
-}
-
-type ConfigProvider interface {
+type ConfigInterface interface {
 	Setup()
 
 	GetDebugMode() bool
 	GetPort() string
-	GetDatabase() DatabaseConfig
-	GetJWT() JWTConfig
+	GetDatabaseConfig() DatabaseConfig
+	GetJWTConfig() JWTConfig
 }
 
 func NewConfig() *Config {
@@ -30,61 +19,44 @@ func NewConfig() *Config {
 	return &config
 }
 
-/* ------------------- */
-
-type DatabaseConfig struct {
-	TYPE     string
-	USERNAME string
-	PASSWORD string
-	HOSTNAME string
-	PORT     string
-	SCHEMA   string
-
-	PURGE bool
-	DEBUG bool
-}
-
-type JWTConfig struct {
-	SECRET                string
-	SESSION_DURATION_DAYS int
-}
-
-/* ------------------- */
+var prefix = "GO_REST_EXAMPLE_"
 
 func (config *Config) Setup() {
-	viper.SetConfigName("config") // configuration file name without the .json or .yaml extension
-	viper.AddConfigPath(".")
 
-	if err := viper.ReadInConfig(); err != nil {
-		log.Fatalf("error reading config: %v", err)
-	}
+	// General configuration with defaults
+	config.PORT = utils.GetEnv(prefix+"PORT", defaultPort)
+	config.DEBUG = utils.GetEnvBool(prefix+"DEBUG", defaultDebug)
 
-	if err := viper.Unmarshal(&config); err != nil {
-		log.Fatalf("error unmarshaling config: %v", err)
-	}
+	// Database configuration with defaults
+	config.DATABASE.TYPE = utils.GetEnv(prefix+"DATABASE_TYPE", defaultDatabaseType)
+	config.DATABASE.USERNAME = utils.GetEnv(prefix+"DATABASE_USERNAME", defaultDatabaseUsername)
+	config.DATABASE.PASSWORD = utils.GetEnv(prefix+"DATABASE_PASSWORD", defaultDatabasePassword)
+	config.DATABASE.HOSTNAME = utils.GetEnv(prefix+"DATABASE_HOSTNAME", defaultDatabaseHostname)
+	config.DATABASE.PORT = utils.GetEnv(prefix+"DATABASE_PORT", defaultDatabasePort)
+	config.DATABASE.SCHEMA = utils.GetEnv(prefix+"DATABASE_SCHEMA", defaultDatabaseSchema)
+	config.DATABASE.PURGE = utils.GetEnvBool(prefix+"DATABASE_PURGE", defaultDatabasePurge)
+	config.DATABASE.DEBUG = utils.GetEnvBool(prefix+"DATABASE_DEBUG", defaultDatabaseDebug)
 
-	os.Setenv("PORT", config.PORT)
+	// JWT configuration with defaults
+	config.JWT.SECRET = utils.GetEnv(prefix+"JWT_SECRET", defaultJWTSecret)
+	config.JWT.SESSION_DURATION_DAYS = utils.GetEnvInt(prefix+"JWT_SESSION_DURATION_DAYS", defaultJWTSessionDurationDays)
+
+	config.validateEnvVars()
 }
 
-func (config *Config) GetDebugMode() bool {
-	return config.DEBUG
-}
+var (
+	defaultPort  = "8040"
+	defaultDebug = false
 
-func (config *Config) GetPort() string {
-	return config.PORT
-}
+	defaultDatabaseType     = "mysql"
+	defaultDatabaseUsername = "root"
+	defaultDatabasePassword = ""
+	defaultDatabaseHostname = "127.0.0.1"
+	defaultDatabasePort     = "3306"
+	defaultDatabaseSchema   = "go-rest-example-db"
+	defaultDatabasePurge    = false
+	defaultDatabaseDebug    = true
 
-func (config *Config) GetDatabase() DatabaseConfig {
-	return config.DATABASE
-}
-
-func (config *Config) GetJWT() JWTConfig {
-	return config.JWT
-}
-
-/* ------------------- */
-
-func (config *DatabaseConfig) GetConnectionString() string {
-	return config.USERNAME + ":" + config.PASSWORD + "@tcp(" + config.HOSTNAME + ":" +
-		config.PORT + ")/" + config.SCHEMA + "?charset=utf8&parseTime=True&loc=Local"
-}
+	defaultJWTSecret              = "a0#3ndl2"
+	defaultJWTSessionDurationDays = 14
+)

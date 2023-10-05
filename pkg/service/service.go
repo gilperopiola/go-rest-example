@@ -9,23 +9,24 @@ import (
 )
 
 type Service struct {
-	Config       config.ConfigProvider
-	Auth         auth.AuthProvider
-	Codec        codec.CodecProvider
-	Repository   repository.RepositoryProvider
-	ErrorsMapper ErrorsMapperProvider
+	Config       config.ConfigInterface
+	Auth         auth.AuthInterface
+	Codec        codec.CodecInterface
+	Repository   repository.RepositoryInterface
+	ErrorsMapper errorsMapperInterface
 }
 
-type ServiceProvider interface {
+type ServiceInterface interface {
 	Signup(signupRequest entities.SignupRequest) (entities.SignupResponse, error)
 	Login(loginRequest entities.LoginRequest) (entities.LoginResponse, error)
 
+	CreateUser(createUserRequest entities.CreateUserRequest) (entities.CreateUserResponse, error)
 	GetUser(getUserRequest entities.GetUserRequest) (entities.GetUserResponse, error)
 	UpdateUser(updateUserRequest entities.UpdateUserRequest) (entities.UpdateUserResponse, error)
 	DeleteUser(deleteUserRequest entities.DeleteUserRequest) (entities.DeleteUserResponse, error)
 }
 
-func NewService(repository repository.RepositoryProvider, auth auth.AuthProvider, codec codec.CodecProvider, config config.ConfigProvider, errorsMapper ErrorsMapperProvider) *Service {
+func NewService(repository repository.RepositoryInterface, auth auth.AuthInterface, codec codec.CodecInterface, config config.ConfigInterface, errorsMapper errorsMapperInterface) *Service {
 	return &Service{
 		Repository:   repository,
 		Auth:         auth,

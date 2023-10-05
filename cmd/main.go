@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"os"
 
 	"github.com/gilperopiola/go-rest-example/pkg/auth"
 	"github.com/gilperopiola/go-rest-example/pkg/codec"
@@ -14,23 +13,47 @@ import (
 
 func main() {
 
+	// It all starts here!
 	log.Println("Server started")
 
 	// Setup dependencies
 	var (
-		config     = config.NewConfig()
-		auth       = auth.NewAuth(config.JWT.SECRET, config.JWT.SESSION_DURATION_DAYS)
-		codec      = codec.NewCodec()
-		database   = repository.NewDatabase(config.DATABASE)
+
+		// Load configuration settings
+		config = config.NewConfig()
+
+		// Initialize authentication module
+		auth = auth.NewAuth(config.JWT.SECRET, config.JWT.SESSION_DURATION_DAYS)
+
+		// Setup codec for encoding and decoding
+		codec = codec.NewCodec()
+
+		// Establish database connection
+		database = repository.NewDatabase(config.DATABASE)
+
+		// Initialize repository with the database connection
 		repository = repository.NewRepository(database)
-		service    = service.NewService(repository, auth, codec, config, service.ErrorsMapper{})
-		endpoints  = transport.NewTransport(service, codec, transport.ErrorsMapper{})
-		router     = transport.NewRouter(endpoints, config, auth)
+
+		// Setup the main service with dependencies
+		service = service.NewService(repository, auth, codec, config, service.ErrorsMapper{})
+
+		// Setup endpoints & transport layer with dependencies
+		endpoints = transport.NewTransport(service, codec, transport.ErrorsMapper{})
+
+		// Initialize the router with the endpoints
+		router = transport.NewRouter(endpoints, config, auth)
 	)
 
+	// Defer closing open connections
 	defer database.Close()
 
 	// Start server
-	log.Println("Server running")
-	router.Run(":" + os.Getenv("PORT"))
+	log.Println("About to run server on port " + config.PORT)
+
+	err := router.Run(":" + config.PORT)
+	if err != nil {
+		log.Fatalf("Failed to start server: %v", err)
+	}
+
+	// Have a nice day!
 }

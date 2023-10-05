@@ -4,6 +4,10 @@ import (
 	"github.com/gilperopiola/go-rest-example/pkg/entities"
 )
 
+func (s *Service) CreateUser(createUserRequest entities.CreateUserRequest) (entities.CreateUserResponse, error) {
+	return entities.CreateUserResponse{}, nil
+}
+
 func (s *Service) GetUser(getUserRequest entities.GetUserRequest) (entities.GetUserResponse, error) {
 
 	// Create userToGet model for DB searching

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/gilperopiola/go-rest-example/pkg/auth"
 	"github.com/gilperopiola/go-rest-example/pkg/entities"
 	"github.com/gilperopiola/go-rest-example/pkg/utils"
 )
@@ -50,5 +51,5 @@ func (s *Service) Login(loginRequest entities.LoginRequest) (entities.LoginRespo
 	userEntity := s.Codec.FromUserModelToEntities(userToLogin)
 
 	// Return generated token on the response
-	return entities.LoginResponse{Token: s.Auth.GenerateToken(userEntity)}, nil
+	return entities.LoginResponse{Token: s.Auth.GenerateToken(userEntity, auth.UserRole)}, nil
 }

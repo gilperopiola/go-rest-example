@@ -15,6 +15,9 @@ type LoginRequest struct {
 	Password        string `json:"password"`
 }
 
+type CreateUserRequest struct {
+}
+
 type GetUserRequest struct {
 	ID int `json:"id"`
 }

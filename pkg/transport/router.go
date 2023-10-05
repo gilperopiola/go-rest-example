@@ -12,7 +12,7 @@ type Router struct {
 	*gin.Engine
 }
 
-func NewRouter(transport TransportProvider, config config.ConfigProvider, auth auth.AuthProvider) Router {
+func NewRouter(transport TransportProvider, config config.ConfigInterface, auth auth.AuthInterface) Router {
 	var router Router
 	router.Setup(transport, config, auth)
 	return router
@@ -20,7 +20,7 @@ func NewRouter(transport TransportProvider, config config.ConfigProvider, auth a
 
 /* ------------------- */
 
-func (router *Router) Setup(transport TransportProvider, config config.ConfigProvider, auth auth.AuthProvider) {
+func (router *Router) Setup(transport TransportProvider, config config.ConfigInterface, auth auth.AuthInterface) {
 
 	// Prepare router
 	if !config.GetDebugMode() {
@@ -32,7 +32,7 @@ func (router *Router) Setup(transport TransportProvider, config config.ConfigPro
 
 	// Set endpoints
 	router.SetPublicEndpoints(transport)
-	router.SetUserEndpoints(transport, config.GetJWT(), auth)
+	router.SetUserEndpoints(transport, config.GetJWTConfig(), auth)
 }
 
 func (router *Router) SetPublicEndpoints(transport TransportProvider) {
@@ -41,7 +41,7 @@ func (router *Router) SetPublicEndpoints(transport TransportProvider) {
 	public.POST("/login", transport.Login)
 }
 
-func (router *Router) SetUserEndpoints(transport TransportProvider, jwtConfig config.JWTConfig, auth auth.AuthProvider) {
+func (router *Router) SetUserEndpoints(transport TransportProvider, jwtConfig config.JWTConfig, auth auth.AuthInterface) {
 	users := router.Group("/users", auth.ValidateToken())
 	users.GET("/:user_id", transport.GetUser)
 	users.PATCH("/:user_id", transport.UpdateUser)

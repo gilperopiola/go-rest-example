@@ -40,6 +40,9 @@ func makeLoginRequest(c *gin.Context) (entities.LoginRequest, error) {
 	return loginRequest, nil
 }
 
+func makeCreateUserRequest(c *gin.Context) (entities.CreateUserRequest, error) {
+	return entities.CreateUserRequest{}, nil
+}
 func makeGetUserRequest(c *gin.Context) (entities.GetUserRequest, error) {
 
 	// Get info from context and URL, check if user IDs match

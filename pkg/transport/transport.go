@@ -9,26 +9,25 @@ import (
 )
 
 type Transport struct {
-	Service      service.ServiceProvider
-	Codec        codec.CodecProvider
-	ErrorsMapper ErrorsMapperProvider
+	Service      service.ServiceInterface
+	Codec        codec.CodecInterface
+	ErrorsMapper ErrorsMapperInterface
 }
 
 type TransportProvider interface {
 
-	// Auth
-
+	// - Auth
 	Signup(c *gin.Context)
 	Login(c *gin.Context)
 
-	// Users
-
+	// - Users
+	CreateUser(c *gin.Context)
 	GetUser(c *gin.Context)
 	UpdateUser(c *gin.Context)
 	DeleteUser(c *gin.Context)
 }
 
-func NewTransport(service service.ServiceProvider, codec codec.CodecProvider, errorsMapper ErrorsMapperProvider) Transport {
+func NewTransport(service service.ServiceInterface, codec codec.CodecInterface, errorsMapper ErrorsMapperInterface) Transport {
 	return Transport{
 		Service:      service,
 		Codec:        codec,
@@ -41,6 +40,7 @@ func NewTransport(service service.ServiceProvider, codec codec.CodecProvider, er
 type Request interface {
 	entities.SignupRequest |
 		entities.LoginRequest |
+		entities.CreateUserRequest |
 		entities.GetUserRequest |
 		entities.UpdateUserRequest |
 		entities.DeleteUserRequest
@@ -48,6 +48,7 @@ type Request interface {
 type Response interface {
 	entities.SignupResponse |
 		entities.LoginResponse |
+		entities.CreateUserResponse |
 		entities.GetUserResponse |
 		entities.UpdateUserResponse |
 		entities.DeleteUserResponse

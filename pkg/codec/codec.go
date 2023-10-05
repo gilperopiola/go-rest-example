@@ -7,7 +7,7 @@ import (
 
 type Codec struct{}
 
-type CodecProvider interface {
+type CodecInterface interface {
 
 	// From Requests to Models
 	FromSignupRequestToUserModel(request entities.SignupRequest, hashedPassword string) models.User
