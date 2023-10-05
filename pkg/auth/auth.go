@@ -7,17 +7,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type Auth struct {
-	secret              string
-	sessionDurationDays int
-}
-
 type AuthInterface interface {
 	GenerateToken(user entities.User, role AuthRole) string
 	ValidateToken() gin.HandlerFunc
 	ValidateRole(role AuthRole) gin.HandlerFunc
 	GetUserRole() AuthRole
 	GetAdminRole() AuthRole
+}
+
+type Auth struct {
+	secret              string
+	sessionDurationDays int
 }
 
 func NewAuth(secret string, sessionDurationDays int) *Auth {

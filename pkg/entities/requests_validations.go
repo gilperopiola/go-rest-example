@@ -18,29 +18,14 @@ const (
 // SignupRequest Validate {Email, Username, Password, RepeatPassword}
 func (request SignupRequest) Validate() error {
 
-	// Empty fields
-	if request.Email == "" || request.Username == "" || request.Password == "" || request.RepeatPassword == "" {
-		return ErrAllFieldsRequired
+	// Check username, email and password basic validations
+	if err := usernameEmailAndPasswordValidation(request.Username, request.Email, request.Password); err != nil {
+		return err
 	}
 
-	// Matching passwords
+	// Check passwords match
 	if request.Password != request.RepeatPassword {
 		return ErrPasswordsDontMatch
-	}
-
-	// Valid email format
-	matched, err := regexp.MatchString(VALID_EMAIL_REGEX, request.Email)
-	if err != nil || !matched {
-		return ErrInvalidEmailFormat
-	}
-
-	// Valid username and password length
-	if len(request.Username) < USERNAME_MIN_LENGTH || len(request.Username) > USERNAME_MAX_LENGTH {
-		return ErrInvalidUsernameLength
-	}
-
-	if len(request.Password) < PASSWORD_MIN_LENGTH || len(request.Password) > PASSWORD_MAX_LENGTH {
-		return ErrInvalidPasswordLength
 	}
 
 	// Return OK
@@ -56,6 +41,11 @@ func (req LoginRequest) Validate() error {
 	}
 
 	return nil
+}
+
+// CreateUserRequest Validate {Email, Username, Password, IsAdmin}
+func (request CreateUserRequest) Validate() error {
+	return usernameEmailAndPasswordValidation(request.Username, request.Email, request.Password)
 }
 
 func (req GetUserRequest) Validate() error {
@@ -103,5 +93,31 @@ func (req DeleteUserRequest) Validate() error {
 		return ErrAllFieldsRequired
 	}
 
+	return nil
+}
+
+func usernameEmailAndPasswordValidation(username, email, password string) error {
+
+	// Empty fields
+	if email == "" || username == "" || password == "" {
+		return ErrAllFieldsRequired
+	}
+
+	// Valid email format
+	matched, err := regexp.MatchString(VALID_EMAIL_REGEX, email)
+	if err != nil || !matched {
+		return ErrInvalidEmailFormat
+	}
+
+	// Valid username and password length
+	if len(username) < USERNAME_MIN_LENGTH || len(username) > USERNAME_MAX_LENGTH {
+		return ErrInvalidUsernameLength
+	}
+
+	if len(password) < PASSWORD_MIN_LENGTH || len(password) > PASSWORD_MAX_LENGTH {
+		return ErrInvalidPasswordLength
+	}
+
+	// Return OK
 	return nil
 }

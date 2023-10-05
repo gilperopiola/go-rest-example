@@ -38,6 +38,18 @@ func (codec *Codec) FromLoginRequestToUserModel(request entities.LoginRequest) m
 	return out
 }
 
+func (codec *Codec) FromCreateUserRequestToUserModel(request entities.CreateUserRequest, hashedPassword string) models.User {
+	return models.User{
+		Email:     request.Email,
+		Username:  request.Username,
+		Password:  hashedPassword,
+		Deleted:   false,
+		IsAdmin:   request.IsAdmin,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+}
+
 func (codec *Codec) FromGetUserRequestToUserModel(request entities.GetUserRequest) models.User {
 	return models.User{ID: request.ID}
 }
