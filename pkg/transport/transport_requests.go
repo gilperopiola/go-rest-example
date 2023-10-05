@@ -12,7 +12,7 @@ func makeSignupRequest(c *gin.Context) (entities.SignupRequest, error) {
 	// Bind & validate request
 	var signupRequest entities.SignupRequest
 	if err := c.ShouldBindJSON(&signupRequest); err != nil {
-		return entities.SignupRequest{}, utils.JoinErrors(entities.ErrBindingRequest, err)
+		return entities.SignupRequest{}, utils.JoinErrors(err, entities.ErrBindingRequest)
 	}
 
 	if err := signupRequest.Validate(); err != nil {
@@ -28,7 +28,7 @@ func makeLoginRequest(c *gin.Context) (entities.LoginRequest, error) {
 	// Bind request
 	var loginRequest entities.LoginRequest
 	if err := c.ShouldBindJSON(&loginRequest); err != nil {
-		return entities.LoginRequest{}, utils.JoinErrors(entities.ErrBindingRequest, err)
+		return entities.LoginRequest{}, utils.JoinErrors(err, entities.ErrBindingRequest)
 	}
 
 	// Validate request
@@ -45,7 +45,7 @@ func makeCreateUserRequest(c *gin.Context) (entities.CreateUserRequest, error) {
 	// Bind & validate request
 	var createUserRequest entities.CreateUserRequest
 	if err := c.ShouldBindJSON(&createUserRequest); err != nil {
-		return entities.CreateUserRequest{}, utils.JoinErrors(entities.ErrBindingRequest, err)
+		return entities.CreateUserRequest{}, utils.JoinErrors(err, entities.ErrBindingRequest)
 	}
 
 	if err := createUserRequest.Validate(); err != nil {
@@ -86,7 +86,7 @@ func makeUpdateUserRequest(c *gin.Context) (entities.UpdateUserRequest, error) {
 	// Bind request
 	var updateUserRequest entities.UpdateUserRequest
 	if err := c.ShouldBindJSON(&updateUserRequest); err != nil {
-		return entities.UpdateUserRequest{}, utils.JoinErrors(entities.ErrBindingRequest, err)
+		return entities.UpdateUserRequest{}, utils.JoinErrors(err, entities.ErrBindingRequest)
 	}
 
 	// Assign User ID to request

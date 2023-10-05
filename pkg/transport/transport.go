@@ -9,12 +9,12 @@ import (
 )
 
 type Transport struct {
-	Service      service.ServiceInterface
+	Service      service.ServiceLayer
 	Codec        codec.CodecInterface
-	ErrorsMapper ErrorsMapperInterface
+	ErrorsMapper errorsMapperInterface
 }
 
-type TransportProvider interface {
+type TransportLayer interface {
 
 	// - Auth
 	Signup(c *gin.Context)
@@ -27,31 +27,12 @@ type TransportProvider interface {
 	DeleteUser(c *gin.Context)
 }
 
-func NewTransport(service service.ServiceInterface, codec codec.CodecInterface, errorsMapper ErrorsMapperInterface) Transport {
+func NewTransport(service service.ServiceLayer, codec codec.CodecInterface, errorsMapper errorsMapperInterface) Transport {
 	return Transport{
 		Service:      service,
 		Codec:        codec,
 		ErrorsMapper: errorsMapper,
 	}
-}
-
-/* ----------------- */
-
-type Request interface {
-	entities.SignupRequest |
-		entities.LoginRequest |
-		entities.CreateUserRequest |
-		entities.GetUserRequest |
-		entities.UpdateUserRequest |
-		entities.DeleteUserRequest
-}
-type Response interface {
-	entities.SignupResponse |
-		entities.LoginResponse |
-		entities.CreateUserResponse |
-		entities.GetUserResponse |
-		entities.UpdateUserResponse |
-		entities.DeleteUserResponse
 }
 
 // HandleRequest takes:
@@ -61,7 +42,8 @@ type Response interface {
 //   - a function that calls the service with that request
 //
 // It returns a response with the result of the service call.
-func HandleRequest[req Request, resp Response](t Transport, c *gin.Context, makeRequest func(*gin.Context) (req, error), serviceCall func(req) (resp, error)) {
+func HandleRequest[req Request, resp Response](t Transport, c *gin.Context,
+	makeRequest func(*gin.Context) (req, error), serviceCall func(req) (resp, error)) {
 
 	// Make, validate and get request
 	request, err := makeRequest(c)
@@ -79,4 +61,21 @@ func HandleRequest[req Request, resp Response](t Transport, c *gin.Context, make
 
 	// Return OK
 	c.JSON(returnOK(response))
+}
+
+type Request interface {
+	entities.SignupRequest |
+		entities.LoginRequest |
+		entities.CreateUserRequest |
+		entities.GetUserRequest |
+		entities.UpdateUserRequest |
+		entities.DeleteUserRequest
+}
+type Response interface {
+	entities.SignupResponse |
+		entities.LoginResponse |
+		entities.CreateUserResponse |
+		entities.GetUserResponse |
+		entities.UpdateUserResponse |
+		entities.DeleteUserResponse
 }

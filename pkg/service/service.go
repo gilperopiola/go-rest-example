@@ -12,11 +12,11 @@ type Service struct {
 	Config       config.ConfigInterface
 	Auth         auth.AuthInterface
 	Codec        codec.CodecInterface
-	Repository   repository.RepositoryInterface
+	Repository   repository.RepositoryLayer
 	ErrorsMapper errorsMapperInterface
 }
 
-type ServiceInterface interface {
+type ServiceLayer interface {
 	Signup(signupRequest entities.SignupRequest) (entities.SignupResponse, error)
 	Login(loginRequest entities.LoginRequest) (entities.LoginResponse, error)
 
@@ -26,7 +26,7 @@ type ServiceInterface interface {
 	DeleteUser(deleteUserRequest entities.DeleteUserRequest) (entities.DeleteUserResponse, error)
 }
 
-func NewService(repository repository.RepositoryInterface, auth auth.AuthInterface, codec codec.CodecInterface, config config.ConfigInterface, errorsMapper errorsMapperInterface) *Service {
+func NewService(repository repository.RepositoryLayer, auth auth.AuthInterface, codec codec.CodecInterface, config config.ConfigInterface, errorsMapper errorsMapperInterface) *Service {
 	return &Service{
 		Repository:   repository,
 		Auth:         auth,

@@ -5,40 +5,46 @@ import (
 	"strings"
 
 	"github.com/gilperopiola/go-rest-example/pkg/entities"
-	"github.com/gilperopiola/go-rest-example/pkg/utils"
 
 	"github.com/sirupsen/logrus"
 )
 
-type ErrorsMapper struct {
+// The errorsMapper maps errors to HTTP status codes
+// It also logs errors and warnings
+
+type errorsMapper struct {
 	logger *logrus.Logger
 }
 
-func NewErrorsMapper(logger *logrus.Logger) ErrorsMapper {
-	return ErrorsMapper{logger: logger}
-}
-
-type ErrorsMapperInterface interface {
+type errorsMapperInterface interface {
 	Map(err error) (status int, response HTTPResponse)
-	MapWithType(errType, err error) (status int, response HTTPResponse)
 }
 
-func (e ErrorsMapper) MapWithType(errType, err error) (status int, response HTTPResponse) {
-	return e.Map(utils.JoinErrors(errType, err))
+func NewErrorsMapper(logger *logrus.Logger) errorsMapper {
+	return errorsMapper{logger: logger}
 }
 
 // This method will define the response of the transport layer
-func (e ErrorsMapper) Map(err error) (status int, response HTTPResponse) {
+func (e errorsMapper) Map(err error) (status int, response HTTPResponse) {
 
 	// If we're here we shouldn't have a nil error
 	if err == nil {
 		err = entities.ErrNilError
 	}
 
-	// We check if the specific error msg is in the error chain
-	// Assigning then the HTTP code and defaulting to 500
+	// We get the HTTP code depending on the error, defaulting to 500
+	responseStatusCode := getResponseStatusCode(err)
+
+	// We log 500's as errors, and 400's as warnings
+	e.logWarningOrError(err, responseStatusCode)
+
+	return returnErrorResponse(responseStatusCode, err)
+}
+
+func getResponseStatusCode(err error) int {
 	responseStatusCode := http.StatusInternalServerError
 
+	// This is done through strings comparison!!! (not ideal)
 	for key, value := range errorsMapToHTTPCode {
 		if strings.Contains(err.Error(), key.Error()) {
 			responseStatusCode = value
@@ -46,14 +52,10 @@ func (e ErrorsMapper) Map(err error) (status int, response HTTPResponse) {
 		}
 	}
 
-	// We log 500's as errors, and 400's as warnings
-	logWarningOrError(e.logger, err, responseStatusCode)
-
-	return returnErrorResponse(responseStatusCode, err)
+	return responseStatusCode
 }
 
 var errorsMapToHTTPCode = map[error]int{
-
 	// 400 - Bad Request
 	entities.ErrBindingRequest:        400,
 	entities.ErrAllFieldsRequired:     400,
@@ -78,10 +80,10 @@ var errorsMapToHTTPCode = map[error]int{
 	entities.ErrUnknown:      500,
 }
 
-func logWarningOrError(logger *logrus.Logger, err error, responseStatusCode int) {
+func (e errorsMapper) logWarningOrError(err error, responseStatusCode int) {
 	if responseStatusCode >= 500 {
-		logger.Error(err.Error())
+		e.logger.Error(err.Error())
 	} else {
-		logger.Warn(err.Error())
+		e.logger.Warn(err.Error())
 	}
 }

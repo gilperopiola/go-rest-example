@@ -10,7 +10,7 @@ type Repository struct {
 	Database Database
 }
 
-type RepositoryInterface interface {
+type RepositoryLayer interface {
 	CreateUser(user models.User) (models.User, error)
 	UpdateUser(user models.User) (models.User, error)
 	GetUser(user models.User, onlyNonDeleted bool) (models.User, error)
@@ -21,8 +21,6 @@ type RepositoryInterface interface {
 func NewRepository(database Database) *Repository {
 	return &Repository{Database: database}
 }
-
-/* ------------------- */
 
 var (
 

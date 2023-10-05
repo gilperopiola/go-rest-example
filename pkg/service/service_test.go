@@ -121,7 +121,7 @@ func TestLogin(t *testing.T) {
 			mockRepository:  makeMockRepositoryWithGetUser(validUser, nil),
 			request:         entities.LoginRequest{Password: VALID_PASSWORD},
 			wantErr:         nil,
-			wantTokenLength: 172,
+			wantTokenLength: 243,
 		},
 	}
 

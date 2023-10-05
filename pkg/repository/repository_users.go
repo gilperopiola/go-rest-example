@@ -9,15 +9,6 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-func buildNonDeletedQuery(query string, onlyNonDeleted bool) string {
-	if onlyNonDeleted {
-		query += " AND deleted = false"
-	}
-	return query
-}
-
-/* ------------------- */
-
 // CreateUser creates a user on the database. Id, username and email are unique
 func (r *Repository) CreateUser(user models.User) (models.User, error) {
 	if err := r.Database.DB.Create(&user).Error; err != nil {
@@ -87,4 +78,11 @@ func (r *Repository) DeleteUser(id int) (user models.User, err error) {
 	}
 
 	return user, nil
+}
+
+func buildNonDeletedQuery(query string, onlyNonDeleted bool) string {
+	if onlyNonDeleted {
+		query += " AND deleted = false"
+	}
+	return query
 }

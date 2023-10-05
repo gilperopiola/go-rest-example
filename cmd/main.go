@@ -57,7 +57,7 @@ func main() {
 	logger.SetLevel(logrus.InfoLevel)
 
 	// Start server
-	log.Println("About to run server on port " + config.PORT)
+	log.Println("Running server on port " + config.PORT)
 
 	err := router.Run(":" + config.PORT)
 	if err != nil {
