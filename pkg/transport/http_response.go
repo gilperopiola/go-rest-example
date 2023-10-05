@@ -1,6 +1,8 @@
 package transport
 
-import "net/http"
+import (
+	"net/http"
+)
 
 type HTTPResponse struct {
 	Success bool        `json:"success"`

@@ -13,6 +13,7 @@ Go's best practices and standards are followed most of the time, using technique
 - [Prerequisites](#prerequisites)
 - [Installation and Usage](#installation-and-usage)
 - [Project Architecture](#project-architecture)
+- [Request Flow Overview](#request-flow-overview)
 - [Contributing and License](#contributing-and-license)
 
 ## Prerequisites
@@ -64,6 +65,56 @@ This will start the server and you'll hopefully be able to hit the endpoints.
 | **pkg > service** | Contains the core business logic. |
 | **pkg > transport** | Sets up routes and manages the transport layer. |
 | **pkg > utils** | Houses utility functions used across the project. |
+
+## Request Flow Overview
+
+1. **Entry Point**: 
+   
+   All requests start at `router.go`, where the URL is matched.
+
+2. **Token Validation**: 
+   
+   For private endpoints, the request is routed through `token_validation.go` for authentication.
+
+3. **Endpoint Matching**: 
+   
+   The corresponding function in `transport_endpoints.go` is invoked based on the matched URL.
+
+4. **Request Handling**: 
+   
+   This function then calls `HandleRequest` from `transport.go`.
+
+5. **Request Typification & Validation**: 
+   
+   Inside `transport.go`, the appropriate function from `transport_requests.go` is called. This step involves typifying and validating the incoming request.
+
+6. **Service Layer Invocation**: 
+   
+   Upon successful validation, `HandleRequest` invokes the corresponding method in `service.go`.
+
+7. **Service Implementation**: 
+   
+   The actual implementation of these methods resides in `service_xxx.go`, organized by domain.
+
+8. **Entity to Model Conversion**: 
+   
+   The service layer operates using **entities**. If needed, the `codec` is used to convert these entities into **models** before interacting with the `repository` layer.
+
+9. **Repository Layer**: 
+   
+   Here, the matching `repository_xxx.go` file is invoked. This layer handles database operations and returns data or errors as required.
+
+10. **Backtracking & Response Handling**: 
+   
+   The system then retraces its steps. If the repository layer returned a model, it's converted back to an entity in `service_xxx.go`. This file also handles any errors or continues execution if there are none.
+
+11. **Finalizing Response**: 
+   
+   The process returns to `HandleRequest` in `transport.go`, where the service's response is processed. If there's an error, it's mapped using `errors_mapper.go`.
+
+12. **Sending HTTP Response**: 
+   
+   Finally, the HTTP response is sent back to the client.
 
 ## Contributing and License
 

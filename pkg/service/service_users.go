@@ -58,6 +58,7 @@ func (s *Service) UpdateUser(updateUserRequest entities.UpdateUserRequest) (enti
 func (s *Service) DeleteUser(deleteUserRequest entities.DeleteUserRequest) (entities.DeleteUserResponse, error) {
 
 	// Set the user's Deleted field to true
+	// This returns an error if the user is already deleted
 	userModel, err := s.Repository.DeleteUser(deleteUserRequest.ID)
 	if err != nil {
 		return entities.DeleteUserResponse{}, s.ErrorsMapper.Map(err)

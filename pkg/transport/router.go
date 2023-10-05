@@ -6,29 +6,41 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 type Router struct {
 	*gin.Engine
 }
 
-func NewRouter(transport TransportProvider, config config.ConfigInterface, auth auth.AuthInterface) Router {
+func NewRouter(transport TransportProvider, config config.ConfigInterface, auth auth.AuthInterface,
+	logger *logrus.Logger) Router {
 	var router Router
-	router.Setup(transport, config, auth)
+	router.Setup(transport, config, auth, logger)
 	return router
 }
 
 /* ------------------- */
 
-func (router *Router) Setup(transport TransportProvider, config config.ConfigInterface, auth auth.AuthInterface) {
+func LoggerToContext(logger *logrus.Logger) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Set("logger", logger)
+		c.Next()
+	}
+}
+
+func (router *Router) Setup(transport TransportProvider, config config.ConfigInterface, auth auth.AuthInterface,
+	logger *logrus.Logger) {
 
 	// Prepare router
 	if !config.GetDebugMode() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
+	// Add middleware
 	router.Engine = gin.New()
 	router.Use(getCORSConfig())
+	router.Use(LoggerToContext(logger))
 
 	// Set endpoints
 	router.SetPublicEndpoints(transport)

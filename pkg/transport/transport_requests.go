@@ -118,7 +118,7 @@ func getUserIDFromContext(c *gin.Context) (int, error) {
 	}
 
 	// Get URL user ID
-	userToGetID, err := utils.GetIntFromURLParams(c, "user_id")
+	userToGetID, err := utils.GetIntFromContextParams(c.Params, "user_id")
 	if err != nil {
 		return 0, err
 	}
