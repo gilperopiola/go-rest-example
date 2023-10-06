@@ -2,6 +2,7 @@ package entities
 
 import "time"
 
+// User entity
 type User struct {
 	ID        int       `json:"id,omitempty"`
 	Username  string    `json:"username,omitempty"`

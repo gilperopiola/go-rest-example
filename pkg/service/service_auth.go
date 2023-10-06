@@ -8,6 +8,12 @@ import (
 
 func (s *Service) Signup(signupRequest entities.SignupRequest) (entities.SignupResponse, error) {
 
+	// Codec functions
+	var (
+		toModel  = s.Codec.FromSignupRequestToUserModel
+		toEntity = s.Codec.FromUserModelToEntities
+	)
+
 	// Validate user doesn't exist
 	if s.Repository.UserExists(signupRequest.Email, signupRequest.Username, false) {
 		return entities.SignupResponse{}, s.ErrorsMapper.Map(entities.ErrUsernameOrEmailAlreadyInUse)
@@ -17,7 +23,7 @@ func (s *Service) Signup(signupRequest entities.SignupRequest) (entities.SignupR
 	hashedPassword := utils.Hash(signupRequest.Email, signupRequest.Password)
 
 	// Transform request to model
-	userToSignup := s.Codec.FromSignupRequestToUserModel(signupRequest, hashedPassword)
+	userToSignup := toModel(signupRequest, hashedPassword)
 
 	// Create user model on the database
 	createdUser, err := s.Repository.CreateUser(userToSignup)
@@ -26,15 +32,19 @@ func (s *Service) Signup(signupRequest entities.SignupRequest) (entities.SignupR
 	}
 
 	// Return response
-	return entities.SignupResponse{
-		User: s.Codec.FromUserModelToEntities(createdUser), // Transform user to entities
-	}, nil
+	return entities.SignupResponse{User: toEntity(createdUser)}, nil
 }
 
 func (s *Service) Login(loginRequest entities.LoginRequest) (entities.LoginResponse, error) {
 
+	// Codec functions
+	var (
+		toModel  = s.Codec.FromLoginRequestToUserModel
+		toEntity = s.Codec.FromUserModelToEntities
+	)
+
 	// Transform LoginRequest to user model
-	userToLogin := s.Codec.FromLoginRequestToUserModel(loginRequest)
+	userToLogin := toModel(loginRequest)
 
 	// Get user from database
 	userToLogin, err := s.Repository.GetUser(userToLogin, true)
@@ -48,7 +58,7 @@ func (s *Service) Login(loginRequest entities.LoginRequest) (entities.LoginRespo
 	}
 
 	// Transform user model to entity
-	userEntity := s.Codec.FromUserModelToEntities(userToLogin)
+	userEntity := toEntity(userToLogin)
 
 	// Set the appropriate role
 	authRole := auth.UserRole

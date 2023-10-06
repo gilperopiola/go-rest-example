@@ -8,11 +8,10 @@ import (
 )
 
 func makeSignupRequest(c *gin.Context) (entities.SignupRequest, error) {
-
 	// Bind & validate request
 	var signupRequest entities.SignupRequest
 	if err := c.ShouldBindJSON(&signupRequest); err != nil {
-		return entities.SignupRequest{}, utils.JoinErrors(err, entities.ErrBindingRequest)
+		return entities.SignupRequest{}, utils.WrapErrors(err, entities.ErrBindingRequest)
 	}
 
 	if err := signupRequest.Validate(); err != nil {
@@ -24,11 +23,10 @@ func makeSignupRequest(c *gin.Context) (entities.SignupRequest, error) {
 }
 
 func makeLoginRequest(c *gin.Context) (entities.LoginRequest, error) {
-
 	// Bind request
 	var loginRequest entities.LoginRequest
 	if err := c.ShouldBindJSON(&loginRequest); err != nil {
-		return entities.LoginRequest{}, utils.JoinErrors(err, entities.ErrBindingRequest)
+		return entities.LoginRequest{}, utils.WrapErrors(err, entities.ErrBindingRequest)
 	}
 
 	// Validate request
@@ -41,11 +39,10 @@ func makeLoginRequest(c *gin.Context) (entities.LoginRequest, error) {
 }
 
 func makeCreateUserRequest(c *gin.Context) (entities.CreateUserRequest, error) {
-
 	// Bind & validate request
 	var createUserRequest entities.CreateUserRequest
 	if err := c.ShouldBindJSON(&createUserRequest); err != nil {
-		return entities.CreateUserRequest{}, utils.JoinErrors(err, entities.ErrBindingRequest)
+		return entities.CreateUserRequest{}, utils.WrapErrors(err, entities.ErrBindingRequest)
 	}
 
 	if err := createUserRequest.Validate(); err != nil {
@@ -57,7 +54,6 @@ func makeCreateUserRequest(c *gin.Context) (entities.CreateUserRequest, error) {
 }
 
 func makeGetUserRequest(c *gin.Context) (entities.GetUserRequest, error) {
-
 	// Get info from context and URL, check if user IDs match
 	userToGetID, err := getUserIDFromContext(c)
 	if err != nil {
@@ -76,7 +72,6 @@ func makeGetUserRequest(c *gin.Context) (entities.GetUserRequest, error) {
 }
 
 func makeUpdateUserRequest(c *gin.Context) (entities.UpdateUserRequest, error) {
-
 	// Validate and get User ID
 	userToUpdateID, err := getUserIDFromContext(c)
 	if err != nil {
@@ -86,7 +81,7 @@ func makeUpdateUserRequest(c *gin.Context) (entities.UpdateUserRequest, error) {
 	// Bind request
 	var updateUserRequest entities.UpdateUserRequest
 	if err := c.ShouldBindJSON(&updateUserRequest); err != nil {
-		return entities.UpdateUserRequest{}, utils.JoinErrors(err, entities.ErrBindingRequest)
+		return entities.UpdateUserRequest{}, utils.WrapErrors(err, entities.ErrBindingRequest)
 	}
 
 	// Assign User ID to request
@@ -102,7 +97,6 @@ func makeUpdateUserRequest(c *gin.Context) (entities.UpdateUserRequest, error) {
 }
 
 func makeDeleteUserRequest(c *gin.Context) (entities.DeleteUserRequest, error) {
-
 	// Get info from context and URL, check if user IDs match
 	userToDeleteID, err := getUserIDFromContext(c)
 	if err != nil {
@@ -120,8 +114,7 @@ func makeDeleteUserRequest(c *gin.Context) (entities.DeleteUserRequest, error) {
 	return deleteUserRequest, nil
 }
 
-/* ----------------- */
-
+// The UserID lives on the ctx and ctx params, they need to match
 func getUserIDFromContext(c *gin.Context) (int, error) {
 
 	// Get logged user ID

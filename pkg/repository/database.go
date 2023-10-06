@@ -12,15 +12,15 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type Database struct {
-	DB *gorm.DB
-}
-
-type DatabaseProvider interface {
+type DatabaseInterface interface {
 	Setup(config config.DatabaseConfig, logger *logrus.Logger)
 	Purge()
 	Migrate()
 	Close()
+}
+
+type Database struct {
+	DB *gorm.DB
 }
 
 func NewDatabase(config config.DatabaseConfig, logger *logrus.Logger) Database {
@@ -28,8 +28,6 @@ func NewDatabase(config config.DatabaseConfig, logger *logrus.Logger) Database {
 	database.Setup(config, logger)
 	return database
 }
-
-/* ------------------- */
 
 func (database *Database) Setup(config config.DatabaseConfig, logger *logrus.Logger) {
 
@@ -45,15 +43,17 @@ func (database *Database) Setup(config config.DatabaseConfig, logger *logrus.Log
 	database.DB.DB().SetMaxOpenConns(100)
 	database.DB.DB().SetConnMaxLifetime(time.Hour)
 
-	// Flags
+	// Log queries
 	if config.DEBUG {
 		database.DB.LogMode(true)
 	}
 
+	// Clean database
 	if config.PURGE {
 		database.Purge()
 	}
 
+	// Run migrations
 	database.Migrate()
 }
 

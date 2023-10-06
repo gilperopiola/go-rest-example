@@ -3,6 +3,7 @@ package entities
 // Here are the input requests that are used in the transport/service layer.
 // They are validated on the transport layer, and then passed to the service layer.
 
+// - Auth
 type SignupRequest struct {
 	Username       string `json:"username"`
 	Email          string `json:"email"`
@@ -15,6 +16,7 @@ type LoginRequest struct {
 	Password        string `json:"password"`
 }
 
+// - Users
 type CreateUserRequest struct {
 	Username string `json:"username"`
 	Email    string `json:"email"`

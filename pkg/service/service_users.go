@@ -8,6 +8,12 @@ import (
 // CreateUser is an admins only endpoint
 func (s *Service) CreateUser(createUserRequest entities.CreateUserRequest) (entities.CreateUserResponse, error) {
 
+	// Codec functions
+	var (
+		toModel  = s.Codec.FromCreateUserRequestToUserModel
+		toEntity = s.Codec.FromUserModelToEntities
+	)
+
 	// Validate user doesn't exist
 	if s.Repository.UserExists(createUserRequest.Email, createUserRequest.Username, false) {
 		return entities.CreateUserResponse{}, s.ErrorsMapper.Map(entities.ErrUsernameOrEmailAlreadyInUse)
@@ -17,7 +23,7 @@ func (s *Service) CreateUser(createUserRequest entities.CreateUserRequest) (enti
 	hashedPassword := utils.Hash(createUserRequest.Email, createUserRequest.Password)
 
 	// Transform request to model
-	userToCreate := s.Codec.FromCreateUserRequestToUserModel(createUserRequest, hashedPassword)
+	userToCreate := toModel(createUserRequest, hashedPassword)
 
 	// Create user model on the database
 	createdUser, err := s.Repository.CreateUser(userToCreate)
@@ -26,15 +32,19 @@ func (s *Service) CreateUser(createUserRequest entities.CreateUserRequest) (enti
 	}
 
 	// Return response
-	return entities.CreateUserResponse{
-		User: s.Codec.FromUserModelToEntities(createdUser), // Transform user to entities
-	}, nil
+	return entities.CreateUserResponse{User: toEntity(createdUser)}, nil
 }
 
 func (s *Service) GetUser(getUserRequest entities.GetUserRequest) (entities.GetUserResponse, error) {
 
+	// Codec functions
+	var (
+		toModel  = s.Codec.FromGetUserRequestToUserModel
+		toEntity = s.Codec.FromUserModelToEntities
+	)
+
 	// Create userToGet model for DB searching
-	userToGet := s.Codec.FromGetUserRequestToUserModel(getUserRequest)
+	userToGet := toModel(getUserRequest)
 
 	// Get user from database
 	userToGet, err := s.Repository.GetUser(userToGet, true)
@@ -43,12 +53,16 @@ func (s *Service) GetUser(getUserRequest entities.GetUserRequest) (entities.GetU
 	}
 
 	// Return user
-	return entities.GetUserResponse{
-		User: s.Codec.FromUserModelToEntities(userToGet),
-	}, nil
+	return entities.GetUserResponse{User: toEntity(userToGet)}, nil
 }
 
 func (s *Service) UpdateUser(updateUserRequest entities.UpdateUserRequest) (entities.UpdateUserResponse, error) {
+
+	// Codec functions
+	var (
+		toModel  = s.Codec.FromUpdateUserRequestToUserModel
+		toEntity = s.Codec.FromUserModelToEntities
+	)
 
 	// Check if username and/or email are available
 	if s.Repository.UserExists(updateUserRequest.Email, updateUserRequest.Username, false) {
@@ -56,7 +70,7 @@ func (s *Service) UpdateUser(updateUserRequest entities.UpdateUserRequest) (enti
 	}
 
 	// If they are available, create userToUpdate model for DB searching
-	userToUpdate := s.Codec.FromUpdateUserRequestToUserModel(updateUserRequest)
+	userToUpdate := toModel(updateUserRequest)
 
 	// Get user from database
 	userToUpdate, err := s.Repository.GetUser(userToUpdate, true)
@@ -73,12 +87,15 @@ func (s *Service) UpdateUser(updateUserRequest entities.UpdateUserRequest) (enti
 	}
 
 	// Return user
-	return entities.UpdateUserResponse{
-		User: s.Codec.FromUserModelToEntities(userToUpdate), // Transform user model to entity
-	}, nil
+	return entities.UpdateUserResponse{User: toEntity(userToUpdate)}, nil
 }
 
 func (s *Service) DeleteUser(deleteUserRequest entities.DeleteUserRequest) (entities.DeleteUserResponse, error) {
+
+	// Codec functions
+	var (
+		toEntity = s.Codec.FromUserModelToEntities
+	)
 
 	// Set the user's Deleted field to true
 	// This returns an error if the user is already deleted
@@ -87,9 +104,6 @@ func (s *Service) DeleteUser(deleteUserRequest entities.DeleteUserRequest) (enti
 		return entities.DeleteUserResponse{}, s.ErrorsMapper.Map(err)
 	}
 
-	// Transform user model to entity
-	userEntity := s.Codec.FromUserModelToEntities(userModel)
-
 	// Return user
-	return entities.DeleteUserResponse{User: userEntity}, nil
+	return entities.DeleteUserResponse{User: toEntity(userModel)}, nil
 }

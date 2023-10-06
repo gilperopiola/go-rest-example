@@ -27,21 +27,20 @@ func (e ErrorsMapper) Map(err error) error {
 
 	// Auth & Users errors
 	if errors.Is(err, repository.ErrCreatingUser) {
-		return utils.JoinErrors(err, entities.ErrCreatingUser)
+		return utils.WrapErrors(err, entities.ErrCreatingUser)
 	}
 
 	if errors.Is(err, repository.ErrGettingUser) {
-		return utils.JoinErrors(err, entities.ErrUserNotFound)
+		return utils.WrapErrors(err, entities.ErrUserNotFound)
 	}
 
 	if errors.Is(err, repository.ErrUserAlreadyDeleted) {
-		return utils.JoinErrors(err, entities.ErrUserNotFound)
+		return utils.WrapErrors(err, entities.ErrUserNotFound)
 	}
 
 	// General errors
-
 	if errors.Is(err, repository.ErrUnknown) {
-		return utils.JoinErrors(err, entities.ErrUserNotFound)
+		return utils.WrapErrors(err, entities.ErrUserNotFound)
 	}
 
 	// Default to the original error

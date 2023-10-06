@@ -5,9 +5,7 @@ import (
 )
 
 const (
-
-	// Signup
-
+	// - Signup & Users
 	USERNAME_MIN_LENGTH = 4
 	USERNAME_MAX_LENGTH = 32
 	PASSWORD_MIN_LENGTH = 8

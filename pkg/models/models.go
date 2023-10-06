@@ -6,6 +6,9 @@ import (
 	"github.com/gilperopiola/go-rest-example/pkg/utils"
 )
 
+// Models are the representation of the entities in the database.
+// If you add a new one, remember to add it to the Purge and Migrate functions in pkg/repository/database.go
+
 type User struct {
 	ID        int
 	Username  string

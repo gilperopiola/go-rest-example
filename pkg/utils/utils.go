@@ -6,13 +6,11 @@ import (
 	"fmt"
 	"os"
 	"strconv"
-
-	"github.com/gin-gonic/gin"
 )
 
 // General utils
 
-func JoinErrors(err1, err2 error) error {
+func WrapErrors(err1, err2 error) error {
 	return fmt.Errorf("%s: %w", err1.Error(), err2)
 }
 
@@ -24,7 +22,12 @@ func Hash(salt string, data string) string {
 
 // API / Gin Utils
 
-func GetIntFromContext(c *gin.Context, key string) (int, error) {
+// We introduce a ContextGetter instead of just using gin.Context to remove the dependency on gin
+type ContextGetter interface {
+	Get(key string) (interface{}, bool)
+}
+
+func GetIntFromContext(c ContextGetter, key string) (int, error) {
 
 	// Get from context
 	value, ok := c.Get(key)
@@ -47,7 +50,12 @@ func GetIntFromContext(c *gin.Context, key string) (int, error) {
 	return valueInt, nil
 }
 
-func GetIntFromContextParams(params gin.Params, key string) (int, error) {
+// We introduce a ParamsGetter instead of just using gin.Params to remove the dependency on gin
+type ParamsGetter interface {
+	Get(name string) (string, bool)
+}
+
+func GetIntFromContextParams(params ParamsGetter, key string) (int, error) {
 
 	// Get from params
 	value, ok := params.Get(key)
