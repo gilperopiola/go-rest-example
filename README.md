@@ -53,6 +53,8 @@ Go's best practices and standards are followed most of the time, using technique
 
 This will start the server and you'll hopefully be able to hit the endpoints.
 
+You can also use Docker :)
+
 ## Project Architecture
 
 | Package | Description |

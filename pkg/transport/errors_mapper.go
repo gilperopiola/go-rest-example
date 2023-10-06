@@ -81,9 +81,9 @@ var errorsMapToHTTPCode = map[error]int{
 }
 
 func (e errorsMapper) logWarningOrError(err error, responseStatusCode int) {
+	logFn := e.logger.Warn
 	if responseStatusCode >= 500 {
-		e.logger.Error(err.Error())
-	} else {
-		e.logger.Warn(err.Error())
+		logFn = e.logger.Error
 	}
+	logFn(err.Error())
 }
