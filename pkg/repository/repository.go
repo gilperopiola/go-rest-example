@@ -23,13 +23,10 @@ func NewRepository(database Database) *Repository {
 }
 
 var (
-
-	// General errors
-
+	// - General errors
 	ErrUnknown = errors.New("error unknown")
 
-	// User errors
-
+	// - User errors
 	ErrCreatingUser       = errors.New("error creating user")
 	ErrUpdatingUser       = errors.New("error updating user")
 	ErrGettingUser        = errors.New("error getting user")

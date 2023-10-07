@@ -2,7 +2,16 @@ package entities
 
 import "time"
 
-// User entity
+// - Auth Roles
+type Role string
+
+const (
+	AnyRole   Role = "any"
+	UserRole  Role = "user"
+	AdminRole Role = "admin"
+)
+
+// - User entity
 type User struct {
 	ID        int       `json:"id,omitempty"`
 	Username  string    `json:"username,omitempty"`

@@ -1,7 +1,6 @@
 package service
 
 import (
-	"github.com/gilperopiola/go-rest-example/pkg/auth"
 	"github.com/gilperopiola/go-rest-example/pkg/entities"
 	"github.com/gilperopiola/go-rest-example/pkg/utils"
 )
@@ -61,9 +60,9 @@ func (s *Service) Login(loginRequest entities.LoginRequest) (entities.LoginRespo
 	userEntity := toEntity(userToLogin)
 
 	// Set the appropriate role
-	authRole := auth.UserRole
+	authRole := entities.UserRole
 	if userEntity.IsAdmin {
-		authRole = auth.AdminRole
+		authRole = entities.AdminRole
 	}
 
 	// Return generated token on the response

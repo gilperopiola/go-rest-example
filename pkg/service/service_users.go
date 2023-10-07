@@ -69,11 +69,8 @@ func (s *Service) UpdateUser(updateUserRequest entities.UpdateUserRequest) (enti
 		return entities.UpdateUserResponse{}, s.ErrorsMapper.Map(entities.ErrUsernameOrEmailAlreadyInUse)
 	}
 
-	// If they are available, create userToUpdate model for DB searching
-	userToUpdate := toModel(updateUserRequest)
-
 	// Get user from database
-	userToUpdate, err := s.Repository.GetUser(userToUpdate, true)
+	userToUpdate, err := s.Repository.GetUser(toModel(updateUserRequest), true)
 	if err != nil {
 		return entities.UpdateUserResponse{}, s.ErrorsMapper.Map(err)
 	}

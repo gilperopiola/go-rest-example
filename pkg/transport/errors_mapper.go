@@ -55,6 +55,14 @@ func getResponseStatusCode(err error) int {
 	return responseStatusCode
 }
 
+func (e errorsMapper) logWarningOrError(err error, responseStatusCode int) {
+	logFn := e.logger.Warn
+	if responseStatusCode >= 500 {
+		logFn = e.logger.Error
+	}
+	logFn(err.Error())
+}
+
 var errorsMapToHTTPCode = map[error]int{
 	// 400 - Bad Request
 	entities.ErrBindingRequest:        400,
@@ -78,12 +86,4 @@ var errorsMapToHTTPCode = map[error]int{
 	entities.ErrCreatingUser: 500,
 	entities.ErrNilError:     500,
 	entities.ErrUnknown:      500,
-}
-
-func (e errorsMapper) logWarningOrError(err error, responseStatusCode int) {
-	logFn := e.logger.Warn
-	if responseStatusCode >= 500 {
-		logFn = e.logger.Error
-	}
-	logFn(err.Error())
 }

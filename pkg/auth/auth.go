@@ -8,11 +8,8 @@ import (
 )
 
 type AuthInterface interface {
-	GenerateToken(user entities.User, role AuthRole) string
-	ValidateToken() gin.HandlerFunc
-	ValidateRole(role AuthRole) gin.HandlerFunc
-	GetUserRole() AuthRole
-	GetAdminRole() AuthRole
+	GenerateToken(user entities.User, role entities.Role) string
+	ValidateToken(role entities.Role) gin.HandlerFunc
 }
 
 type Auth struct {
@@ -28,23 +25,8 @@ func NewAuth(secret string, sessionDurationDays int) *Auth {
 }
 
 type CustomClaims struct {
-	Username string   `json:"username"`
-	Email    string   `json:"email"`
-	Role     AuthRole `json:"role"`
+	Username string        `json:"username"`
+	Email    string        `json:"email"`
+	Role     entities.Role `json:"role"`
 	jwt.StandardClaims
-}
-
-type AuthRole string
-
-const (
-	UserRole  AuthRole = "user"
-	AdminRole AuthRole = "admin"
-)
-
-func (auth *Auth) GetUserRole() AuthRole {
-	return UserRole
-}
-
-func (auth *Auth) GetAdminRole() AuthRole {
-	return AdminRole
 }

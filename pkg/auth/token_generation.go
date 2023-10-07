@@ -9,7 +9,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
-func (auth *Auth) GenerateToken(user entities.User, role AuthRole) string {
+func (auth *Auth) GenerateToken(user entities.User, role entities.Role) string {
 
 	var (
 		issuedAt  = time.Now().Unix()
