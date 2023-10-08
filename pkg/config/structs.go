@@ -4,8 +4,9 @@ type Config struct {
 	PORT  string
 	DEBUG bool
 
-	DATABASE DatabaseConfig
-	JWT      JWTConfig
+	DATABASE   DatabaseConfig
+	JWT        JWTConfig
+	MONITORING MonitoringConfig
 }
 
 type DatabaseConfig struct {
@@ -25,6 +26,11 @@ type JWTConfig struct {
 	SESSION_DURATION_DAYS int
 }
 
+type MonitoringConfig struct {
+	ENABLED bool
+	SECRET  string
+}
+
 func (config *Config) GetPort() string {
 	return config.PORT
 }
@@ -39,6 +45,10 @@ func (config *Config) GetDatabaseConfig() DatabaseConfig {
 
 func (config *Config) GetJWTConfig() JWTConfig {
 	return config.JWT
+}
+
+func (config *Config) GetMonitoringConfig() MonitoringConfig {
+	return config.MONITORING
 }
 
 func (config *DatabaseConfig) GetConnectionString() string {

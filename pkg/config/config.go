@@ -12,6 +12,7 @@ type ConfigInterface interface {
 	GetPort() string
 	GetDatabaseConfig() DatabaseConfig
 	GetJWTConfig() JWTConfig
+	GetMonitoringConfig() MonitoringConfig
 }
 
 func NewConfig() *Config {
@@ -26,6 +27,7 @@ func (config *Config) Setup() {
 	config.loadGeneralVars()
 	config.loadDatabaseVars()
 	config.loadJWTVars()
+	config.loadMonitoringVars()
 
 	// Validate required variables, if not present, panic
 	config.validate()
@@ -50,4 +52,9 @@ func (config *Config) loadDatabaseVars() {
 func (config *Config) loadJWTVars() {
 	config.JWT.SECRET = utils.GetEnv(prefix+"JWT_SECRET", defaultJWTSecret)
 	config.JWT.SESSION_DURATION_DAYS = utils.GetEnvInt(prefix+"JWT_SESSION_DURATION_DAYS", defaultJWTSessionDurationDays)
+}
+
+func (config *Config) loadMonitoringVars() {
+	config.MONITORING.ENABLED = utils.GetEnvBool(prefix+"MONITORING_ENABLED", defaultMonitoringEnabled)
+	config.MONITORING.SECRET = utils.GetEnv(prefix+"MONITORING_SECRET", defaultMonitoringSecret)
 }

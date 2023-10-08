@@ -6,7 +6,7 @@ import (
 
 	"github.com/gilperopiola/go-rest-example/pkg/entities"
 
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt/v4"
 )
 
 func (auth *Auth) GenerateToken(user entities.User, role entities.Role) string {

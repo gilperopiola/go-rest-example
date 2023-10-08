@@ -10,8 +10,11 @@ import (
 	"github.com/gilperopiola/go-rest-example/pkg/service"
 	"github.com/gilperopiola/go-rest-example/pkg/transport"
 
+	"github.com/newrelic/go-agent/v3/newrelic"
 	"github.com/sirupsen/logrus"
 )
+
+const appName = "go-rest-example"
 
 func main() {
 
@@ -20,12 +23,14 @@ func main() {
 
 	// Setup dependencies
 	var (
-
 		// Load configuration settings
 		config = config.NewConfig()
 
 		// Initialize logger
 		logger = logrus.New()
+
+		// Initialize monitoring (New Relic)
+		monitoring = NewMonitoring(config)
 
 		// Initialize authentication module
 		auth = auth.NewAuth(config.JWT.SECRET, config.JWT.SESSION_DURATION_DAYS)
@@ -46,7 +51,7 @@ func main() {
 		endpoints = transport.NewTransport(service, codec, transport.NewErrorsMapper(logger))
 
 		// Initialize the router with the endpoints
-		router = transport.NewRouter(endpoints, config, auth, logger)
+		router = transport.NewRouter(endpoints, config, auth, logger, monitoring)
 	)
 
 	// Defer closing open connections
@@ -65,4 +70,29 @@ func main() {
 	}
 
 	// Have a nice day!
+}
+
+func NewMonitoring(config config.ConfigInterface) *newrelic.Application {
+	if !config.GetMonitoringConfig().ENABLED {
+		return nil
+	}
+
+	// If monitoring is enabled, use license to create New Relic app
+	license := config.GetMonitoringConfig().SECRET
+	if license == "" {
+		log.Fatalf("New Relic license not found")
+	}
+
+	newRelicApp, err := newrelic.NewApplication(
+		newrelic.ConfigAppName(appName),
+		newrelic.ConfigLicense(license),
+		newrelic.ConfigAppLogForwardingEnabled(true),
+	)
+
+	// Panic on failure
+	if err != nil {
+		log.Fatalf("Failed to start New Relic: %v", err)
+	}
+
+	return newRelicApp
 }

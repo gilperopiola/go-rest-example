@@ -4,7 +4,7 @@ package config
 
 var (
 	defaultPort  = "8040"
-	defaultDebug = false
+	defaultDebug = true
 
 	defaultDatabaseType     = "mysql"
 	defaultDatabaseUsername = "root"
@@ -17,4 +17,7 @@ var (
 
 	defaultJWTSecret              = "a0#3ndl2"
 	defaultJWTSessionDurationDays = 14
+
+	defaultMonitoringEnabled = true
+	defaultMonitoringSecret  = ""
 )

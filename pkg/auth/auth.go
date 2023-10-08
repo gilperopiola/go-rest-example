@@ -3,8 +3,8 @@ package auth
 import (
 	"github.com/gilperopiola/go-rest-example/pkg/entities"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v4"
 )
 
 type AuthInterface interface {
