@@ -4,7 +4,7 @@
 
 This repository is just a template or example of a **medium-sized microservice** that exposes a simple yet elegant and extensible **HTTP REST API**.
 
-Using Gin, it provides a clean and layered architecture complete with User Management, JWT Authentication, MySQL Storage, Easy Configuration and much more.
+Using Gin, it provides a clean and layered architecture complete with User Management, JWT Authentication, MySQL Storage, Easy Configuration, Logging, Monitoring and much more.
 
 Go's best practices and standards are followed most of the time, using techniques as Dependency Injection and Table Driven Tests and applying the holy proverbs 🙏.
 
@@ -39,7 +39,7 @@ Go's best practices and standards are followed most of the time, using technique
    go mod download
    ```
 
-4. Set up your database and update the `config.json` file as you see fit.
+4. Set up your database and update your env vars as you see fit. See `config.go` for more info.
 
 5. Build the project:
    ```bash
@@ -63,6 +63,7 @@ You can also use Docker :)
 | **pkg > auth** | Handles authentication logic. |
 | **pkg > codec** | Responsible for encoding and decoding tasks. |
 | **pkg > entities** | Defines various entities and custom errors. |
+| **pkg > logger** | Just a logger idk. |
 | **pkg > repository** | Manages database connections and operations. |
 | **pkg > service** | Contains the core business logic. |
 | **pkg > transport** | Sets up routes and manages the transport layer. |
