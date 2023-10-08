@@ -10,8 +10,8 @@ import (
 
 type Transport struct {
 	Service      service.ServiceLayer
-	Codec        codec.CodecInterface
-	ErrorsMapper errorsMapperInterface
+	Codec        codec.CodecI
+	ErrorsMapper errorsMapperI
 }
 
 type TransportLayer interface {
@@ -27,7 +27,7 @@ type TransportLayer interface {
 	DeleteUser(c *gin.Context)
 }
 
-func NewTransport(service service.ServiceLayer, codec codec.CodecInterface, errorsMapper errorsMapperInterface) Transport {
+func NewTransport(service service.ServiceLayer, codec codec.CodecI, errorsMapper errorsMapperI) Transport {
 	return Transport{
 		Service:      service,
 		Codec:        codec,

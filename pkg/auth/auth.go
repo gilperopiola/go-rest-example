@@ -7,7 +7,7 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
-type AuthInterface interface {
+type AuthI interface {
 	GenerateToken(user entities.User, role entities.Role) string
 	ValidateToken(role entities.Role) gin.HandlerFunc
 }

@@ -27,8 +27,9 @@ type JWTConfig struct {
 }
 
 type MonitoringConfig struct {
-	ENABLED bool
-	SECRET  string
+	ENABLED  bool
+	APP_NAME string
+	SECRET   string
 }
 
 func (config *Config) GetPort() string {

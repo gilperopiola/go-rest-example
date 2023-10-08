@@ -16,7 +16,7 @@ func (router *Router) SetPublicEndpoints(transport TransportLayer) {
 	}
 }
 
-func (router *Router) SetUserEndpoints(transport TransportLayer, auth auth.AuthInterface) {
+func (router *Router) SetUserEndpoints(transport TransportLayer, auth auth.AuthI) {
 	users := router.Group("/users", auth.ValidateToken(entities.AnyRole))
 	{
 		users.GET("/:user_id", transport.GetUser)
@@ -25,7 +25,7 @@ func (router *Router) SetUserEndpoints(transport TransportLayer, auth auth.AuthI
 	}
 }
 
-func (router *Router) SetAdminEndpoints(transport TransportLayer, auth auth.AuthInterface) {
+func (router *Router) SetAdminEndpoints(transport TransportLayer, auth auth.AuthI) {
 	admin := router.Group("/admin", auth.ValidateToken(entities.AdminRole))
 	{
 		admin.POST("/user", transport.CreateUser)

@@ -5,22 +5,21 @@ import (
 	"strings"
 
 	"github.com/gilperopiola/go-rest-example/pkg/entities"
-
-	"github.com/sirupsen/logrus"
+	"github.com/gilperopiola/go-rest-example/pkg/logger"
 )
 
 // The errorsMapper maps errors to HTTP status codes
 // It also logs errors and warnings
 
 type errorsMapper struct {
-	logger *logrus.Logger
+	logger logger.LoggerI
 }
 
-type errorsMapperInterface interface {
+type errorsMapperI interface {
 	Map(err error) (status int, response HTTPResponse)
 }
 
-func NewErrorsMapper(logger *logrus.Logger) errorsMapper {
+func NewErrorsMapper(logger logger.LoggerI) errorsMapper {
 	return errorsMapper{logger: logger}
 }
 

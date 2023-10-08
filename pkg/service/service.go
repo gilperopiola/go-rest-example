@@ -9,11 +9,11 @@ import (
 )
 
 type Service struct {
-	Config       config.ConfigInterface
-	Auth         auth.AuthInterface
-	Codec        codec.CodecInterface
+	Config       config.ConfigI
+	Auth         auth.AuthI
+	Codec        codec.CodecI
 	Repository   repository.RepositoryLayer
-	ErrorsMapper errorsMapperInterface
+	ErrorsMapper errorsMapperI
 }
 
 type ServiceLayer interface {
@@ -26,7 +26,7 @@ type ServiceLayer interface {
 	DeleteUser(deleteUserRequest entities.DeleteUserRequest) (entities.DeleteUserResponse, error)
 }
 
-func NewService(repository repository.RepositoryLayer, auth auth.AuthInterface, codec codec.CodecInterface, config config.ConfigInterface, errorsMapper errorsMapperInterface) *Service {
+func NewService(repository repository.RepositoryLayer, auth auth.AuthI, codec codec.CodecI, config config.ConfigI, errorsMapper errorsMapperI) *Service {
 	return &Service{
 		Repository:   repository,
 		Auth:         auth,

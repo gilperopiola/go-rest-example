@@ -19,5 +19,6 @@ var (
 	defaultJWTSessionDurationDays = 14
 
 	defaultMonitoringEnabled = true
+	defaultMonitoringAppName = "go-rest-example"
 	defaultMonitoringSecret  = ""
 )

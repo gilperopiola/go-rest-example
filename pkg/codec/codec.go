@@ -5,7 +5,7 @@ import (
 	"github.com/gilperopiola/go-rest-example/pkg/models"
 )
 
-type CodecInterface interface {
+type CodecI interface {
 
 	// --- From Requests to Models
 	// - Auth

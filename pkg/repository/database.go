@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/gilperopiola/go-rest-example/pkg/config"
+	"github.com/gilperopiola/go-rest-example/pkg/logger"
 	"github.com/gilperopiola/go-rest-example/pkg/models"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -23,13 +24,13 @@ type Database struct {
 	DB *gorm.DB
 }
 
-func NewDatabase(config config.DatabaseConfig, logger *logrus.Logger) Database {
+func NewDatabase(config config.DatabaseConfig, logger logger.LoggerI) Database {
 	var database Database
 	database.Setup(config, logger)
 	return database
 }
 
-func (database *Database) Setup(config config.DatabaseConfig, logger *logrus.Logger) {
+func (database *Database) Setup(config config.DatabaseConfig, logger logger.LoggerI) {
 
 	// Create connection
 	var err error

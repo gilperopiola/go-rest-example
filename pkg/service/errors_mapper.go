@@ -8,7 +8,7 @@ import (
 	"github.com/gilperopiola/go-rest-example/pkg/utils"
 )
 
-type errorsMapperInterface interface {
+type errorsMapperI interface {
 	Map(err error) error
 }
 

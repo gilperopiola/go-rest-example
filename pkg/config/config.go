@@ -5,7 +5,7 @@ import "github.com/gilperopiola/go-rest-example/pkg/utils"
 // Env vars prefix => GO_REST_EXAMPLE_PORT, GO_REST_EXAMPLE_DATABASE_TYPE, etc.
 const prefix = "GO_REST_EXAMPLE_"
 
-type ConfigInterface interface {
+type ConfigI interface {
 	Setup()
 
 	GetDebugMode() bool
@@ -56,5 +56,6 @@ func (config *Config) loadJWTVars() {
 
 func (config *Config) loadMonitoringVars() {
 	config.MONITORING.ENABLED = utils.GetEnvBool(prefix+"MONITORING_ENABLED", defaultMonitoringEnabled)
+	config.MONITORING.APP_NAME = utils.GetEnv(prefix+"MONITORING_APP_NAME", defaultMonitoringAppName)
 	config.MONITORING.SECRET = utils.GetEnv(prefix+"MONITORING_SECRET", defaultMonitoringSecret)
 }
