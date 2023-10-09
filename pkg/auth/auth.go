@@ -8,8 +8,8 @@ import (
 )
 
 type AuthI interface {
-	GenerateToken(user entities.User, role entities.Role) string
-	ValidateToken(role entities.Role) gin.HandlerFunc
+	GenerateToken(user entities.User, role entities.Role) (string, error)
+	ValidateToken(role entities.Role, shouldMatchUserID bool) gin.HandlerFunc
 }
 
 type Auth struct {
@@ -28,5 +28,5 @@ type CustomClaims struct {
 	Username string        `json:"username"`
 	Email    string        `json:"email"`
 	Role     entities.Role `json:"role"`
-	jwt.StandardClaims
+	jwt.RegisteredClaims
 }

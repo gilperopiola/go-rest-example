@@ -23,7 +23,6 @@ const (
 )
 
 func TestMakeSignupRequest(t *testing.T) {
-
 	type SignupBody struct {
 		Email          any `json:"email"`
 		Username       any `json:"username"`
@@ -88,7 +87,6 @@ func TestMakeSignupRequest(t *testing.T) {
 }
 
 func TestMakeLoginRequest(t *testing.T) {
-
 	type LoginBody struct {
 		UsernameOrEmail any `json:"username_or_email"`
 		Password        any `json:"password"`
@@ -147,7 +145,6 @@ func TestMakeLoginRequest(t *testing.T) {
 }
 
 func TestMakeGetUserRequest(t *testing.T) {
-
 	tests := []struct {
 		name      string
 		ctxUserID string
@@ -155,13 +152,6 @@ func TestMakeGetUserRequest(t *testing.T) {
 		want      entities.GetUserRequest
 		wantErr   error
 	}{
-		{
-			name:      "error_mismatched_ids",
-			ctxUserID: "2",
-			urlUserID: "1",
-			want:      entities.GetUserRequest{},
-			wantErr:   entities.ErrUnauthorized,
-		},
 		{
 			name:      "error_invalid_id",
 			ctxUserID: "0",
@@ -196,7 +186,6 @@ func TestMakeGetUserRequest(t *testing.T) {
 }
 
 func TestMakeUpdateUserRequest(t *testing.T) {
-
 	type UpdateUserBody struct {
 		ID       any `json:"id"`
 		Username any `json:"username"`
@@ -214,14 +203,6 @@ func TestMakeUpdateUserRequest(t *testing.T) {
 		want      entities.UpdateUserRequest
 		wantErr   error
 	}{
-		{
-			name:      "error_mismatched_ids",
-			ctxUserID: "1",
-			urlUserID: "2",
-			body:      UpdateUserBody{},
-			want:      entities.UpdateUserRequest{},
-			wantErr:   entities.ErrUnauthorized,
-		},
 		{
 			name:      "error_binding_request",
 			ctxUserID: "1",

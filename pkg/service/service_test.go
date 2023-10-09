@@ -109,7 +109,7 @@ func TestLogin(t *testing.T) {
 	}{
 		{
 			name:           "error_getting_user",
-			mockRepository: makeMockRepositoryWithGetUser(models.User{}, repository.ErrGettingUser),
+			mockRepository: makeMockRepositoryWithGetUser(models.User{}, repository.ErrUserNotFound),
 			wantErr:        entities.ErrUserNotFound,
 		},
 		{
@@ -123,7 +123,7 @@ func TestLogin(t *testing.T) {
 			mockRepository:  makeMockRepositoryWithGetUser(validUser, nil),
 			request:         entities.LoginRequest{Password: VALID_PASSWORD},
 			wantErr:         nil,
-			wantTokenLength: 243,
+			wantTokenLength: 212,
 		},
 	}
 
@@ -166,7 +166,7 @@ func TestGetUser(t *testing.T) {
 	}{
 		{
 			name:           "error_getting_user",
-			mockRepository: makeMockRepositoryWithGetUser(models.User{}, repository.ErrGettingUser),
+			mockRepository: makeMockRepositoryWithGetUser(models.User{}, repository.ErrUserNotFound),
 			wantErr:        entities.ErrUserNotFound,
 		},
 		{

@@ -14,7 +14,7 @@ import (
 
 func main() {
 
-	// It all starts here!
+	// It all starts here
 	log.Println("Server started")
 
 	// Setup dependencies

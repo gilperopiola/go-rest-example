@@ -29,6 +29,6 @@ var (
 	// - User errors
 	ErrCreatingUser       = errors.New("error creating user")
 	ErrUpdatingUser       = errors.New("error updating user")
-	ErrGettingUser        = errors.New("error getting user")
+	ErrUserNotFound       = errors.New("error, user not found")
 	ErrUserAlreadyDeleted = errors.New("error, user already deleted")
 )

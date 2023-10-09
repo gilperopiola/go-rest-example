@@ -12,7 +12,7 @@ import (
 // CreateUser creates a user on the database. Id, username and email are unique
 func (r *Repository) CreateUser(user models.User) (models.User, error) {
 	if err := r.Database.DB.Create(&user).Error; err != nil {
-		return models.User{}, utils.WrapErrors(err, ErrCreatingUser)
+		return models.User{}, utils.Wrap(err, ErrCreatingUser)
 	}
 
 	return user, nil
@@ -21,7 +21,7 @@ func (r *Repository) CreateUser(user models.User) (models.User, error) {
 // UpdateUser updates the user on the database, skipping fields that are empty
 func (r *Repository) UpdateUser(user models.User) (models.User, error) {
 	if err := r.Database.DB.Model(&user).Update(&user).Error; err != nil {
-		return models.User{}, utils.WrapErrors(err, ErrUpdatingUser)
+		return models.User{}, utils.Wrap(err, ErrUpdatingUser)
 	}
 
 	return user, nil
@@ -49,9 +49,9 @@ func (r *Repository) GetUser(user models.User, onlyNonDeleted bool) (models.User
 	err := r.Database.DB.Where(query, user.ID, user.Username, user.Email).First(&user).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return models.User{}, utils.WrapErrors(err, ErrGettingUser)
+			return models.User{}, utils.Wrap(err, ErrUserNotFound)
 		}
-		return models.User{}, utils.WrapErrors(err, ErrUnknown)
+		return models.User{}, utils.Wrap(err, ErrUnknown)
 	}
 
 	return user, nil
@@ -74,7 +74,7 @@ func (r *Repository) DeleteUser(id int) (user models.User, err error) {
 	// Then, mark the user as deleted and save it
 	user.Deleted = true
 	if _, err := r.UpdateUser(user); err != nil {
-		return models.User{}, utils.WrapErrors(err, ErrUpdatingUser)
+		return models.User{}, utils.Wrap(err, ErrUpdatingUser)
 	}
 
 	return user, nil

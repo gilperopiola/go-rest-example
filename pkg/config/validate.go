@@ -7,12 +7,12 @@ import (
 // Validate environment variables which need to be set
 func (config *Config) validate() {
 	var (
-		missingVars   = []string{}
 		necessaryVars = map[string]string{
 			prefix + "PORT":            config.PORT,
 			prefix + "DATABASE_TYPE":   config.DATABASE.TYPE,
 			prefix + "DATABASE_SCHEMA": config.DATABASE.SCHEMA,
 		}
+		missingVars = []string{}
 	)
 
 	// Check if each necessary variable is set

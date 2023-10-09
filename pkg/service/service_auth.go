@@ -65,6 +65,11 @@ func (s *Service) Login(loginRequest entities.LoginRequest) (entities.LoginRespo
 		authRole = entities.AdminRole
 	}
 
+	tokenString, err := s.Auth.GenerateToken(userEntity, authRole)
+	if err != nil {
+		return entities.LoginResponse{}, s.ErrorsMapper.Map(utils.Wrap(err, entities.ErrUnauthorized))
+	}
+
 	// Return generated token on the response
-	return entities.LoginResponse{Token: s.Auth.GenerateToken(userEntity, authRole)}, nil
+	return entities.LoginResponse{Token: tokenString}, nil
 }

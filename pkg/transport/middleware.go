@@ -16,8 +16,9 @@ import (
 func NewMonitoringMiddleware(config config.ConfigI) gin.HandlerFunc {
 	cfg := config.GetMonitoringConfig()
 
+	// If monitoring is not enabled, return empty middleware
 	if !cfg.ENABLED {
-		return nil
+		return gin.HandlerFunc(func(c *gin.Context) {})
 	}
 
 	// If monitoring is enabled, use license to create New Relic app

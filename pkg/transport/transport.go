@@ -1,6 +1,8 @@
 package transport
 
 import (
+	"net/http"
+
 	"github.com/gilperopiola/go-rest-example/pkg/codec"
 	"github.com/gilperopiola/go-rest-example/pkg/entities"
 	"github.com/gilperopiola/go-rest-example/pkg/service"
@@ -35,6 +37,12 @@ func NewTransport(service service.ServiceLayer, codec codec.CodecI, errorsMapper
 	}
 }
 
+type HTTPResponse struct {
+	Success bool        `json:"success"`
+	Content interface{} `json:"content"`
+	Error   string      `json:"error"`
+}
+
 // HandleRequest takes:
 //
 //   - a transport and a gin context
@@ -60,7 +68,10 @@ func HandleRequest[req Request, resp Response](t Transport, c *gin.Context,
 	}
 
 	// Return OK
-	c.JSON(returnOK(response))
+	c.JSON(http.StatusOK, HTTPResponse{
+		Success: true,
+		Content: response,
+	})
 }
 
 type Request interface {

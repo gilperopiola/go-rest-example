@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"crypto/sha1"
+	"crypto/sha256"
 	"encoding/base64"
 	"fmt"
 	"os"
@@ -10,66 +10,16 @@ import (
 
 // General utils
 
-func WrapErrors(err1, err2 error) error {
+// Wrap should actaully be called WrapError, but it's too long
+func Wrap(err1, err2 error) error {
 	return fmt.Errorf("%s: %w", err1.Error(), err2)
 }
 
+// Hash hashes
 func Hash(salt string, data string) string {
-	hasher := sha1.New()
+	hasher := sha256.New()
 	hasher.Write([]byte(salt + data))
 	return base64.URLEncoding.EncodeToString(hasher.Sum(nil))
-}
-
-// API / Gin Utils
-
-// We introduce a ContextGetter instead of just using gin.Context to remove the dependency on gin
-type ContextGetter interface {
-	Get(key string) (interface{}, bool)
-}
-
-func GetIntFromContext(c ContextGetter, key string) (int, error) {
-
-	// Get from context
-	value, ok := c.Get(key)
-	if value == nil || !ok {
-		return 0, fmt.Errorf("error getting %s from context", key)
-	}
-
-	// Cast to string
-	valueStr, ok := value.(string)
-	if !ok {
-		return 0, fmt.Errorf("error casting %s from context to string", key)
-	}
-
-	// Convert to int
-	valueInt, err := strconv.Atoi(valueStr)
-	if err != nil {
-		return 0, fmt.Errorf("error converting %s from string to int", key)
-	}
-
-	return valueInt, nil
-}
-
-// We introduce a ParamsGetter instead of just using gin.Params to remove the dependency on gin
-type ParamsGetter interface {
-	Get(name string) (string, bool)
-}
-
-func GetIntFromContextParams(params ParamsGetter, key string) (int, error) {
-
-	// Get from params
-	value, ok := params.Get(key)
-	if !ok {
-		return 0, fmt.Errorf("error getting %s from URL params", key)
-	}
-
-	// Convert to int
-	valueInt, err := strconv.Atoi(value)
-	if err != nil {
-		return 0, fmt.Errorf("error converting %s from string to int", key)
-	}
-
-	return valueInt, nil
 }
 
 // Environment utils

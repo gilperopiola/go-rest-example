@@ -9,22 +9,23 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
-func (auth *Auth) GenerateToken(user entities.User, role entities.Role) string {
+func (auth *Auth) GenerateToken(user entities.User, role entities.Role) (string, error) {
 
 	var (
-		issuedAt  = time.Now().Unix()
-		expiresAt = time.Now().Add(time.Hour * 24 * time.Duration(auth.sessionDurationDays)).Unix()
+		// Session duration can be set in the config
+		issuedAt  = time.Now()
+		expiresAt = time.Now().Add(time.Hour * 24 * time.Duration(auth.sessionDurationDays))
 	)
 
+	// Generate claims containing Username, Email, Role and ID
 	claims := &CustomClaims{
 		Username: user.Username,
 		Email:    user.Email,
 		Role:     role,
-		StandardClaims: jwt.StandardClaims{
-			Id:        fmt.Sprint(user.ID),
-			Audience:  user.Email,
-			IssuedAt:  issuedAt,
-			ExpiresAt: expiresAt,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ID:        fmt.Sprint(user.ID),
+			IssuedAt:  jwt.NewNumericDate(issuedAt),
+			ExpiresAt: jwt.NewNumericDate(expiresAt),
 		},
 	}
 
@@ -32,7 +33,5 @@ func (auth *Auth) GenerateToken(user entities.User, role entities.Role) string {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	// Generate token (string)
-	tokenString, _ := token.SignedString([]byte(auth.secret))
-
-	return tokenString
+	return token.SignedString([]byte(auth.secret))
 }

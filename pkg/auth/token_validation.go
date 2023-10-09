@@ -1,60 +1,75 @@
 package auth
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 
 	"github.com/gilperopiola/go-rest-example/pkg/entities"
+	"github.com/gilperopiola/go-rest-example/pkg/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 )
 
-const (
-	UnauthorizedMsg = "unauthorized"
-)
-
 // ValidateToken validates a token for a specific role and sets ID and Email in context
-func (auth *Auth) ValidateToken(role entities.Role) gin.HandlerFunc {
+func (auth *Auth) ValidateToken(role entities.Role, shouldMatchUserID bool) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
-		// Get token first as a string and then as a *jwt.Token
-		token := auth.getTokenStructFromContext(c)
+		// Get token string and then convert it to a *jwt.Token
+		token, err := auth.getTokenStructFromContext(c)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, "unauthorized")
+			c.Abort()
+		}
 
 		// Get custom claims from token
 		customClaims, ok := token.Claims.(*CustomClaims)
 
-		// Check if token is invalid
-		if !ok || !token.Valid {
-			c.JSON(http.StatusUnauthorized, UnauthorizedMsg)
+		// Check if claims and token are valid
+		if !ok || !token.Valid || customClaims.Valid() != nil {
+			c.JSON(http.StatusUnauthorized, "unauthorized")
 			c.Abort()
 		}
 
 		// Check if role is valid
 		if role != entities.AnyRole && customClaims.Role != role {
-			c.JSON(http.StatusUnauthorized, UnauthorizedMsg)
+			c.JSON(http.StatusUnauthorized, "unauthorized")
 			c.Abort()
 		}
 
-		// If OK, set ID and Email inside of context
-		addInfoToContext(c, customClaims)
+		// Check if user ID in URL matches user ID in token
+		if shouldMatchUserID {
+			urlUserID, err := utils.GetIntFromContextURLParams(c.Params, "user_id")
+			if err != nil {
+				c.JSON(http.StatusUnauthorized, "unauthorized")
+				c.Abort()
+			}
+
+			if customClaims.ID != fmt.Sprint(urlUserID) {
+				c.JSON(http.StatusUnauthorized, "unauthorized")
+				c.Abort()
+			}
+		}
+
+		// If OK, set ID, Username and Email inside of context
+		addUserInfoToContext(c, customClaims)
 	}
 }
 
-func (auth *Auth) getTokenStructFromContext(c *gin.Context) *jwt.Token {
+func (auth *Auth) getTokenStructFromContext(c *gin.Context) (*jwt.Token, error) {
 
 	// Get token string from context
-	tokenString := removeBearerPrefix(auth.getJWTStringFromHeader(c.Request.Header))
+	tokenString := removeBearerPrefix(getJWTStringFromHeader(c.Request.Header))
 
 	// Decode string into actual *jwt.Token
-	if token, err := auth.decodeTokenString(tokenString); err == nil {
-		return token
+	token, err := auth.decodeTokenString(tokenString)
+	if err != nil {
+		return nil, err
 	}
 
 	// Error decoding token
-	c.JSON(http.StatusUnauthorized, UnauthorizedMsg)
-	c.Abort()
-	return nil
+	return token, nil
 }
 
 // decodeTokenString decodes a JWT token string into a *jwt.Token
@@ -72,16 +87,16 @@ func (auth *Auth) decodeTokenString(tokenString string) (*jwt.Token, error) {
 	return jwt.ParseWithClaims(tokenString, &CustomClaims{}, keyFunc)
 }
 
-func (auth *Auth) getJWTStringFromHeader(header http.Header) string {
+func addUserInfoToContext(c *gin.Context, claims *CustomClaims) {
+	c.Set("ID", claims.ID)
+	c.Set("Username", claims.Username)
+	c.Set("Email", claims.Email)
+}
+
+func getJWTStringFromHeader(header http.Header) string {
 	return header.Get("Authorization")
 }
 
 func removeBearerPrefix(token string) string {
 	return strings.TrimPrefix(token, "Bearer ")
-}
-
-func addInfoToContext(c *gin.Context, claims *CustomClaims) {
-	c.Set("ID", claims.Id)
-	c.Set("Username", claims.Username)
-	c.Set("Email", claims.Email)
 }

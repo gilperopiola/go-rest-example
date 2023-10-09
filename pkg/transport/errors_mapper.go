@@ -24,7 +24,7 @@ func NewErrorsMapper(logger logger.LoggerI) errorsMapper {
 }
 
 // This method will define the response of the transport layer
-func (e errorsMapper) Map(err error) (status int, response HTTPResponse) {
+func (e errorsMapper) Map(err error) (statusCode int, response HTTPResponse) {
 
 	// If we're here we shouldn't have a nil error
 	if err == nil {
@@ -32,15 +32,19 @@ func (e errorsMapper) Map(err error) (status int, response HTTPResponse) {
 	}
 
 	// We get the HTTP code depending on the error, defaulting to 500
-	responseStatusCode := getResponseStatusCode(err)
+	statusCode = getStatusCodeFromError(err)
 
 	// We log 500's as errors, and 400's as warnings
-	e.logWarningOrError(err, responseStatusCode)
+	e.logWarningOrError(err, statusCode)
 
-	return returnErrorResponse(responseStatusCode, err)
+	return statusCode, HTTPResponse{
+		Success: false,
+		Content: nil,
+		Error:   err.Error(),
+	}
 }
 
-func getResponseStatusCode(err error) int {
+func getStatusCodeFromError(err error) int {
 	responseStatusCode := http.StatusInternalServerError
 
 	// This is done through strings comparison!!! (not ideal)
@@ -52,14 +56,6 @@ func getResponseStatusCode(err error) int {
 	}
 
 	return responseStatusCode
-}
-
-func (e errorsMapper) logWarningOrError(err error, responseStatusCode int) {
-	logFn := e.logger.Warn
-	if responseStatusCode >= 500 {
-		logFn = e.logger.Error
-	}
-	logFn(err.Error())
 }
 
 var errorsMapToHTTPCode = map[error]int{
@@ -83,6 +79,15 @@ var errorsMapToHTTPCode = map[error]int{
 
 	// 500 - Internal Server Error
 	entities.ErrCreatingUser: 500,
+	entities.ErrGettingUser:  500,
 	entities.ErrNilError:     500,
 	entities.ErrUnknown:      500,
+}
+
+func (e errorsMapper) logWarningOrError(err error, responseStatusCode int) {
+	logFn := e.logger.Warn
+	if responseStatusCode >= 500 {
+		logFn = e.logger.Error
+	}
+	logFn(err.Error())
 }

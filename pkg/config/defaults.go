@@ -1,6 +1,6 @@
 package config
 
-// Config Defaults
+// Config Defaults - TODO - Move to config file
 
 var (
 	defaultPort  = "8040"
@@ -18,7 +18,7 @@ var (
 	defaultJWTSecret              = "a0#3ndl2"
 	defaultJWTSessionDurationDays = 14
 
-	defaultMonitoringEnabled = true
+	defaultMonitoringEnabled = false
 	defaultMonitoringAppName = "go-rest-example"
 	defaultMonitoringSecret  = ""
 )
