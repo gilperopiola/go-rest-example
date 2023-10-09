@@ -40,9 +40,9 @@ func (e ErrorsMapper) Map(err error) error {
 
 	// General errors
 	if errors.Is(err, repository.ErrUnknown) {
-		return utils.Wrap(err, entities.ErrUserNotFound)
+		return utils.Wrap(err, entities.ErrUnknown)
 	}
 
-	// Default to the original error
-	return err
+	// Default to ErrUnknown
+	return entities.ErrUnknown
 }

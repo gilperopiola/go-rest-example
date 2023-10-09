@@ -7,109 +7,87 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func makeSignupRequest(c *gin.Context) (entities.SignupRequest, error) {
-	// Bind & validate request
-	var signupRequest entities.SignupRequest
-	if err := c.ShouldBindJSON(&signupRequest); err != nil {
+func makeSignupRequest(c *gin.Context) (request entities.SignupRequest, err error) {
+	if err = c.ShouldBindJSON(&request); err != nil {
 		return entities.SignupRequest{}, utils.Wrap(err, entities.ErrBindingRequest)
 	}
 
-	if err := signupRequest.Validate(); err != nil {
+	if err = request.Validate(); err != nil {
 		return entities.SignupRequest{}, err
 	}
 
-	// Return request
-	return signupRequest, nil
+	return request, nil
 }
 
-func makeLoginRequest(c *gin.Context) (entities.LoginRequest, error) {
-	// Bind request
-	var loginRequest entities.LoginRequest
-	if err := c.ShouldBindJSON(&loginRequest); err != nil {
+func makeLoginRequest(c *gin.Context) (request entities.LoginRequest, err error) {
+	if err = c.ShouldBindJSON(&request); err != nil {
 		return entities.LoginRequest{}, utils.Wrap(err, entities.ErrBindingRequest)
 	}
 
-	// Validate request
-	if err := loginRequest.Validate(); err != nil {
+	if err = request.Validate(); err != nil {
 		return entities.LoginRequest{}, err
 	}
 
-	// Return request
-	return loginRequest, nil
+	return request, nil
 }
 
-func makeCreateUserRequest(c *gin.Context) (entities.CreateUserRequest, error) {
-	// Bind & validate request
-	var createUserRequest entities.CreateUserRequest
-	if err := c.ShouldBindJSON(&createUserRequest); err != nil {
+func makeCreateUserRequest(c *gin.Context) (request entities.CreateUserRequest, err error) {
+	if err = c.ShouldBindJSON(&request); err != nil {
 		return entities.CreateUserRequest{}, utils.Wrap(err, entities.ErrBindingRequest)
 	}
 
-	if err := createUserRequest.Validate(); err != nil {
+	if err = request.Validate(); err != nil {
 		return entities.CreateUserRequest{}, err
 	}
 
-	// Return request
-	return createUserRequest, nil
+	return request, nil
 }
 
-func makeGetUserRequest(c *gin.Context) (entities.GetUserRequest, error) {
-	// Get user ID from context
+func makeGetUserRequest(c *gin.Context) (request entities.GetUserRequest, err error) {
 	userToGetID, err := utils.GetIntFromContext(c, "ID")
 	if err != nil {
 		return entities.GetUserRequest{}, err
 	}
 
-	// Create & validate request
-	getUserRequest := entities.GetUserRequest{ID: userToGetID}
+	request.ID = userToGetID
 
-	if err := getUserRequest.Validate(); err != nil {
+	if err = request.Validate(); err != nil {
 		return entities.GetUserRequest{}, err
 	}
 
-	// Return request
-	return getUserRequest, nil
+	return request, nil
 }
 
-func makeUpdateUserRequest(c *gin.Context) (entities.UpdateUserRequest, error) {
-	// Get user ID from context
+func makeUpdateUserRequest(c *gin.Context) (request entities.UpdateUserRequest, err error) {
+	if err = c.ShouldBindJSON(&request); err != nil {
+		return entities.UpdateUserRequest{}, utils.Wrap(err, entities.ErrBindingRequest)
+	}
+
 	userToUpdateID, err := utils.GetIntFromContext(c, "ID")
 	if err != nil {
 		return entities.UpdateUserRequest{}, err
 	}
 
-	// Bind request
-	var updateUserRequest entities.UpdateUserRequest
-	if err := c.ShouldBindJSON(&updateUserRequest); err != nil {
-		return entities.UpdateUserRequest{}, utils.Wrap(err, entities.ErrBindingRequest)
-	}
+	request.ID = userToUpdateID
 
-	// Assign User ID to request
-	updateUserRequest.ID = userToUpdateID
-
-	// Validate request
-	if err := updateUserRequest.Validate(); err != nil {
+	if err = request.Validate(); err != nil {
 		return entities.UpdateUserRequest{}, err
 	}
 
-	// Return request
-	return updateUserRequest, nil
+	return request, nil
 }
 
-func makeDeleteUserRequest(c *gin.Context) (entities.DeleteUserRequest, error) {
-	// Get user ID from context
+func makeDeleteUserRequest(c *gin.Context) (request entities.DeleteUserRequest, err error) {
 	userToDeleteID, err := utils.GetIntFromContext(c, "ID")
 	if err != nil {
 		return entities.DeleteUserRequest{}, err
 	}
 
-	// Create & validate request
-	deleteUserRequest := entities.DeleteUserRequest{ID: userToDeleteID}
+	request.ID = userToDeleteID
 
-	if err := deleteUserRequest.Validate(); err != nil {
+	if err = request.Validate(); err != nil {
 		return entities.DeleteUserRequest{}, err
 	}
 
-	// Return request
-	return deleteUserRequest, nil
+	return request, nil
 }

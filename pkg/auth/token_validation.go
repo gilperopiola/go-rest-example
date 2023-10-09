@@ -19,8 +19,7 @@ func (auth *Auth) ValidateToken(role entities.Role, shouldMatchUserID bool) gin.
 		// Get token string and then convert it to a *jwt.Token
 		token, err := auth.getTokenStructFromContext(c)
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, "unauthorized")
-			c.Abort()
+			abortRequest(c)
 		}
 
 		// Get custom claims from token
@@ -28,33 +27,34 @@ func (auth *Auth) ValidateToken(role entities.Role, shouldMatchUserID bool) gin.
 
 		// Check if claims and token are valid
 		if !ok || !token.Valid || customClaims.Valid() != nil {
-			c.JSON(http.StatusUnauthorized, "unauthorized")
-			c.Abort()
+			abortRequest(c)
 		}
 
 		// Check if role is valid
 		if role != entities.AnyRole && customClaims.Role != role {
-			c.JSON(http.StatusUnauthorized, "unauthorized")
-			c.Abort()
+			abortRequest(c)
 		}
 
 		// Check if user ID in URL matches user ID in token
 		if shouldMatchUserID {
 			urlUserID, err := utils.GetIntFromContextURLParams(c.Params, "user_id")
 			if err != nil {
-				c.JSON(http.StatusUnauthorized, "unauthorized")
-				c.Abort()
+				abortRequest(c)
 			}
 
 			if customClaims.ID != fmt.Sprint(urlUserID) {
-				c.JSON(http.StatusUnauthorized, "unauthorized")
-				c.Abort()
+				abortRequest(c)
 			}
 		}
 
 		// If OK, set ID, Username and Email inside of context
 		addUserInfoToContext(c, customClaims)
 	}
+}
+
+func abortRequest(c *gin.Context) {
+	c.JSON(http.StatusUnauthorized, "unauthorized")
+	c.Abort()
 }
 
 func (auth *Auth) getTokenStructFromContext(c *gin.Context) (*jwt.Token, error) {
@@ -68,7 +68,7 @@ func (auth *Auth) getTokenStructFromContext(c *gin.Context) (*jwt.Token, error) 
 		return nil, err
 	}
 
-	// Error decoding token
+	// Token decoded OK
 	return token, nil
 }
 

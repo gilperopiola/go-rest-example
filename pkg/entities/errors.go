@@ -5,8 +5,15 @@ import (
 	"fmt"
 )
 
-// These are the domain errors that can be returned by the service layer.
+// These are the service errors that can be returned by the service layer.
 //
+// - IMPORTANT: If you add a new error, make sure to add it to the errorsMapToHTTPCode map in pkg/transport/errors_mapper.go
+// - IMPORTANT: If you add a new error, make sure to add it to the errorsMapToHTTPCode map in pkg/transport/errors_mapper.go
+// - IMPORTANT: If you add a new error, make sure to add it to the errorsMapToHTTPCode map in pkg/transport/errors_mapper.go
+// - IMPORTANT: If you add a new error, make sure to add it to the errorsMapToHTTPCode map in pkg/transport/errors_mapper.go
+// - IMPORTANT: If you add a new error, make sure to add it to the errorsMapToHTTPCode map in pkg/transport/errors_mapper.go
+// - IMPORTANT: If you add a new error, make sure to add it to the errorsMapToHTTPCode map in pkg/transport/errors_mapper.go
+// - IMPORTANT: If you add a new error, make sure to add it to the errorsMapToHTTPCode map in pkg/transport/errors_mapper.go
 // - IMPORTANT: If you add a new error, make sure to add it to the errorsMapToHTTPCode map in pkg/transport/errors_mapper.go
 
 var (
@@ -22,12 +29,11 @@ var (
 	// - Auth & Users
 
 	ErrCreatingUser = errors.New("failed to create user")
-	ErrGettingUser  = errors.New("failed to get user")
 	ErrUserNotFound = errors.New("user not found")
 
 	ErrInvalidEmailFormat    = errors.New("invalid email format")
-	ErrInvalidUsernameLength = fmt.Errorf("username must be between %d and %d characters", USERNAME_MIN_LENGTH, USERNAME_MAX_LENGTH)
-	ErrInvalidPasswordLength = fmt.Errorf("password must be between %d and %d characters", PASSWORD_MIN_LENGTH, PASSWORD_MAX_LENGTH)
+	ErrInvalidUsernameLength = fmt.Errorf("username must be between %d and %d characters", usernameMinLength, usernameMaxLength)
+	ErrInvalidPasswordLength = fmt.Errorf("password must be between %d and %d characters", passwordMinLength, passwordMaxLength)
 
 	ErrPasswordsDontMatch          = errors.New("passwords don't match")
 	ErrUsernameOrEmailAlreadyInUse = errors.New("username or email already in use")

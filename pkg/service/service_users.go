@@ -16,7 +16,7 @@ func (s *Service) CreateUser(createUserRequest entities.CreateUserRequest) (enti
 
 	// Validate user doesn't exist
 	if s.Repository.UserExists(createUserRequest.Email, createUserRequest.Username, false) {
-		return entities.CreateUserResponse{}, s.ErrorsMapper.Map(entities.ErrUsernameOrEmailAlreadyInUse)
+		return entities.CreateUserResponse{}, entities.ErrUsernameOrEmailAlreadyInUse
 	}
 
 	// Hash password
@@ -66,7 +66,7 @@ func (s *Service) UpdateUser(updateUserRequest entities.UpdateUserRequest) (enti
 
 	// Check if username and/or email are available
 	if s.Repository.UserExists(updateUserRequest.Email, updateUserRequest.Username, false) {
-		return entities.UpdateUserResponse{}, s.ErrorsMapper.Map(entities.ErrUsernameOrEmailAlreadyInUse)
+		return entities.UpdateUserResponse{}, entities.ErrUsernameOrEmailAlreadyInUse
 	}
 
 	// Get user from database

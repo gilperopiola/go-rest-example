@@ -15,7 +15,7 @@ func (s *Service) Signup(signupRequest entities.SignupRequest) (entities.SignupR
 
 	// Validate user doesn't exist
 	if s.Repository.UserExists(signupRequest.Email, signupRequest.Username, false) {
-		return entities.SignupResponse{}, s.ErrorsMapper.Map(entities.ErrUsernameOrEmailAlreadyInUse)
+		return entities.SignupResponse{}, entities.ErrUsernameOrEmailAlreadyInUse
 	}
 
 	// Hash password
@@ -53,7 +53,7 @@ func (s *Service) Login(loginRequest entities.LoginRequest) (entities.LoginRespo
 
 	// Check if passwords match, if not return error
 	if !userToLogin.PasswordMatches(loginRequest.Password) {
-		return entities.LoginResponse{}, s.ErrorsMapper.Map(entities.ErrWrongPassword)
+		return entities.LoginResponse{}, entities.ErrWrongPassword
 	}
 
 	// Transform user model to entity
@@ -67,7 +67,7 @@ func (s *Service) Login(loginRequest entities.LoginRequest) (entities.LoginRespo
 
 	tokenString, err := s.Auth.GenerateToken(userEntity, authRole)
 	if err != nil {
-		return entities.LoginResponse{}, s.ErrorsMapper.Map(utils.Wrap(err, entities.ErrUnauthorized))
+		return entities.LoginResponse{}, entities.ErrUnauthorized
 	}
 
 	// Return generated token on the response

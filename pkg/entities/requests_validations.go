@@ -6,23 +6,25 @@ import (
 
 const (
 	// - Signup & Users
-	USERNAME_MIN_LENGTH = 4
-	USERNAME_MAX_LENGTH = 32
-	PASSWORD_MIN_LENGTH = 8
-	PASSWORD_MAX_LENGTH = 64
-	VALID_EMAIL_REGEX   = `^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`
+	usernameMinLength = 4
+	usernameMaxLength = 32
+	passwordMinLength = 8
+	passwordMaxLength = 64
+)
+
+var (
+	validEmailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`)
 )
 
 // SignupRequest Validate {Email, Username, Password, RepeatPassword}
-func (request SignupRequest) Validate() error {
-
+func (req SignupRequest) Validate() error {
 	// Check username, email and password basic validations
-	if err := usernameEmailAndPasswordValidation(request.Username, request.Email, request.Password); err != nil {
+	if err := validateUsernameEmailAndPassword(req.Username, req.Email, req.Password); err != nil {
 		return err
 	}
 
 	// Check passwords match
-	if request.Password != request.RepeatPassword {
+	if req.Password != req.RepeatPassword {
 		return ErrPasswordsDontMatch
 	}
 
@@ -32,7 +34,6 @@ func (request SignupRequest) Validate() error {
 
 // LoginRequest Validate {UsernameOrEmail, Password}
 func (req LoginRequest) Validate() error {
-
 	// Empty fields
 	if req.UsernameOrEmail == "" || req.Password == "" {
 		return ErrAllFieldsRequired
@@ -42,39 +43,33 @@ func (req LoginRequest) Validate() error {
 }
 
 // CreateUserRequest Validate {Email, Username, Password, IsAdmin}
-func (request CreateUserRequest) Validate() error {
-	return usernameEmailAndPasswordValidation(request.Username, request.Email, request.Password)
+func (req CreateUserRequest) Validate() error {
+	return validateUsernameEmailAndPassword(req.Username, req.Email, req.Password)
 }
 
 func (req GetUserRequest) Validate() error {
-
 	// Empty ID
 	if req.ID == 0 {
 		return ErrAllFieldsRequired
 	}
-
 	return nil
 }
 
 // UpdateUserRequest Validate {ID, Email, Username}
-func (request UpdateUserRequest) Validate() error {
-
+func (req UpdateUserRequest) Validate() error {
 	// Empty fields
-	if request.ID == 0 || (request.Email == "" && request.Username == "") {
+	if req.ID == 0 || (req.Email == "" && req.Username == "") {
 		return ErrAllFieldsRequired
 	}
 
 	// Valid email format
-	if request.Email != "" {
-		matched, err := regexp.MatchString(VALID_EMAIL_REGEX, request.Email)
-		if err != nil || !matched {
-			return ErrInvalidEmailFormat
-		}
+	if req.Email != "" && !validEmailRegex.MatchString(req.Email) {
+		return ErrInvalidEmailFormat
 	}
 
 	// Valid username length
-	if request.Username != "" {
-		if len(request.Username) < USERNAME_MIN_LENGTH || len(request.Username) > USERNAME_MAX_LENGTH {
+	if req.Username != "" {
+		if len(req.Username) < usernameMinLength || len(req.Username) > usernameMaxLength {
 			return ErrInvalidUsernameLength
 		}
 	}
@@ -85,7 +80,6 @@ func (request UpdateUserRequest) Validate() error {
 
 // DeleteUserRequest Validate {ID}
 func (req DeleteUserRequest) Validate() error {
-
 	// Empty ID
 	if req.ID == 0 {
 		return ErrAllFieldsRequired
@@ -94,25 +88,23 @@ func (req DeleteUserRequest) Validate() error {
 	return nil
 }
 
-func usernameEmailAndPasswordValidation(username, email, password string) error {
-
+func validateUsernameEmailAndPassword(username, email, password string) error {
 	// Empty fields
 	if email == "" || username == "" || password == "" {
 		return ErrAllFieldsRequired
 	}
 
 	// Valid email format
-	matched, err := regexp.MatchString(VALID_EMAIL_REGEX, email)
-	if err != nil || !matched {
+	if !validEmailRegex.MatchString(email) {
 		return ErrInvalidEmailFormat
 	}
 
 	// Valid username and password length
-	if len(username) < USERNAME_MIN_LENGTH || len(username) > USERNAME_MAX_LENGTH {
+	if len(username) < usernameMinLength || len(username) > usernameMaxLength {
 		return ErrInvalidUsernameLength
 	}
 
-	if len(password) < PASSWORD_MIN_LENGTH || len(password) > PASSWORD_MAX_LENGTH {
+	if len(password) < passwordMinLength || len(password) > passwordMaxLength {
 		return ErrInvalidPasswordLength
 	}
 
