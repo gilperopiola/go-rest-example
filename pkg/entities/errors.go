@@ -29,6 +29,7 @@ var (
 	// - Auth & Users
 
 	ErrCreatingUser = errors.New("failed to create user")
+	ErrUpdatingUser = errors.New("failed to update user")
 	ErrUserNotFound = errors.New("user not found")
 
 	ErrInvalidEmailFormat    = errors.New("invalid email format")

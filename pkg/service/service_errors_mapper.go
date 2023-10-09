@@ -30,6 +30,10 @@ func (e ErrorsMapper) Map(err error) error {
 		return utils.Wrap(err, entities.ErrCreatingUser)
 	}
 
+	if errors.Is(err, repository.ErrUpdatingUser) {
+		return utils.Wrap(err, entities.ErrUpdatingUser)
+	}
+
 	if errors.Is(err, repository.ErrUserNotFound) {
 		return utils.Wrap(err, entities.ErrUserNotFound)
 	}

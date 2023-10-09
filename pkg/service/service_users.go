@@ -2,6 +2,7 @@ package service
 
 import (
 	"github.com/gilperopiola/go-rest-example/pkg/entities"
+	"github.com/gilperopiola/go-rest-example/pkg/repository"
 	"github.com/gilperopiola/go-rest-example/pkg/utils"
 )
 
@@ -15,7 +16,7 @@ func (s *Service) CreateUser(createUserRequest entities.CreateUserRequest) (enti
 	)
 
 	// Validate user doesn't exist
-	if s.Repository.UserExists(createUserRequest.Email, createUserRequest.Username, false) {
+	if s.Repository.UserExists(createUserRequest.Email, createUserRequest.Username) {
 		return entities.CreateUserResponse{}, entities.ErrUsernameOrEmailAlreadyInUse
 	}
 
@@ -47,7 +48,7 @@ func (s *Service) GetUser(getUserRequest entities.GetUserRequest) (entities.GetU
 	userToGet := toModel(getUserRequest)
 
 	// Get user from database
-	userToGet, err := s.Repository.GetUser(userToGet, true)
+	userToGet, err := s.Repository.GetUser(userToGet, repository.WithoutDeleted)
 	if err != nil {
 		return entities.GetUserResponse{}, s.ErrorsMapper.Map(err)
 	}
@@ -65,12 +66,12 @@ func (s *Service) UpdateUser(updateUserRequest entities.UpdateUserRequest) (enti
 	)
 
 	// Check if username and/or email are available
-	if s.Repository.UserExists(updateUserRequest.Email, updateUserRequest.Username, false) {
+	if s.Repository.UserExists(updateUserRequest.Email, updateUserRequest.Username) {
 		return entities.UpdateUserResponse{}, entities.ErrUsernameOrEmailAlreadyInUse
 	}
 
 	// Get user from database
-	userToUpdate, err := s.Repository.GetUser(toModel(updateUserRequest), true)
+	userToUpdate, err := s.Repository.GetUser(toModel(updateUserRequest), repository.WithoutDeleted)
 	if err != nil {
 		return entities.UpdateUserResponse{}, s.ErrorsMapper.Map(err)
 	}

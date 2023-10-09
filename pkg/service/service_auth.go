@@ -2,11 +2,11 @@ package service
 
 import (
 	"github.com/gilperopiola/go-rest-example/pkg/entities"
+	"github.com/gilperopiola/go-rest-example/pkg/repository"
 	"github.com/gilperopiola/go-rest-example/pkg/utils"
 )
 
 func (s *Service) Signup(signupRequest entities.SignupRequest) (entities.SignupResponse, error) {
-
 	// Codec functions
 	var (
 		toModel  = s.Codec.FromSignupRequestToUserModel
@@ -14,14 +14,12 @@ func (s *Service) Signup(signupRequest entities.SignupRequest) (entities.SignupR
 	)
 
 	// Validate user doesn't exist
-	if s.Repository.UserExists(signupRequest.Email, signupRequest.Username, false) {
+	if s.Repository.UserExists(signupRequest.Email, signupRequest.Username) {
 		return entities.SignupResponse{}, entities.ErrUsernameOrEmailAlreadyInUse
 	}
 
-	// Hash password
+	// Hash password, transform request + hash to model
 	hashedPassword := utils.Hash(signupRequest.Email, signupRequest.Password)
-
-	// Transform request to model
 	userToSignup := toModel(signupRequest, hashedPassword)
 
 	// Create user model on the database
@@ -46,18 +44,18 @@ func (s *Service) Login(loginRequest entities.LoginRequest) (entities.LoginRespo
 	userToLogin := toModel(loginRequest)
 
 	// Get user from database
-	userToLogin, err := s.Repository.GetUser(userToLogin, true)
+	userFromDB, err := s.Repository.GetUser(userToLogin, repository.WithoutDeleted)
 	if err != nil {
 		return entities.LoginResponse{}, s.ErrorsMapper.Map(err)
 	}
 
-	// Check if passwords match, if not return error
-	if !userToLogin.PasswordMatches(loginRequest.Password) {
+	// Check if passwords hashes match, if not return error
+	if !userFromDB.PasswordMatches(loginRequest.Password) {
 		return entities.LoginResponse{}, entities.ErrWrongPassword
 	}
 
 	// Transform user model to entity
-	userEntity := toEntity(userToLogin)
+	userEntity := toEntity(userFromDB)
 
 	// Set the appropriate role
 	authRole := entities.UserRole
@@ -65,6 +63,7 @@ func (s *Service) Login(loginRequest entities.LoginRequest) (entities.LoginRespo
 		authRole = entities.AdminRole
 	}
 
+	// Generate token string
 	tokenString, err := s.Auth.GenerateToken(userEntity, authRole)
 	if err != nil {
 		return entities.LoginResponse{}, entities.ErrUnauthorized

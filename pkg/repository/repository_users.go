@@ -9,6 +9,12 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
+type queryOption func(*string)
+
+func WithoutDeleted(q *string) {
+	*q += " AND deleted = false"
+}
+
 // CreateUser creates a user on the database. Id, username and email are unique
 func (r *Repository) CreateUser(user models.User) (models.User, error) {
 	if err := r.Database.DB.Create(&user).Error; err != nil {
@@ -28,23 +34,29 @@ func (r *Repository) UpdateUser(user models.User) (models.User, error) {
 }
 
 // UserExists checks if a user exists on the database
-func (r *Repository) UserExists(email, username string, onlyNonDeleted bool) bool {
+func (r *Repository) UserExists(email, username string, opts ...queryOption) bool {
 	var user models.User
 
-	query := buildNonDeletedQuery("(email = ? OR username = ?)", onlyNonDeleted)
+	query := "(email = ? OR username = ?)"
+
+	for _, opt := range opts {
+		opt(&query)
+	}
 
 	if err := r.Database.DB.Where(query, email, username).First(&user).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return false
-		}
+		return false
 	}
 
 	return true
 }
 
 // GetUser retrieves a user from the database, if it exists
-func (r *Repository) GetUser(user models.User, onlyNonDeleted bool) (models.User, error) {
-	query := buildNonDeletedQuery("(id = ? OR username = ? OR email = ?)", onlyNonDeleted)
+func (r *Repository) GetUser(user models.User, opts ...queryOption) (models.User, error) {
+	query := "(id = ? OR username = ? OR email = ?)"
+
+	for _, opt := range opts {
+		opt(&query)
+	}
 
 	err := r.Database.DB.Where(query, user.ID, user.Username, user.Email).First(&user).Error
 	if err != nil {
@@ -58,11 +70,12 @@ func (r *Repository) GetUser(user models.User, onlyNonDeleted bool) (models.User
 }
 
 // DeleteUser marks a user as deleted on the database, if it is already deleted it throws an error
-func (r *Repository) DeleteUser(id int) (user models.User, err error) {
+func (r *Repository) DeleteUser(id int) (models.User, error) {
 
 	// First, retrieve the user
-	user.ID = id
-	if user, err = r.GetUser(user, false); err != nil {
+	user := models.User{ID: id}
+	var err error
+	if user, err = r.GetUser(user); err != nil {
 		return models.User{}, err
 	}
 
@@ -78,11 +91,4 @@ func (r *Repository) DeleteUser(id int) (user models.User, err error) {
 	}
 
 	return user, nil
-}
-
-func buildNonDeletedQuery(query string, onlyNonDeleted bool) string {
-	if onlyNonDeleted {
-		query += " AND deleted = false"
-	}
-	return query
 }

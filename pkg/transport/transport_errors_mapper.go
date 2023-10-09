@@ -79,6 +79,7 @@ var errorsMapToHTTPCode = map[error]int{
 
 	// 500 - Internal Server Error
 	entities.ErrCreatingUser: 500,
+	entities.ErrUpdatingUser: 500,
 	entities.ErrNilError:     500,
 	entities.ErrUnknown:      500,
 }
