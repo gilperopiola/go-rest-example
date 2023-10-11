@@ -6,6 +6,7 @@ import (
 	"github.com/gilperopiola/go-rest-example/pkg/auth"
 	"github.com/gilperopiola/go-rest-example/pkg/config"
 	"github.com/gilperopiola/go-rest-example/pkg/entities"
+	customErrors "github.com/gilperopiola/go-rest-example/pkg/errors"
 	"github.com/gilperopiola/go-rest-example/pkg/models"
 	"github.com/gilperopiola/go-rest-example/pkg/repository"
 	"github.com/gilperopiola/go-rest-example/pkg/requests"
@@ -54,12 +55,12 @@ func TestSignup(t *testing.T) {
 		{
 			name:           "error_user_already_exists",
 			mockRepository: makeMockRepositoryWithUserExists(true),
-			wantErr:        entities.ErrUsernameOrEmailAlreadyInUse,
+			wantErr:        customErrors.ErrUsernameOrEmailAlreadyInUse,
 		},
 		{
 			name:           "error_creating_user",
-			mockRepository: makeMockRepositoryWithCreateUser(models.User{}, repository.ErrCreatingUser),
-			wantErr:        entities.ErrCreatingUser,
+			mockRepository: makeMockRepositoryWithCreateUser(models.User{}, customErrors.ErrCreatingUser),
+			wantErr:        customErrors.ErrCreatingUser,
 		},
 		{
 			name:           "success",
@@ -108,14 +109,14 @@ func TestLogin(t *testing.T) {
 	}{
 		{
 			name:           "error_getting_user",
-			mockRepository: makeMockRepositoryWithGetUser(models.User{}, repository.ErrUserNotFound),
-			wantErr:        entities.ErrUserNotFound,
+			mockRepository: makeMockRepositoryWithGetUser(models.User{}, customErrors.ErrUserNotFound),
+			wantErr:        customErrors.ErrUserNotFound,
 		},
 		{
 			name:           "error_mismatched_passwords",
 			mockRepository: makeMockRepositoryWithGetUser(validUser, nil),
 			request:        requests.LoginRequest{Password: INVALID_PASSWORD},
-			wantErr:        entities.ErrWrongPassword,
+			wantErr:        customErrors.ErrWrongPassword,
 		},
 		{
 			name:            "success",
@@ -165,8 +166,8 @@ func TestGetUser(t *testing.T) {
 	}{
 		{
 			name:           "error_getting_user",
-			mockRepository: makeMockRepositoryWithGetUser(models.User{}, repository.ErrUserNotFound),
-			wantErr:        entities.ErrUserNotFound,
+			mockRepository: makeMockRepositoryWithGetUser(models.User{}, customErrors.ErrUserNotFound),
+			wantErr:        customErrors.ErrUserNotFound,
 		},
 		{
 			name:           "success",
@@ -216,8 +217,8 @@ func TestDeleteUser(t *testing.T) {
 		{
 			name:           "error_deleting_user",
 			request:        requests.DeleteUserRequest{ID: VALID_ID},
-			mockRepository: makeMockRepositoryWithDeleteUser(models.User{}, repository.ErrUserAlreadyDeleted),
-			wantErr:        entities.ErrUserAlreadyDeleted,
+			mockRepository: makeMockRepositoryWithDeleteUser(models.User{}, customErrors.ErrUserAlreadyDeleted),
+			wantErr:        customErrors.ErrUserAlreadyDeleted,
 		},
 		{
 			name:           "success",

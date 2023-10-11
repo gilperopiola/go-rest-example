@@ -1,11 +1,14 @@
 package service
 
 import (
-	"github.com/gilperopiola/go-rest-example/pkg/entities"
+	"fmt"
+
+	customErrors "github.com/gilperopiola/go-rest-example/pkg/errors"
 	"github.com/gilperopiola/go-rest-example/pkg/handlers"
 	"github.com/gilperopiola/go-rest-example/pkg/repository"
 	"github.com/gilperopiola/go-rest-example/pkg/requests"
 	"github.com/gilperopiola/go-rest-example/pkg/responses"
+	"github.com/gilperopiola/go-rest-example/pkg/utils"
 )
 
 // CreateUser is an admins only endpoint
@@ -13,7 +16,7 @@ func (s *Service) CreateUser(createUserRequest requests.CreateUserRequest) (resp
 	user := handlers.New(createUserRequest.ToUserModel())
 
 	if user.Exists(s.Repository) {
-		return responses.CreateUserResponse{}, entities.ErrUsernameOrEmailAlreadyInUse
+		return responses.CreateUserResponse{}, customErrors.ErrUsernameOrEmailAlreadyInUse
 	}
 
 	user.HashPassword()
@@ -39,7 +42,7 @@ func (s *Service) UpdateUser(updateUserRequest requests.UpdateUserRequest) (resp
 	user := handlers.New(updateUserRequest.ToUserModel())
 
 	if user.Exists(s.Repository) {
-		return responses.UpdateUserResponse{}, entities.ErrUsernameOrEmailAlreadyInUse
+		return responses.UpdateUserResponse{}, customErrors.ErrUsernameOrEmailAlreadyInUse
 	}
 
 	if err := user.Get(s.Repository, repository.WithoutDeleted); err != nil {
@@ -60,7 +63,7 @@ func (s *Service) DeleteUser(deleteUserRequest requests.DeleteUserRequest) (resp
 
 	// This returns an error if the user is already deleted
 	if err := user.Delete(s.Repository); err != nil {
-		return responses.DeleteUserResponse{}, err
+		return responses.DeleteUserResponse{}, utils.Wrap(fmt.Errorf("service_users: DeleteUser: user.Delete"), err)
 	}
 
 	return responses.DeleteUserResponse{User: user.ToEntity()}, nil

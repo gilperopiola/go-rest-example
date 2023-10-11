@@ -7,7 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/gilperopiola/go-rest-example/pkg/entities"
+	customErrors "github.com/gilperopiola/go-rest-example/pkg/errors"
 	"github.com/gilperopiola/go-rest-example/pkg/requests"
 
 	"github.com/gin-gonic/gin"
@@ -55,13 +55,13 @@ func TestMakeSignupRequest(t *testing.T) {
 			name:    "error_binding_request",
 			body:    SignupBody{Email: 5},
 			want:    requests.SignupRequest{},
-			wantErr: entities.ErrBindingRequest,
+			wantErr: customErrors.ErrBindingRequest,
 		},
 		{
 			name:    "error_validating_request",
 			body:    SignupBody{Email: "invalid"},
 			want:    requests.SignupRequest{},
-			wantErr: entities.ErrAllFieldsRequired,
+			wantErr: customErrors.ErrAllFieldsRequired,
 		},
 		{
 			name:    "success",
@@ -113,13 +113,13 @@ func TestMakeLoginRequest(t *testing.T) {
 			name:    "error_binding_request",
 			body:    LoginBody{UsernameOrEmail: 5},
 			want:    requests.LoginRequest{},
-			wantErr: entities.ErrBindingRequest,
+			wantErr: customErrors.ErrBindingRequest,
 		},
 		{
 			name:    "error_validating_request",
 			body:    LoginBody{UsernameOrEmail: "invalid"},
 			want:    requests.LoginRequest{},
-			wantErr: entities.ErrAllFieldsRequired,
+			wantErr: customErrors.ErrAllFieldsRequired,
 		},
 		{
 			name:    "success",
@@ -158,7 +158,7 @@ func TestMakeGetUserRequest(t *testing.T) {
 			ctxUserID: "0",
 			urlUserID: "0",
 			want:      requests.GetUserRequest{},
-			wantErr:   entities.ErrAllFieldsRequired,
+			wantErr:   customErrors.ErrAllFieldsRequired,
 		},
 		{
 			name:      "success",
@@ -210,7 +210,7 @@ func TestMakeUpdateUserRequest(t *testing.T) {
 			urlUserID: "1",
 			body:      UpdateUserBody{Username: 5},
 			want:      requests.UpdateUserRequest{},
-			wantErr:   entities.ErrBindingRequest,
+			wantErr:   customErrors.ErrBindingRequest,
 		},
 		{
 			name:      "error_validating_request",
@@ -218,7 +218,7 @@ func TestMakeUpdateUserRequest(t *testing.T) {
 			urlUserID: "0",
 			body:      UpdateUserBody{Username: VALID_USERNAME},
 			want:      requests.UpdateUserRequest{},
-			wantErr:   entities.ErrAllFieldsRequired,
+			wantErr:   customErrors.ErrAllFieldsRequired,
 		},
 		{
 			name:      "success",

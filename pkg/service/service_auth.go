@@ -1,7 +1,7 @@
 package service
 
 import (
-	"github.com/gilperopiola/go-rest-example/pkg/entities"
+	customErrors "github.com/gilperopiola/go-rest-example/pkg/errors"
 	"github.com/gilperopiola/go-rest-example/pkg/handlers"
 	"github.com/gilperopiola/go-rest-example/pkg/repository"
 	"github.com/gilperopiola/go-rest-example/pkg/requests"
@@ -12,7 +12,7 @@ func (s *Service) Signup(signupRequest requests.SignupRequest) (responses.Signup
 	user := handlers.New(signupRequest.ToUserModel())
 
 	if user.Exists(s.Repository) {
-		return responses.SignupResponse{}, entities.ErrUsernameOrEmailAlreadyInUse
+		return responses.SignupResponse{}, customErrors.ErrUsernameOrEmailAlreadyInUse
 	}
 
 	user.HashPassword()
@@ -32,12 +32,12 @@ func (s *Service) Login(loginRequest requests.LoginRequest) (responses.LoginResp
 	}
 
 	if !user.PasswordMatches(loginRequest.Password) {
-		return responses.LoginResponse{}, entities.ErrWrongPassword
+		return responses.LoginResponse{}, customErrors.ErrWrongPassword
 	}
 
 	tokenString, err := user.GenerateTokenString(s.Auth)
 	if err != nil {
-		return responses.LoginResponse{}, entities.ErrUnauthorized
+		return responses.LoginResponse{}, customErrors.ErrUnauthorized
 	}
 
 	return responses.LoginResponse{Token: tokenString}, nil

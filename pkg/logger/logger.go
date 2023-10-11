@@ -11,6 +11,6 @@ type LoggerI interface {
 func NewLogger() LoggerI {
 	logger := logrus.New()
 	logger.SetFormatter(&logrus.JSONFormatter{})
-	logger.SetLevel(logrus.ErrorLevel)
+	logger.SetLevel(logrus.InfoLevel)
 	return logger
 }

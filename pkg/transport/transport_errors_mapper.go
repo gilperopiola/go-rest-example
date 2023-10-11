@@ -1,10 +1,11 @@
 package transport
 
 import (
+	"errors"
 	"net/http"
 	"strings"
 
-	"github.com/gilperopiola/go-rest-example/pkg/entities"
+	customErrors "github.com/gilperopiola/go-rest-example/pkg/errors"
 	"github.com/gilperopiola/go-rest-example/pkg/logger"
 )
 
@@ -28,7 +29,7 @@ func (e errorsMapper) Map(err error) (statusCode int, response HTTPResponse) {
 
 	// If we're here we shouldn't have a nil error
 	if err == nil {
-		err = entities.ErrNilError
+		err = customErrors.ErrNilError // TODO fix
 	}
 
 	// We get the HTTP code depending on the error, defaulting to 500
@@ -40,8 +41,17 @@ func (e errorsMapper) Map(err error) (statusCode int, response HTTPResponse) {
 	return statusCode, HTTPResponse{
 		Success: false,
 		Content: nil,
-		Error:   err.Error(),
+		Error:   getFirstError(err),
 	}
+}
+
+func getFirstError(err error) string {
+	var messages []string
+	for err != nil {
+		messages = append(messages, err.Error())
+		err = errors.Unwrap(err)
+	}
+	return messages[len(messages)-1]
 }
 
 func getStatusCodeFromError(err error) int {
@@ -60,36 +70,38 @@ func getStatusCodeFromError(err error) int {
 
 var errorsMapToHTTPCode = map[error]int{
 	// 400 - Bad Request
-	entities.ErrBindingRequest:        400,
-	entities.ErrAllFieldsRequired:     400,
-	entities.ErrPasswordsDontMatch:    400,
-	entities.ErrInvalidEmailFormat:    400,
-	entities.ErrInvalidUsernameLength: 400,
-	entities.ErrInvalidPasswordLength: 400,
+	customErrors.ErrBindingRequest:        400,
+	customErrors.ErrAllFieldsRequired:     400,
+	customErrors.ErrPasswordsDontMatch:    400,
+	customErrors.ErrInvalidEmailFormat:    400,
+	customErrors.ErrInvalidUsernameLength: 400,
+	customErrors.ErrInvalidPasswordLength: 400,
 
 	// 401 - Unauthorized
-	entities.ErrUnauthorized:  401,
-	entities.ErrWrongPassword: 401,
+	customErrors.ErrUnauthorized:  401,
+	customErrors.ErrWrongPassword: 401,
 
 	// 404 - Not Found
-	entities.ErrUserNotFound:       404,
-	entities.ErrUserAlreadyDeleted: 404,
+	customErrors.ErrUserNotFound:       404,
+	customErrors.ErrUserAlreadyDeleted: 404,
 
 	// 409 - Conflict
-	entities.ErrUsernameOrEmailAlreadyInUse: 409,
+	customErrors.ErrUsernameOrEmailAlreadyInUse: 409,
 
 	// 500 - Internal Server Error
-	entities.ErrCreatingUser: 500,
-	entities.ErrGettingUser:  500,
-	entities.ErrUpdatingUser: 500,
-	entities.ErrNilError:     500,
-	entities.ErrUnknown:      500,
+	customErrors.ErrCreatingUser: 500,
+	customErrors.ErrGettingUser:  500,
+	customErrors.ErrUpdatingUser: 500,
+	customErrors.ErrUnknown:      500,
 }
 
 func (e errorsMapper) logWarningOrError(err error, responseStatusCode int) {
+	chain := err.Error()
+
 	logFn := e.logger.Warn
 	if responseStatusCode >= 500 {
 		logFn = e.logger.Error
 	}
-	logFn(err.Error())
+
+	logFn(chain)
 }

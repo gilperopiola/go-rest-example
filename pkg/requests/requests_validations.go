@@ -3,7 +3,7 @@ package requests
 import (
 	"regexp"
 
-	"github.com/gilperopiola/go-rest-example/pkg/entities"
+	customErrors "github.com/gilperopiola/go-rest-example/pkg/errors"
 )
 
 const (
@@ -25,23 +25,23 @@ func (req CreateUserRequest) Validate() error {
 
 func (req GetUserRequest) Validate() error {
 	if req.ID == 0 {
-		return entities.ErrAllFieldsRequired
+		return customErrors.ErrAllFieldsRequired
 	}
 	return nil
 }
 
 func (req UpdateUserRequest) Validate() error {
 	if req.ID == 0 || (req.Email == "" && req.Username == "") {
-		return entities.ErrAllFieldsRequired
+		return customErrors.ErrAllFieldsRequired
 	}
 
 	if req.Email != "" && !validEmailRegex.MatchString(req.Email) {
-		return entities.ErrInvalidEmailFormat
+		return customErrors.ErrInvalidEmailFormat
 	}
 
 	if req.Username != "" {
 		if len(req.Username) < usernameMinLength || len(req.Username) > usernameMaxLength {
-			return entities.ErrInvalidUsernameLength
+			return customErrors.ErrInvalidUsernameLength
 		}
 	}
 
@@ -50,7 +50,7 @@ func (req UpdateUserRequest) Validate() error {
 
 func (req DeleteUserRequest) Validate() error {
 	if req.ID == 0 {
-		return entities.ErrAllFieldsRequired
+		return customErrors.ErrAllFieldsRequired
 	}
 
 	return nil
@@ -58,19 +58,19 @@ func (req DeleteUserRequest) Validate() error {
 
 func validateUsernameEmailAndPassword(username, email, password string) error {
 	if email == "" || username == "" || password == "" {
-		return entities.ErrAllFieldsRequired
+		return customErrors.ErrAllFieldsRequired
 	}
 
 	if !validEmailRegex.MatchString(email) {
-		return entities.ErrInvalidEmailFormat
+		return customErrors.ErrInvalidEmailFormat
 	}
 
 	if len(username) < usernameMinLength || len(username) > usernameMaxLength {
-		return entities.ErrInvalidUsernameLength
+		return customErrors.ErrInvalidUsernameLength
 	}
 
 	if len(password) < passwordMinLength || len(password) > passwordMaxLength {
-		return entities.ErrInvalidPasswordLength
+		return customErrors.ErrInvalidPasswordLength
 	}
 
 	return nil
@@ -84,7 +84,7 @@ func (req SignupRequest) Validate() error {
 	}
 
 	if req.Password != req.RepeatPassword {
-		return entities.ErrPasswordsDontMatch
+		return customErrors.ErrPasswordsDontMatch
 	}
 
 	return nil
@@ -92,7 +92,7 @@ func (req SignupRequest) Validate() error {
 
 func (req LoginRequest) Validate() error {
 	if req.UsernameOrEmail == "" || req.Password == "" {
-		return entities.ErrAllFieldsRequired
+		return customErrors.ErrAllFieldsRequired
 	}
 
 	return nil

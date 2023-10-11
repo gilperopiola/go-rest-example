@@ -1,7 +1,7 @@
 package transport
 
 import (
-	"github.com/gilperopiola/go-rest-example/pkg/entities"
+	customErrors "github.com/gilperopiola/go-rest-example/pkg/errors"
 	"github.com/gilperopiola/go-rest-example/pkg/requests"
 	"github.com/gilperopiola/go-rest-example/pkg/utils"
 
@@ -10,7 +10,7 @@ import (
 
 func makeSignupRequest(c *gin.Context) (request requests.SignupRequest, err error) {
 	if err = c.ShouldBindJSON(&request); err != nil {
-		return requests.SignupRequest{}, utils.Wrap(err, entities.ErrBindingRequest)
+		return requests.SignupRequest{}, utils.Wrap(err, customErrors.ErrBindingRequest)
 	}
 
 	if err = request.Validate(); err != nil {
@@ -22,7 +22,7 @@ func makeSignupRequest(c *gin.Context) (request requests.SignupRequest, err erro
 
 func makeLoginRequest(c *gin.Context) (request requests.LoginRequest, err error) {
 	if err = c.ShouldBindJSON(&request); err != nil {
-		return requests.LoginRequest{}, utils.Wrap(err, entities.ErrBindingRequest)
+		return requests.LoginRequest{}, utils.Wrap(err, customErrors.ErrBindingRequest)
 	}
 
 	if err = request.Validate(); err != nil {
@@ -34,7 +34,7 @@ func makeLoginRequest(c *gin.Context) (request requests.LoginRequest, err error)
 
 func makeCreateUserRequest(c *gin.Context) (request requests.CreateUserRequest, err error) {
 	if err = c.ShouldBindJSON(&request); err != nil {
-		return requests.CreateUserRequest{}, utils.Wrap(err, entities.ErrBindingRequest)
+		return requests.CreateUserRequest{}, utils.Wrap(err, customErrors.ErrBindingRequest)
 	}
 
 	if err = request.Validate(); err != nil {
@@ -61,7 +61,7 @@ func makeGetUserRequest(c *gin.Context) (request requests.GetUserRequest, err er
 
 func makeUpdateUserRequest(c *gin.Context) (request requests.UpdateUserRequest, err error) {
 	if err = c.ShouldBindJSON(&request); err != nil {
-		return requests.UpdateUserRequest{}, utils.Wrap(err, entities.ErrBindingRequest)
+		return requests.UpdateUserRequest{}, utils.Wrap(err, customErrors.ErrBindingRequest)
 	}
 
 	userToUpdateID, err := utils.GetIntFromContext(c, "ID")
