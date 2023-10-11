@@ -13,7 +13,7 @@ type Repository struct {
 }
 
 type UserI interface {
-	OverwriteFields(username, email string) models.User
+	OverwriteFields(username, email, password string) models.User
 	PasswordMatches(password string) bool
 	ToEntity() entities.User
 	GetAuthRole() entities.Role

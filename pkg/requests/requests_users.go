@@ -69,7 +69,7 @@ type UpdateUserRequest struct {
 }
 
 func (r *UpdateUserRequest) ToUserModel() models.User {
-	return models.User{ID: r.ID}
+	return models.User{ID: r.ID, Username: r.Username, Email: r.Email}
 }
 
 func (req UpdateUserRequest) Validate() error {
@@ -92,6 +92,10 @@ func (req UpdateUserRequest) Validate() error {
 
 type DeleteUserRequest struct {
 	ID int `json:"id"`
+}
+
+func (r *DeleteUserRequest) ToUserModel() models.User {
+	return models.User{ID: r.ID}
 }
 
 func (req DeleteUserRequest) Validate() error {

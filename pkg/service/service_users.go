@@ -2,71 +2,67 @@ package service
 
 import (
 	"github.com/gilperopiola/go-rest-example/pkg/entities"
+	"github.com/gilperopiola/go-rest-example/pkg/handlers"
 	"github.com/gilperopiola/go-rest-example/pkg/repository"
 	"github.com/gilperopiola/go-rest-example/pkg/requests"
 	"github.com/gilperopiola/go-rest-example/pkg/responses"
-	"github.com/gilperopiola/go-rest-example/pkg/utils"
 )
 
 // CreateUser is an admins only endpoint
 func (s *Service) CreateUser(createUserRequest requests.CreateUserRequest) (responses.CreateUserResponse, error) {
+	userHandler := handlers.New(createUserRequest.ToUserModel())
 
-	// Check if username or email are already in use
-	if s.Repository.UserExists(createUserRequest.Email, createUserRequest.Username) {
+	if userHandler.Exists(s.Repository) {
 		return responses.CreateUserResponse{}, entities.ErrUsernameOrEmailAlreadyInUse
 	}
 
-	createUserRequest.Password = utils.Hash(createUserRequest.Email, createUserRequest.Password)
+	userHandler.HashPassword()
 
-	userFromDB, err := s.Repository.CreateUser(createUserRequest.ToUserModel())
-	if err != nil {
+	if err := userHandler.Create(s.Repository); err != nil {
 		return responses.CreateUserResponse{}, s.ErrorsMapper.Map(err)
 	}
 
-	// Return response
-	return responses.CreateUserResponse{User: userFromDB.ToEntity()}, nil
+	return responses.CreateUserResponse{User: userHandler.ToEntity()}, nil
 }
 
 func (s *Service) GetUser(getUserRequest requests.GetUserRequest) (responses.GetUserResponse, error) {
-	userFromDB, err := s.Repository.GetUser(getUserRequest.ToUserModel(), repository.WithoutDeleted)
-	if err != nil {
+	userHandler := handlers.New(getUserRequest.ToUserModel())
+
+	if err := userHandler.Get(s.Repository, repository.WithoutDeleted); err != nil {
 		return responses.GetUserResponse{}, s.ErrorsMapper.Map(err)
 	}
 
-	return responses.GetUserResponse{User: userFromDB.ToEntity()}, nil
+	return responses.GetUserResponse{User: userHandler.ToEntity()}, nil
 }
 
 func (s *Service) UpdateUser(updateUserRequest requests.UpdateUserRequest) (responses.UpdateUserResponse, error) {
+	userHandler := handlers.New(updateUserRequest.ToUserModel())
 
-	// Check if username or email are already in use
-	if s.Repository.UserExists(updateUserRequest.Email, updateUserRequest.Username) {
+	if userHandler.Exists(s.Repository) {
 		return responses.UpdateUserResponse{}, entities.ErrUsernameOrEmailAlreadyInUse
 	}
 
-	// Get user from database
-	userFromDB, err := s.Repository.GetUser(updateUserRequest.ToUserModel(), repository.WithoutDeleted)
-	if err != nil {
+	if err := userHandler.Get(s.Repository, repository.WithoutDeleted); err != nil {
 		return responses.UpdateUserResponse{}, s.ErrorsMapper.Map(err)
 	}
 
 	// Replace fields with the new ones
-	userFromDB.OverwriteFields(updateUserRequest.Username, updateUserRequest.Email)
+	userHandler.OverwriteFields(updateUserRequest.Username, updateUserRequest.Email, "")
 
-	if userFromDB, err = s.Repository.UpdateUser(userFromDB); err != nil {
+	if err := userHandler.Update(s.Repository); err != nil {
 		return responses.UpdateUserResponse{}, s.ErrorsMapper.Map(err)
 	}
 
-	return responses.UpdateUserResponse{User: userFromDB.ToEntity()}, nil
+	return responses.UpdateUserResponse{User: userHandler.ToEntity()}, nil
 }
 
 func (s *Service) DeleteUser(deleteUserRequest requests.DeleteUserRequest) (responses.DeleteUserResponse, error) {
-	// Set the user's Deleted field to true
+	userHandler := handlers.New(deleteUserRequest.ToUserModel())
+
 	// This returns an error if the user is already deleted
-	userFromDB, err := s.Repository.DeleteUser(deleteUserRequest.ID)
-	if err != nil {
+	if err := userHandler.Delete(s.Repository); err != nil {
 		return responses.DeleteUserResponse{}, s.ErrorsMapper.Map(err)
 	}
 
-	// Return user
-	return responses.DeleteUserResponse{User: userFromDB.ToEntity()}, nil
+	return responses.DeleteUserResponse{User: userHandler.ToEntity()}, nil
 }
