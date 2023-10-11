@@ -72,13 +72,15 @@ var errorsMapToHTTPCode = map[error]int{
 	entities.ErrWrongPassword: 401,
 
 	// 404 - Not Found
-	entities.ErrUserNotFound: 404,
+	entities.ErrUserNotFound:       404,
+	entities.ErrUserAlreadyDeleted: 404,
 
 	// 409 - Conflict
 	entities.ErrUsernameOrEmailAlreadyInUse: 409,
 
 	// 500 - Internal Server Error
 	entities.ErrCreatingUser: 500,
+	entities.ErrGettingUser:  500,
 	entities.ErrUpdatingUser: 500,
 	entities.ErrNilError:     500,
 	entities.ErrUnknown:      500,

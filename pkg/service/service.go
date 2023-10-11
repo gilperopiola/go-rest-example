@@ -9,10 +9,9 @@ import (
 )
 
 type Service struct {
-	Config       config.ConfigI
-	Auth         auth.AuthI
-	Repository   repository.RepositoryLayer
-	ErrorsMapper errorsMapperI
+	Config     config.ConfigI
+	Auth       auth.AuthI
+	Repository repository.RepositoryLayer
 }
 
 type ServiceLayer interface {
@@ -25,11 +24,10 @@ type ServiceLayer interface {
 	DeleteUser(deleteUserRequest requests.DeleteUserRequest) (responses.DeleteUserResponse, error)
 }
 
-func NewService(repository repository.RepositoryLayer, auth auth.AuthI, config config.ConfigI, errorsMapper errorsMapperI) *Service {
+func NewService(repository repository.RepositoryLayer, auth auth.AuthI, config config.ConfigI) *Service {
 	return &Service{
-		Repository:   repository,
-		Auth:         auth,
-		Config:       config,
-		ErrorsMapper: errorsMapper,
+		Repository: repository,
+		Auth:       auth,
+		Config:     config,
 	}
 }

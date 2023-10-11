@@ -28,9 +28,12 @@ var (
 
 	// - Auth & Users
 
-	ErrCreatingUser = errors.New("failed to create user")
-	ErrUpdatingUser = errors.New("failed to update user")
-	ErrUserNotFound = errors.New("user not found")
+	ErrCreatingUser       = errors.New("failed to create user")
+	ErrGettingUser        = errors.New("failed to get user")
+	ErrUpdatingUser       = errors.New("failed to update user")
+	ErrDeletingUser       = errors.New("failed to delete user")
+	ErrUserNotFound       = errors.New("user not found")
+	ErrUserAlreadyDeleted = errors.New("user already deleted")
 
 	ErrInvalidEmailFormat    = errors.New("invalid email format")
 	ErrInvalidUsernameLength = fmt.Errorf("username either too short or too long")

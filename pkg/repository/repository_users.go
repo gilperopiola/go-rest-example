@@ -33,14 +33,13 @@ func (r *Repository) UpdateUser(user models.User) (models.User, error) {
 
 // UserExists checks if a user exists on the database
 func (r *Repository) UserExists(email, username string, opts ...utils.QueryOption) bool {
-	var user models.User
-
 	query := "(email = ? OR username = ?)"
 
 	for _, opt := range opts {
 		opt(&query)
 	}
 
+	var user models.User
 	if err := r.Database.DB.Where(query, email, username).First(&user).Error; err != nil {
 		return false
 	}
@@ -74,7 +73,7 @@ func (r *Repository) DeleteUser(id int) (models.User, error) {
 	user := models.User{ID: id}
 	var err error
 	if user, err = r.GetUser(user); err != nil {
-		return models.User{}, err
+		return models.User{}, utils.Wrap(err, ErrGettingUser)
 	}
 
 	// If it's already deleted, return an error

@@ -9,33 +9,33 @@ import (
 )
 
 func (s *Service) Signup(signupRequest requests.SignupRequest) (responses.SignupResponse, error) {
-	userHandler := handlers.New(signupRequest.ToUserModel())
+	user := handlers.New(signupRequest.ToUserModel())
 
-	if userHandler.Exists(s.Repository) {
+	if user.Exists(s.Repository) {
 		return responses.SignupResponse{}, entities.ErrUsernameOrEmailAlreadyInUse
 	}
 
-	userHandler.HashPassword()
+	user.HashPassword()
 
-	if err := userHandler.Create(s.Repository); err != nil {
-		return responses.SignupResponse{}, s.ErrorsMapper.Map(err)
+	if err := user.Create(s.Repository); err != nil {
+		return responses.SignupResponse{}, err
 	}
 
-	return responses.SignupResponse{User: userHandler.ToEntity()}, nil
+	return responses.SignupResponse{User: user.ToEntity()}, nil
 }
 
 func (s *Service) Login(loginRequest requests.LoginRequest) (responses.LoginResponse, error) {
-	userHandler := handlers.New(loginRequest.ToUserModel())
+	user := handlers.New(loginRequest.ToUserModel())
 
-	if err := userHandler.Get(s.Repository, repository.WithoutDeleted); err != nil {
-		return responses.LoginResponse{}, s.ErrorsMapper.Map(err)
+	if err := user.Get(s.Repository, repository.WithoutDeleted); err != nil {
+		return responses.LoginResponse{}, err
 	}
 
-	if !userHandler.PasswordMatches(loginRequest.Password) {
+	if !user.PasswordMatches(loginRequest.Password) {
 		return responses.LoginResponse{}, entities.ErrWrongPassword
 	}
 
-	tokenString, err := userHandler.GenerateTokenString(s.Auth)
+	tokenString, err := user.GenerateTokenString(s.Auth)
 	if err != nil {
 		return responses.LoginResponse{}, entities.ErrUnauthorized
 	}

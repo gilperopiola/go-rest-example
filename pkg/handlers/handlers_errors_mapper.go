@@ -1,4 +1,4 @@
-package service
+package handlers
 
 import (
 	"errors"
@@ -8,26 +8,20 @@ import (
 	"github.com/gilperopiola/go-rest-example/pkg/utils"
 )
 
-type errorsMapperI interface {
-	Map(err error) error
-}
+// mapError maps repository errors to entities errors
+func mapRepositoryError(err error) error {
 
-type ErrorsMapper struct{}
-
-func NewErrorsMapper() ErrorsMapper {
-	return ErrorsMapper{}
-}
-
-func (e ErrorsMapper) Map(err error) error {
-
-	// If we're here we shouldn't have a nil error
 	if err == nil {
-		return entities.ErrNilError
+		return nil
 	}
 
 	// Auth & Users errors
 	if errors.Is(err, repository.ErrCreatingUser) {
 		return utils.Wrap(err, entities.ErrCreatingUser)
+	}
+
+	if errors.Is(err, repository.ErrGettingUser) {
+		return utils.Wrap(err, entities.ErrGettingUser)
 	}
 
 	if errors.Is(err, repository.ErrUpdatingUser) {
@@ -39,14 +33,9 @@ func (e ErrorsMapper) Map(err error) error {
 	}
 
 	if errors.Is(err, repository.ErrUserAlreadyDeleted) {
-		return utils.Wrap(err, entities.ErrUserNotFound)
-	}
-
-	// General errors
-	if errors.Is(err, repository.ErrUnknown) {
-		return utils.Wrap(err, entities.ErrUnknown)
+		return utils.Wrap(err, entities.ErrUserAlreadyDeleted)
 	}
 
 	// Default to ErrUnknown
-	return entities.ErrUnknown
+	return utils.Wrap(err, entities.ErrUnknown)
 }

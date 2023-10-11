@@ -37,7 +37,7 @@ func main() {
 		repository = repository.NewRepository(database)
 
 		// Setup the main service with dependencies
-		service = service.NewService(repository, auth, config, service.NewErrorsMapper())
+		service = service.NewService(repository, auth, config)
 
 		// Setup endpoints & transport layer with dependencies
 		endpoints = transport.NewTransport(service, transport.NewErrorsMapper(logger))

@@ -27,8 +27,7 @@ const (
 func newTestService(mockRepository *repository.RepositoryMock) *Service {
 	config := &config.Config{}
 	auth := &auth.Auth{}
-	errorsMapper := ErrorsMapper{}
-	return NewService(mockRepository, auth, config, errorsMapper)
+	return NewService(mockRepository, auth, config)
 }
 
 func TestSignup(t *testing.T) {
@@ -218,7 +217,7 @@ func TestDeleteUser(t *testing.T) {
 			name:           "error_deleting_user",
 			request:        requests.DeleteUserRequest{ID: VALID_ID},
 			mockRepository: makeMockRepositoryWithDeleteUser(models.User{}, repository.ErrUserAlreadyDeleted),
-			wantErr:        entities.ErrUserNotFound,
+			wantErr:        entities.ErrUserAlreadyDeleted,
 		},
 		{
 			name:           "success",

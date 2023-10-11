@@ -3,7 +3,6 @@ package requests
 import (
 	"time"
 
-	"github.com/gilperopiola/go-rest-example/pkg/entities"
 	"github.com/gilperopiola/go-rest-example/pkg/models"
 )
 
@@ -30,18 +29,6 @@ func (r *SignupRequest) ToUserModel() models.User {
 	}
 }
 
-func (req SignupRequest) Validate() error {
-	if err := validateUsernameEmailAndPassword(req.Username, req.Email, req.Password); err != nil {
-		return err
-	}
-
-	if req.Password != req.RepeatPassword {
-		return entities.ErrPasswordsDontMatch
-	}
-
-	return nil
-}
-
 type LoginRequest struct {
 	UsernameOrEmail string `json:"username_or_email"`
 	Password        string `json:"password"`
@@ -59,11 +46,4 @@ func (r *LoginRequest) ToUserModel() models.User {
 	}
 
 	return user
-}
-func (req LoginRequest) Validate() error {
-	if req.UsernameOrEmail == "" || req.Password == "" {
-		return entities.ErrAllFieldsRequired
-	}
-
-	return nil
 }

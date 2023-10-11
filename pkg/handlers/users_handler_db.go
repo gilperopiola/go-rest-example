@@ -7,22 +7,22 @@ import (
 
 func (h *UserHandler) Create(r repository.RepositoryLayer) (err error) {
 	h.User, err = r.CreateUser(h.User)
-	return err
+	return mapRepositoryError(err)
 }
 
 func (h *UserHandler) Get(r repository.RepositoryLayer, opts ...utils.QueryOption) (err error) {
 	h.User, err = r.GetUser(h.User, opts...)
-	return err
+	return mapRepositoryError(err)
 }
 
 func (h *UserHandler) Update(r repository.RepositoryLayer) (err error) {
 	h.User, err = r.UpdateUser(h.User)
-	return err
+	return mapRepositoryError(err)
 }
 
 func (h *UserHandler) Delete(r repository.RepositoryLayer) (err error) {
 	h.User, err = r.DeleteUser(h.User.ID)
-	return err
+	return mapRepositoryError(err)
 }
 
 func (h *UserHandler) Exists(r repository.RepositoryLayer) bool {
