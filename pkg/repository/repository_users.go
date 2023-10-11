@@ -9,8 +9,6 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-type queryOption func(*string)
-
 func WithoutDeleted(q *string) {
 	*q += " AND deleted = false"
 }
@@ -34,7 +32,7 @@ func (r *Repository) UpdateUser(user models.User) (models.User, error) {
 }
 
 // UserExists checks if a user exists on the database
-func (r *Repository) UserExists(email, username string, opts ...queryOption) bool {
+func (r *Repository) UserExists(email, username string, opts ...utils.QueryOption) bool {
 	var user models.User
 
 	query := "(email = ? OR username = ?)"
@@ -51,7 +49,7 @@ func (r *Repository) UserExists(email, username string, opts ...queryOption) boo
 }
 
 // GetUser retrieves a user from the database, if it exists
-func (r *Repository) GetUser(user models.User, opts ...queryOption) (models.User, error) {
+func (r *Repository) GetUser(user models.User, opts ...utils.QueryOption) (models.User, error) {
 	query := "(id = ? OR username = ? OR email = ?)"
 
 	for _, opt := range opts {

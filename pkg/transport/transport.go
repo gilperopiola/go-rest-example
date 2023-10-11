@@ -3,8 +3,8 @@ package transport
 import (
 	"net/http"
 
-	"github.com/gilperopiola/go-rest-example/pkg/codec"
-	"github.com/gilperopiola/go-rest-example/pkg/entities"
+	"github.com/gilperopiola/go-rest-example/pkg/requests"
+	"github.com/gilperopiola/go-rest-example/pkg/responses"
 	"github.com/gilperopiola/go-rest-example/pkg/service"
 
 	"github.com/gin-gonic/gin"
@@ -12,7 +12,6 @@ import (
 
 type Transport struct {
 	Service      service.ServiceLayer
-	Codec        codec.CodecI
 	ErrorsMapper errorsMapperI
 }
 
@@ -29,10 +28,9 @@ type TransportLayer interface {
 	DeleteUser(c *gin.Context)
 }
 
-func NewTransport(service service.ServiceLayer, codec codec.CodecI, errorsMapper errorsMapperI) Transport {
+func NewTransport(service service.ServiceLayer, errorsMapper errorsMapperI) Transport {
 	return Transport{
 		Service:      service,
-		Codec:        codec,
 		ErrorsMapper: errorsMapper,
 	}
 }
@@ -75,18 +73,18 @@ func HandleRequest[req Request, resp Response](t Transport, c *gin.Context,
 }
 
 type Request interface {
-	entities.SignupRequest |
-		entities.LoginRequest |
-		entities.CreateUserRequest |
-		entities.GetUserRequest |
-		entities.UpdateUserRequest |
-		entities.DeleteUserRequest
+	requests.SignupRequest |
+		requests.LoginRequest |
+		requests.CreateUserRequest |
+		requests.GetUserRequest |
+		requests.UpdateUserRequest |
+		requests.DeleteUserRequest
 }
 type Response interface {
-	entities.SignupResponse |
-		entities.LoginResponse |
-		entities.CreateUserResponse |
-		entities.GetUserResponse |
-		entities.UpdateUserResponse |
-		entities.DeleteUserResponse
+	responses.SignupResponse |
+		responses.LoginResponse |
+		responses.CreateUserResponse |
+		responses.GetUserResponse |
+		responses.UpdateUserResponse |
+		responses.DeleteUserResponse
 }

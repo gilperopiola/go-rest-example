@@ -8,6 +8,8 @@ import (
 	"strconv"
 )
 
+type QueryOption func(*string)
+
 // General utils
 
 // Wrap should actaully be called WrapError, but it's too long

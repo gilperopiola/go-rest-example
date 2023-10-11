@@ -3,18 +3,27 @@ package repository
 import (
 	"errors"
 
+	"github.com/gilperopiola/go-rest-example/pkg/entities"
 	"github.com/gilperopiola/go-rest-example/pkg/models"
+	"github.com/gilperopiola/go-rest-example/pkg/utils"
 )
 
 type Repository struct {
 	Database Database
 }
 
+type UserI interface {
+	OverwriteFields(username, email string) models.User
+	PasswordMatches(password string) bool
+	ToEntity() entities.User
+	GetAuthRole() entities.Role
+}
+
 type RepositoryLayer interface {
 	CreateUser(user models.User) (models.User, error)
 	UpdateUser(user models.User) (models.User, error)
-	GetUser(user models.User, opts ...queryOption) (models.User, error)
-	UserExists(email, username string, opts ...queryOption) bool
+	GetUser(user models.User, opts ...utils.QueryOption) (models.User, error)
+	UserExists(email, username string, opts ...utils.QueryOption) bool
 	DeleteUser(id int) (models.User, error)
 }
 

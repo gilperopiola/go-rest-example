@@ -2,35 +2,33 @@ package service
 
 import (
 	"github.com/gilperopiola/go-rest-example/pkg/auth"
-	"github.com/gilperopiola/go-rest-example/pkg/codec"
 	"github.com/gilperopiola/go-rest-example/pkg/config"
-	"github.com/gilperopiola/go-rest-example/pkg/entities"
 	"github.com/gilperopiola/go-rest-example/pkg/repository"
+	"github.com/gilperopiola/go-rest-example/pkg/requests"
+	"github.com/gilperopiola/go-rest-example/pkg/responses"
 )
 
 type Service struct {
 	Config       config.ConfigI
 	Auth         auth.AuthI
-	Codec        codec.CodecI
 	Repository   repository.RepositoryLayer
 	ErrorsMapper errorsMapperI
 }
 
 type ServiceLayer interface {
-	Signup(signupRequest entities.SignupRequest) (entities.SignupResponse, error)
-	Login(loginRequest entities.LoginRequest) (entities.LoginResponse, error)
+	Signup(signupRequest requests.SignupRequest) (responses.SignupResponse, error)
+	Login(loginRequest requests.LoginRequest) (responses.LoginResponse, error)
 
-	CreateUser(createUserRequest entities.CreateUserRequest) (entities.CreateUserResponse, error)
-	GetUser(getUserRequest entities.GetUserRequest) (entities.GetUserResponse, error)
-	UpdateUser(updateUserRequest entities.UpdateUserRequest) (entities.UpdateUserResponse, error)
-	DeleteUser(deleteUserRequest entities.DeleteUserRequest) (entities.DeleteUserResponse, error)
+	CreateUser(createUserRequest requests.CreateUserRequest) (responses.CreateUserResponse, error)
+	GetUser(getUserRequest requests.GetUserRequest) (responses.GetUserResponse, error)
+	UpdateUser(updateUserRequest requests.UpdateUserRequest) (responses.UpdateUserResponse, error)
+	DeleteUser(deleteUserRequest requests.DeleteUserRequest) (responses.DeleteUserResponse, error)
 }
 
-func NewService(repository repository.RepositoryLayer, auth auth.AuthI, codec codec.CodecI, config config.ConfigI, errorsMapper errorsMapperI) *Service {
+func NewService(repository repository.RepositoryLayer, auth auth.AuthI, config config.ConfigI, errorsMapper errorsMapperI) *Service {
 	return &Service{
 		Repository:   repository,
 		Auth:         auth,
-		Codec:        codec,
 		Config:       config,
 		ErrorsMapper: errorsMapper,
 	}

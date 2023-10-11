@@ -33,8 +33,8 @@ var (
 	ErrUserNotFound = errors.New("user not found")
 
 	ErrInvalidEmailFormat    = errors.New("invalid email format")
-	ErrInvalidUsernameLength = fmt.Errorf("username must be between %d and %d characters", usernameMinLength, usernameMaxLength)
-	ErrInvalidPasswordLength = fmt.Errorf("password must be between %d and %d characters", passwordMinLength, passwordMaxLength)
+	ErrInvalidUsernameLength = fmt.Errorf("username either too short or too long")
+	ErrInvalidPasswordLength = fmt.Errorf("password either too short or too long")
 
 	ErrPasswordsDontMatch          = errors.New("passwords don't match")
 	ErrUsernameOrEmailAlreadyInUse = errors.New("username or email already in use")

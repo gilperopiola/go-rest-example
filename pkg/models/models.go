@@ -3,6 +3,7 @@ package models
 import (
 	"time"
 
+	"github.com/gilperopiola/go-rest-example/pkg/entities"
 	"github.com/gilperopiola/go-rest-example/pkg/utils"
 )
 
@@ -20,15 +21,42 @@ type User struct {
 	UpdatedAt time.Time
 }
 
-func (user *User) OverwriteFields(username, email string) {
+type UserI interface {
+	OverwriteFields(username, email string) User
+	PasswordMatches(password string) bool
+	ToEntity() entities.User
+	GetAuthRole() entities.Role
+}
+
+func (user User) OverwriteFields(username, email string) User {
 	if username != "" {
 		user.Username = username
 	}
 	if email != "" {
 		user.Email = email
 	}
+	return user
 }
 
-func (user *User) PasswordMatches(password string) bool {
+func (user User) PasswordMatches(password string) bool {
 	return user.Password == utils.Hash(user.Email, password)
+}
+
+func (user User) ToEntity() entities.User {
+	return entities.User{
+		ID:        user.ID,
+		Email:     user.Email,
+		Username:  user.Username,
+		IsAdmin:   user.IsAdmin,
+		Deleted:   user.Deleted,
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
+	}
+}
+
+func (user User) GetAuthRole() entities.Role {
+	if user.IsAdmin {
+		return entities.AdminRole
+	}
+	return entities.UserRole
 }

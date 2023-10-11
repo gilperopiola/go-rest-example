@@ -2,6 +2,7 @@ package repository
 
 import (
 	"github.com/gilperopiola/go-rest-example/pkg/models"
+	"github.com/gilperopiola/go-rest-example/pkg/utils"
 
 	"github.com/stretchr/testify/mock"
 )
@@ -24,12 +25,12 @@ func (m *RepositoryMock) UpdateUser(user models.User) (models.User, error) {
 	return args.Get(0).(models.User), args.Error(1)
 }
 
-func (m *RepositoryMock) GetUser(user models.User, opts ...queryOption) (models.User, error) {
+func (m *RepositoryMock) GetUser(user models.User, opts ...utils.QueryOption) (models.User, error) {
 	args := m.Called(user)
 	return args.Get(0).(models.User), args.Error(1)
 }
 
-func (m *RepositoryMock) UserExists(email, username string, opts ...queryOption) bool {
+func (m *RepositoryMock) UserExists(email, username string, opts ...utils.QueryOption) bool {
 	args := m.Called(email, username)
 	return args.Bool(0)
 }

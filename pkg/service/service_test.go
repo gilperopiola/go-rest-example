@@ -4,11 +4,12 @@ import (
 	"testing"
 
 	"github.com/gilperopiola/go-rest-example/pkg/auth"
-	"github.com/gilperopiola/go-rest-example/pkg/codec"
 	"github.com/gilperopiola/go-rest-example/pkg/config"
 	"github.com/gilperopiola/go-rest-example/pkg/entities"
 	"github.com/gilperopiola/go-rest-example/pkg/models"
 	"github.com/gilperopiola/go-rest-example/pkg/repository"
+	"github.com/gilperopiola/go-rest-example/pkg/requests"
+	"github.com/gilperopiola/go-rest-example/pkg/responses"
 	"github.com/gilperopiola/go-rest-example/pkg/utils"
 
 	"github.com/stretchr/testify/assert"
@@ -24,11 +25,10 @@ const (
 )
 
 func newTestService(mockRepository *repository.RepositoryMock) *Service {
-	codec := codec.NewCodec()
 	config := &config.Config{}
 	auth := &auth.Auth{}
 	errorsMapper := ErrorsMapper{}
-	return NewService(mockRepository, auth, codec, config, errorsMapper)
+	return NewService(mockRepository, auth, config, errorsMapper)
 }
 
 func TestSignup(t *testing.T) {
@@ -47,9 +47,9 @@ func TestSignup(t *testing.T) {
 
 	tests := []struct {
 		name           string
-		request        entities.SignupRequest
+		request        requests.SignupRequest
 		mockRepository *repository.RepositoryMock
-		want           entities.SignupResponse
+		want           responses.SignupResponse
 		wantErr        error
 	}{
 		{
@@ -65,7 +65,7 @@ func TestSignup(t *testing.T) {
 		{
 			name:           "success",
 			mockRepository: makeMockRepositoryWithCreateUser(models.User{}, nil),
-			want:           entities.SignupResponse{},
+			want:           responses.SignupResponse{},
 			wantErr:        nil,
 		},
 	}
@@ -102,7 +102,7 @@ func TestLogin(t *testing.T) {
 
 	tests := []struct {
 		name            string
-		request         entities.LoginRequest
+		request         requests.LoginRequest
 		mockRepository  *repository.RepositoryMock
 		wantTokenLength int
 		wantErr         error
@@ -115,13 +115,13 @@ func TestLogin(t *testing.T) {
 		{
 			name:           "error_mismatched_passwords",
 			mockRepository: makeMockRepositoryWithGetUser(validUser, nil),
-			request:        entities.LoginRequest{Password: INVALID_PASSWORD},
+			request:        requests.LoginRequest{Password: INVALID_PASSWORD},
 			wantErr:        entities.ErrWrongPassword,
 		},
 		{
 			name:            "success",
 			mockRepository:  makeMockRepositoryWithGetUser(validUser, nil),
-			request:         entities.LoginRequest{Password: VALID_PASSWORD},
+			request:         requests.LoginRequest{Password: VALID_PASSWORD},
 			wantErr:         nil,
 			wantTokenLength: 212,
 		},
@@ -159,9 +159,9 @@ func TestGetUser(t *testing.T) {
 
 	tests := []struct {
 		name           string
-		request        entities.GetUserRequest
+		request        requests.GetUserRequest
 		mockRepository *repository.RepositoryMock
-		want           entities.GetUserResponse
+		want           responses.GetUserResponse
 		wantErr        error
 	}{
 		{
@@ -172,7 +172,7 @@ func TestGetUser(t *testing.T) {
 		{
 			name:           "success",
 			mockRepository: makeMockRepositoryWithGetUser(modelUser, nil),
-			want:           entities.GetUserResponse{User: entityUser},
+			want:           responses.GetUserResponse{User: entityUser},
 			wantErr:        nil,
 		},
 	}
@@ -209,22 +209,22 @@ func TestDeleteUser(t *testing.T) {
 
 	tests := []struct {
 		name           string
-		request        entities.DeleteUserRequest
+		request        requests.DeleteUserRequest
 		mockRepository *repository.RepositoryMock
-		want           entities.DeleteUserResponse
+		want           responses.DeleteUserResponse
 		wantErr        error
 	}{
 		{
 			name:           "error_deleting_user",
-			request:        entities.DeleteUserRequest{ID: VALID_ID},
+			request:        requests.DeleteUserRequest{ID: VALID_ID},
 			mockRepository: makeMockRepositoryWithDeleteUser(models.User{}, repository.ErrUserAlreadyDeleted),
 			wantErr:        entities.ErrUserNotFound,
 		},
 		{
 			name:           "success",
-			request:        entities.DeleteUserRequest{ID: VALID_ID},
+			request:        requests.DeleteUserRequest{ID: VALID_ID},
 			mockRepository: makeMockRepositoryWithDeleteUser(modelUser, nil),
-			want:           entities.DeleteUserResponse{User: entityUser},
+			want:           responses.DeleteUserResponse{User: entityUser},
 			wantErr:        nil,
 		},
 	}
