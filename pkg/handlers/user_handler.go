@@ -2,10 +2,10 @@ package handlers
 
 import (
 	"github.com/gilperopiola/go-rest-example/pkg/auth"
+	"github.com/gilperopiola/go-rest-example/pkg/common"
 	"github.com/gilperopiola/go-rest-example/pkg/entities"
 	"github.com/gilperopiola/go-rest-example/pkg/models"
 	"github.com/gilperopiola/go-rest-example/pkg/repository"
-	"github.com/gilperopiola/go-rest-example/pkg/utils"
 )
 
 type UserHandlerI interface {
@@ -13,7 +13,7 @@ type UserHandlerI interface {
 
 	// DB Methods
 	Create(r repository.RepositoryLayer) error
-	Get(r repository.RepositoryLayer, opts ...utils.QueryOption) error
+	Get(r repository.RepositoryLayer, opts ...common.QueryOption) error
 	Update(r repository.RepositoryLayer) error
 	Delete(r repository.RepositoryLayer) error
 	Exists(r repository.RepositoryLayer) bool
@@ -51,11 +51,11 @@ func (h *UserHandler) ToEntity() entities.User {
 // Helpers
 
 func (h *UserHandler) HashPassword() {
-	h.User.Password = utils.Hash(h.User.Email, h.User.Password)
+	h.User.Password = common.Hash(h.User.Email, h.User.Password)
 }
 
 func (h *UserHandler) PasswordMatches(password string) bool {
-	return h.User.Password == utils.Hash(h.User.Email, password)
+	return h.User.Password == common.Hash(h.User.Email, password)
 }
 
 func (h *UserHandler) OverwriteFields(username, email, password string) {

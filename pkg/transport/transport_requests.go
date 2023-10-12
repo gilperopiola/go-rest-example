@@ -1,16 +1,19 @@
 package transport
 
 import (
+	"fmt"
+	"strconv"
+
+	"github.com/gilperopiola/go-rest-example/pkg/common"
 	customErrors "github.com/gilperopiola/go-rest-example/pkg/errors"
 	"github.com/gilperopiola/go-rest-example/pkg/requests"
-	"github.com/gilperopiola/go-rest-example/pkg/utils"
 
 	"github.com/gin-gonic/gin"
 )
 
 func makeSignupRequest(c *gin.Context) (request requests.SignupRequest, err error) {
 	if err = c.ShouldBindJSON(&request); err != nil {
-		return requests.SignupRequest{}, utils.Wrap(err, customErrors.ErrBindingRequest)
+		return requests.SignupRequest{}, common.Wrap(err, customErrors.ErrBindingRequest)
 	}
 
 	if err = request.Validate(); err != nil {
@@ -22,7 +25,7 @@ func makeSignupRequest(c *gin.Context) (request requests.SignupRequest, err erro
 
 func makeLoginRequest(c *gin.Context) (request requests.LoginRequest, err error) {
 	if err = c.ShouldBindJSON(&request); err != nil {
-		return requests.LoginRequest{}, utils.Wrap(err, customErrors.ErrBindingRequest)
+		return requests.LoginRequest{}, common.Wrap(err, customErrors.ErrBindingRequest)
 	}
 
 	if err = request.Validate(); err != nil {
@@ -34,7 +37,7 @@ func makeLoginRequest(c *gin.Context) (request requests.LoginRequest, err error)
 
 func makeCreateUserRequest(c *gin.Context) (request requests.CreateUserRequest, err error) {
 	if err = c.ShouldBindJSON(&request); err != nil {
-		return requests.CreateUserRequest{}, utils.Wrap(err, customErrors.ErrBindingRequest)
+		return requests.CreateUserRequest{}, common.Wrap(err, customErrors.ErrBindingRequest)
 	}
 
 	if err = request.Validate(); err != nil {
@@ -45,7 +48,7 @@ func makeCreateUserRequest(c *gin.Context) (request requests.CreateUserRequest, 
 }
 
 func makeGetUserRequest(c *gin.Context) (request requests.GetUserRequest, err error) {
-	userToGetID, err := utils.GetIntFromContext(c, "ID")
+	userToGetID, err := getIntFromContext(c, "ID")
 	if err != nil {
 		return requests.GetUserRequest{}, err
 	}
@@ -61,10 +64,10 @@ func makeGetUserRequest(c *gin.Context) (request requests.GetUserRequest, err er
 
 func makeUpdateUserRequest(c *gin.Context) (request requests.UpdateUserRequest, err error) {
 	if err = c.ShouldBindJSON(&request); err != nil {
-		return requests.UpdateUserRequest{}, utils.Wrap(err, customErrors.ErrBindingRequest)
+		return requests.UpdateUserRequest{}, common.Wrap(err, customErrors.ErrBindingRequest)
 	}
 
-	userToUpdateID, err := utils.GetIntFromContext(c, "ID")
+	userToUpdateID, err := getIntFromContext(c, "ID")
 	if err != nil {
 		return requests.UpdateUserRequest{}, err
 	}
@@ -79,7 +82,7 @@ func makeUpdateUserRequest(c *gin.Context) (request requests.UpdateUserRequest, 
 }
 
 func makeDeleteUserRequest(c *gin.Context) (request requests.DeleteUserRequest, err error) {
-	userToDeleteID, err := utils.GetIntFromContext(c, "ID")
+	userToDeleteID, err := getIntFromContext(c, "ID")
 	if err != nil {
 		return requests.DeleteUserRequest{}, err
 	}
@@ -91,4 +94,31 @@ func makeDeleteUserRequest(c *gin.Context) (request requests.DeleteUserRequest, 
 	}
 
 	return request, nil
+}
+
+type ContextGetter interface {
+	Get(key string) (interface{}, bool)
+}
+
+func getIntFromContext(c ContextGetter, key string) (int, error) {
+
+	// Get from context
+	value, ok := c.Get(key)
+	if value == nil || !ok {
+		return 0, fmt.Errorf("error getting %s from context", key)
+	}
+
+	// Cast to string
+	valueStr, ok := value.(string)
+	if !ok {
+		return 0, fmt.Errorf("error casting %s from context to string", key)
+	}
+
+	// Convert to int
+	valueInt, err := strconv.Atoi(valueStr)
+	if err != nil {
+		return 0, fmt.Errorf("error converting %s from string to int", key)
+	}
+
+	return valueInt, nil
 }

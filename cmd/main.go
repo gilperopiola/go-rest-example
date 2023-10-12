@@ -33,10 +33,10 @@ func main() {
 		// Establish database connection
 		database = repository.NewDatabase(config.DATABASE, logger)
 
-		// Initialize repository with the database connection
+		// Initialize repository layer with the database connection
 		repository = repository.NewRepository(database)
 
-		// Setup the main service with dependencies
+		// Setup the main service layer with dependencies
 		service = service.NewService(repository, auth, config)
 
 		// Setup endpoints & transport layer with dependencies

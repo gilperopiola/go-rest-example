@@ -1,8 +1,8 @@
 package repository
 
 import (
+	"github.com/gilperopiola/go-rest-example/pkg/common"
 	"github.com/gilperopiola/go-rest-example/pkg/models"
-	"github.com/gilperopiola/go-rest-example/pkg/utils"
 )
 
 type Repository struct {
@@ -12,8 +12,8 @@ type Repository struct {
 type RepositoryLayer interface {
 	CreateUser(user models.User) (models.User, error)
 	UpdateUser(user models.User) (models.User, error)
-	GetUser(user models.User, opts ...utils.QueryOption) (models.User, error)
-	UserExists(email, username string, opts ...utils.QueryOption) bool
+	GetUser(user models.User, opts ...common.QueryOption) (models.User, error)
+	UserExists(email, username string, opts ...common.QueryOption) bool
 	DeleteUser(id int) (models.User, error)
 }
 

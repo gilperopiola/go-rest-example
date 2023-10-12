@@ -3,11 +3,11 @@ package auth
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gilperopiola/go-rest-example/pkg/entities"
 	customErrors "github.com/gilperopiola/go-rest-example/pkg/errors"
-	"github.com/gilperopiola/go-rest-example/pkg/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
@@ -44,7 +44,7 @@ func (auth *Auth) ValidateToken(role entities.Role, shouldMatchUserID bool) gin.
 
 		// Check if user ID in URL matches user ID in token
 		if shouldMatchUserID {
-			urlUserID, err := utils.GetIntFromContextURLParams(c.Params, "user_id")
+			urlUserID, err := getIntFromContextURLParams(c.Params, "user_id")
 			if err != nil {
 				abortRequest(c)
 			}
@@ -110,4 +110,25 @@ func abortRequest(c *gin.Context) {
 		Error:   "unauthorized",
 	})
 	c.Abort()
+}
+
+type ParamsGetter interface {
+	Get(name string) (string, bool)
+}
+
+func getIntFromContextURLParams(params ParamsGetter, key string) (int, error) {
+
+	// Get from params
+	value, ok := params.Get(key)
+	if !ok {
+		return 0, fmt.Errorf("error getting %s from URL params", key)
+	}
+
+	// Convert to int
+	valueInt, err := strconv.Atoi(value)
+	if err != nil {
+		return 0, fmt.Errorf("error converting %s from string to int", key)
+	}
+
+	return valueInt, nil
 }

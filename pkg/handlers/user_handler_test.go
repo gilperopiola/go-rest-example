@@ -3,10 +3,10 @@ package handlers
 import (
 	"testing"
 
+	"github.com/gilperopiola/go-rest-example/pkg/common"
 	"github.com/gilperopiola/go-rest-example/pkg/entities"
 	"github.com/gilperopiola/go-rest-example/pkg/models"
 	"github.com/gilperopiola/go-rest-example/pkg/repository"
-	"github.com/gilperopiola/go-rest-example/pkg/utils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -91,7 +91,7 @@ func TestGenerateTokenString(t *testing.T) {
 func TestHashPassword(t *testing.T) {
 	h := New(testModel)
 	h.HashPassword()
-	expected := utils.Hash(testModel.Email, testModel.Password)
+	expected := common.Hash(testModel.Email, testModel.Password)
 	assert.Equal(t, expected, h.User.Password)
 }
 

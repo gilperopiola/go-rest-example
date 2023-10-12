@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/gilperopiola/go-rest-example/pkg/auth"
+	"github.com/gilperopiola/go-rest-example/pkg/common"
 	"github.com/gilperopiola/go-rest-example/pkg/config"
 	"github.com/gilperopiola/go-rest-example/pkg/entities"
 	customErrors "github.com/gilperopiola/go-rest-example/pkg/errors"
@@ -11,7 +12,6 @@ import (
 	"github.com/gilperopiola/go-rest-example/pkg/repository"
 	"github.com/gilperopiola/go-rest-example/pkg/requests"
 	"github.com/gilperopiola/go-rest-example/pkg/responses"
-	"github.com/gilperopiola/go-rest-example/pkg/utils"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -81,7 +81,7 @@ func TestSignup(t *testing.T) {
 
 func TestLogin(t *testing.T) {
 
-	modelUser.Password = utils.Hash(VALID_EMAIL, VALID_PASSWORD)
+	modelUser.Password = common.Hash(VALID_EMAIL, VALID_PASSWORD)
 
 	tests := []struct {
 		name            string
