@@ -16,13 +16,13 @@ func (s *Service) CreateUser(createUserRequest requests.CreateUserRequest) (resp
 	user := handlers.New(createUserRequest.ToUserModel())
 
 	if user.Exists(s.Repository) {
-		return responses.CreateUserResponse{}, customErrors.ErrUsernameOrEmailAlreadyInUse
+		return responses.CreateUserResponse{}, utils.Wrap(fmt.Errorf("user.Exists"), customErrors.ErrUsernameOrEmailAlreadyInUse)
 	}
 
 	user.HashPassword()
 
 	if err := user.Create(s.Repository); err != nil {
-		return responses.CreateUserResponse{}, err
+		return responses.CreateUserResponse{}, utils.Wrap(fmt.Errorf("user.Create"), err)
 	}
 
 	return responses.CreateUserResponse{User: user.ToEntity()}, nil
@@ -32,7 +32,7 @@ func (s *Service) GetUser(getUserRequest requests.GetUserRequest) (responses.Get
 	user := handlers.New(getUserRequest.ToUserModel())
 
 	if err := user.Get(s.Repository, repository.WithoutDeleted); err != nil {
-		return responses.GetUserResponse{}, err
+		return responses.GetUserResponse{}, utils.Wrap(fmt.Errorf("user.Get"), err)
 	}
 
 	return responses.GetUserResponse{User: user.ToEntity()}, nil
@@ -42,17 +42,17 @@ func (s *Service) UpdateUser(updateUserRequest requests.UpdateUserRequest) (resp
 	user := handlers.New(updateUserRequest.ToUserModel())
 
 	if user.Exists(s.Repository) {
-		return responses.UpdateUserResponse{}, customErrors.ErrUsernameOrEmailAlreadyInUse
+		return responses.UpdateUserResponse{}, utils.Wrap(fmt.Errorf("user.Exists"), customErrors.ErrUsernameOrEmailAlreadyInUse)
 	}
 
 	if err := user.Get(s.Repository, repository.WithoutDeleted); err != nil {
-		return responses.UpdateUserResponse{}, err
+		return responses.UpdateUserResponse{}, utils.Wrap(fmt.Errorf("user.Get"), err)
 	}
 
 	user.OverwriteFields(updateUserRequest.Username, updateUserRequest.Email, "")
 
 	if err := user.Update(s.Repository); err != nil {
-		return responses.UpdateUserResponse{}, err
+		return responses.UpdateUserResponse{}, utils.Wrap(fmt.Errorf("user.Update"), err)
 	}
 
 	return responses.UpdateUserResponse{User: user.ToEntity()}, nil
@@ -63,7 +63,7 @@ func (s *Service) DeleteUser(deleteUserRequest requests.DeleteUserRequest) (resp
 
 	// This returns an error if the user is already deleted
 	if err := user.Delete(s.Repository); err != nil {
-		return responses.DeleteUserResponse{}, utils.Wrap(fmt.Errorf("service_users: DeleteUser: user.Delete"), err)
+		return responses.DeleteUserResponse{}, utils.Wrap(fmt.Errorf("user.Delete"), err)
 	}
 
 	return responses.DeleteUserResponse{User: user.ToEntity()}, nil

@@ -17,6 +17,10 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+func newTestService(mockRepository *repository.RepositoryMock) *Service {
+	return NewService(mockRepository, &auth.Auth{}, &config.Config{})
+}
+
 const (
 	VALID_ID         = 1
 	VALID_USERNAME   = "valid_username"
@@ -25,20 +29,18 @@ const (
 	INVALID_PASSWORD = "invalid_password"
 )
 
-func newTestService(mockRepository *repository.RepositoryMock) *Service {
-	config := &config.Config{}
-	auth := &auth.Auth{}
-	return NewService(mockRepository, auth, config)
-}
+var (
+	modelUser = models.User{
+		ID:    VALID_ID,
+		Email: VALID_EMAIL,
+	}
+	entityUser = entities.User{
+		ID:    VALID_ID,
+		Email: VALID_EMAIL,
+	}
+)
 
 func TestSignup(t *testing.T) {
-
-	makeMockRepositoryWithUserExists := func(exists bool) *repository.RepositoryMock {
-		mockRepository := repository.NewRepositoryMock()
-		mockRepository.On("UserExists", mock.Anything, mock.Anything).Return(exists).Once()
-		return mockRepository
-	}
-
 	makeMockRepositoryWithCreateUser := func(returnUser models.User, returnErr error) *repository.RepositoryMock {
 		mockRepository := makeMockRepositoryWithUserExists(false)
 		mockRepository.On("CreateUser", mock.Anything).Return(returnUser, returnErr).Once()
@@ -47,7 +49,6 @@ func TestSignup(t *testing.T) {
 
 	tests := []struct {
 		name           string
-		request        requests.SignupRequest
 		mockRepository *repository.RepositoryMock
 		want           responses.SignupResponse
 		wantErr        error
@@ -70,35 +71,17 @@ func TestSignup(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-
-			// Prepare
-			service := newTestService(tt.mockRepository)
-
-			// Act
-			got, err := service.Signup(tt.request)
-
-			// Assert
-			assert.Equal(t, tt.want, got)
-			assert.ErrorIs(t, err, tt.wantErr)
-			tt.mockRepository.AssertExpectations(t)
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			got, err := newTestService(tc.mockRepository).Signup(requests.SignupRequest{})
+			assertTC(t, tc.want, tc.wantErr, got, err, tc.mockRepository)
 		})
 	}
 }
 
 func TestLogin(t *testing.T) {
 
-	var (
-		hashedCorrectPassword = utils.Hash(VALID_EMAIL, VALID_PASSWORD)
-		validUser             = models.User{Email: VALID_EMAIL, Password: hashedCorrectPassword}
-	)
-
-	makeMockRepositoryWithGetUser := func(returnUser models.User, returnErr error) *repository.RepositoryMock {
-		mockRepository := repository.NewRepositoryMock()
-		mockRepository.On("GetUser", mock.Anything).Return(returnUser, returnErr).Once()
-		return mockRepository
-	}
+	modelUser.Password = utils.Hash(VALID_EMAIL, VALID_PASSWORD)
 
 	tests := []struct {
 		name            string
@@ -114,48 +97,68 @@ func TestLogin(t *testing.T) {
 		},
 		{
 			name:           "error_mismatched_passwords",
-			mockRepository: makeMockRepositoryWithGetUser(validUser, nil),
+			mockRepository: makeMockRepositoryWithGetUser(modelUser, nil),
 			request:        requests.LoginRequest{Password: INVALID_PASSWORD},
 			wantErr:        customErrors.ErrWrongPassword,
 		},
 		{
 			name:            "success",
-			mockRepository:  makeMockRepositoryWithGetUser(validUser, nil),
+			mockRepository:  makeMockRepositoryWithGetUser(modelUser, nil),
 			request:         requests.LoginRequest{Password: VALID_PASSWORD},
 			wantErr:         nil,
 			wantTokenLength: 212,
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			got, err := newTestService(tc.mockRepository).Login(tc.request)
+			assertTC(t, tc.wantTokenLength, tc.wantErr, len(got.Token), err, tc.mockRepository)
+		})
+	}
+}
 
-			// Prepare
-			service := newTestService(tt.mockRepository)
+func TestCreateUser(t *testing.T) {
 
-			// Act
-			got, err := service.Login(tt.request)
+	makeMockRepositoryWithCreateUser := func(returnUser models.User, returnErr error) *repository.RepositoryMock {
+		mockRepository := makeMockRepositoryWithUserExists(false)
+		mockRepository.On("CreateUser", mock.Anything).Return(returnUser, returnErr).Once()
+		return mockRepository
+	}
 
-			// Assert
-			assert.Equal(t, tt.wantTokenLength, len(got.Token))
-			assert.ErrorIs(t, err, tt.wantErr)
-			tt.mockRepository.AssertExpectations(t)
+	tests := []struct {
+		name           string
+		mockRepository *repository.RepositoryMock
+		want           responses.CreateUserResponse
+		wantErr        error
+	}{
+		{
+			name:           "error_user_exists",
+			mockRepository: makeMockRepositoryWithUserExists(true),
+			wantErr:        customErrors.ErrUsernameOrEmailAlreadyInUse,
+		},
+		{
+			name:           "error_creating_user",
+			mockRepository: makeMockRepositoryWithCreateUser(modelUser, customErrors.ErrCreatingUser),
+			wantErr:        customErrors.ErrCreatingUser,
+		},
+		{
+			name:           "success",
+			mockRepository: makeMockRepositoryWithCreateUser(modelUser, nil),
+			want:           responses.CreateUserResponse{User: entityUser},
+			wantErr:        nil,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			got, err := newTestService(tc.mockRepository).CreateUser(requests.CreateUserRequest{})
+			assertTC(t, tc.want, tc.wantErr, got, err, tc.mockRepository)
 		})
 	}
 }
 
 func TestGetUser(t *testing.T) {
-
-	var (
-		modelUser  = models.User{Email: VALID_EMAIL}
-		entityUser = entities.User{Email: VALID_EMAIL}
-	)
-
-	makeMockRepositoryWithGetUser := func(returnUser models.User, returnErr error) *repository.RepositoryMock {
-		mockRepository := repository.NewRepositoryMock()
-		mockRepository.On("GetUser", mock.Anything).Return(returnUser, returnErr).Once()
-		return mockRepository
-	}
 
 	tests := []struct {
 		name           string
@@ -177,71 +180,112 @@ func TestGetUser(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-
-			// Prepare
-			service := newTestService(tt.mockRepository)
-
-			// Act
-			got, err := service.GetUser(tt.request)
-
-			// Assert
-			assert.Equal(t, tt.want, got)
-			assert.ErrorIs(t, err, tt.wantErr)
-			tt.mockRepository.AssertExpectations(t)
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			got, err := newTestService(tc.mockRepository).GetUser(tc.request)
+			assertTC(t, tc.want, tc.wantErr, got, err, tc.mockRepository)
 		})
 	}
 }
 
-func TestDeleteUser(t *testing.T) {
+func TestUpdateUser(t *testing.T) {
 
-	var (
-		modelUser  = models.User{ID: VALID_ID}
-		entityUser = entities.User{ID: VALID_ID}
-	)
+	makeMockRepositoryWithGetUser := func(returnUser models.User, returnErr error) *repository.RepositoryMock {
+		mockRepository := makeMockRepositoryWithUserExists(false)
+		mockRepository.On("GetUser", mock.Anything, mock.Anything).Return(returnUser, returnErr).Once()
+		return mockRepository
+	}
 
-	makeMockRepositoryWithDeleteUser := func(returnUser models.User, returnErr error) *repository.RepositoryMock {
-		mockRepository := repository.NewRepositoryMock()
-		mockRepository.On("DeleteUser", mock.Anything).Return(returnUser, returnErr).Once()
+	makeMockRepositoryWithUpdateUser := func(returnUser models.User, returnErr error) *repository.RepositoryMock {
+		mockRepository := makeMockRepositoryWithGetUser(returnUser, nil)
+		mockRepository.On("UpdateUser", mock.Anything).Return(returnUser, returnErr).Once()
 		return mockRepository
 	}
 
 	tests := []struct {
 		name           string
-		request        requests.DeleteUserRequest
+		mockRepository *repository.RepositoryMock
+		want           responses.UpdateUserResponse
+		wantErr        error
+	}{
+		{
+			name:           "error_user_exists",
+			mockRepository: makeMockRepositoryWithUserExists(true),
+			wantErr:        customErrors.ErrUsernameOrEmailAlreadyInUse,
+		},
+		{
+			name:           "error_getting_user",
+			mockRepository: makeMockRepositoryWithGetUser(modelUser, customErrors.ErrGettingUser),
+			wantErr:        customErrors.ErrGettingUser,
+		},
+		{
+			name:           "error_updating_user",
+			mockRepository: makeMockRepositoryWithUpdateUser(modelUser, customErrors.ErrUpdatingUser),
+			wantErr:        customErrors.ErrUpdatingUser,
+		},
+		{
+			name:           "success",
+			mockRepository: makeMockRepositoryWithUpdateUser(modelUser, nil),
+			want:           responses.UpdateUserResponse{User: entityUser},
+			wantErr:        nil,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			got, err := newTestService(tc.mockRepository).UpdateUser(requests.UpdateUserRequest{})
+			assertTC(t, tc.want, tc.wantErr, got, err, tc.mockRepository)
+		})
+	}
+}
+
+func TestDeleteUser(t *testing.T) {
+	tests := []struct {
+		name           string
 		mockRepository *repository.RepositoryMock
 		want           responses.DeleteUserResponse
 		wantErr        error
 	}{
 		{
 			name:           "error_deleting_user",
-			request:        requests.DeleteUserRequest{ID: VALID_ID},
 			mockRepository: makeMockRepositoryWithDeleteUser(models.User{}, customErrors.ErrUserAlreadyDeleted),
 			wantErr:        customErrors.ErrUserAlreadyDeleted,
 		},
 		{
 			name:           "success",
-			request:        requests.DeleteUserRequest{ID: VALID_ID},
 			mockRepository: makeMockRepositoryWithDeleteUser(modelUser, nil),
 			want:           responses.DeleteUserResponse{User: entityUser},
-			wantErr:        nil,
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-
-			// Prepare
-			service := newTestService(tt.mockRepository)
-
-			// Act
-			got, err := service.DeleteUser(tt.request)
-
-			// Assert
-			assert.Equal(t, tt.want, got)
-			assert.ErrorIs(t, err, tt.wantErr)
-			tt.mockRepository.AssertExpectations(t)
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			got, err := newTestService(tc.mockRepository).DeleteUser(requests.DeleteUserRequest{ID: VALID_ID})
+			assertTC(t, tc.want, tc.wantErr, got, err, tc.mockRepository)
 		})
 	}
+}
+
+func assertTC(t *testing.T, want interface{}, wantErr error, got interface{}, err error, mockRepository *repository.RepositoryMock) {
+	assert.Equal(t, want, got)
+	assert.ErrorIs(t, err, wantErr)
+	mockRepository.AssertExpectations(t)
+}
+
+func makeMockRepositoryWithUserExists(exists bool) *repository.RepositoryMock {
+	mockRepository := repository.NewRepositoryMock()
+	mockRepository.On("UserExists", mock.Anything, mock.Anything).Return(exists).Once()
+	return mockRepository
+}
+
+func makeMockRepositoryWithGetUser(returnUser models.User, returnErr error) *repository.RepositoryMock {
+	mockRepository := repository.NewRepositoryMock()
+	mockRepository.On("GetUser", mock.Anything).Return(returnUser, returnErr).Once()
+	return mockRepository
+}
+
+func makeMockRepositoryWithDeleteUser(returnUser models.User, returnErr error) *repository.RepositoryMock {
+	mockRepository := repository.NewRepositoryMock()
+	mockRepository.On("DeleteUser", mock.Anything).Return(returnUser, returnErr).Once()
+	return mockRepository
 }

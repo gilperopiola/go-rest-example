@@ -13,6 +13,12 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
+type HTTPResponse struct {
+	Success bool        `json:"success"`
+	Content interface{} `json:"content"`
+	Error   string      `json:"error"`
+}
+
 // ValidateToken validates a token for a specific role and sets ID and Email in context
 func (auth *Auth) ValidateToken(role entities.Role, shouldMatchUserID bool) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -51,11 +57,6 @@ func (auth *Auth) ValidateToken(role entities.Role, shouldMatchUserID bool) gin.
 		// If OK, set ID, Username and Email inside of context
 		addUserInfoToContext(c, customClaims)
 	}
-}
-
-func abortRequest(c *gin.Context) {
-	c.JSON(http.StatusUnauthorized, "unauthorized")
-	c.Abort()
 }
 
 func (auth *Auth) getTokenStructFromContext(c *gin.Context) (*jwt.Token, error) {
@@ -100,4 +101,13 @@ func getJWTStringFromHeader(header http.Header) string {
 
 func removeBearerPrefix(token string) string {
 	return strings.TrimPrefix(token, "Bearer ")
+}
+
+func abortRequest(c *gin.Context) {
+	c.JSON(http.StatusUnauthorized, HTTPResponse{
+		Success: false,
+		Content: nil,
+		Error:   "unauthorized",
+	})
+	c.Abort()
 }

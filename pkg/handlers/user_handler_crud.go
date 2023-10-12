@@ -1,28 +1,42 @@
 package handlers
 
 import (
+	"fmt"
+
 	"github.com/gilperopiola/go-rest-example/pkg/repository"
 	"github.com/gilperopiola/go-rest-example/pkg/utils"
 )
 
 func (h *UserHandler) Create(r repository.RepositoryLayer) (err error) {
 	h.User, err = r.CreateUser(h.User)
-	return err
+	if err != nil {
+		return utils.Wrap(fmt.Errorf("UserHandler.Create"), err)
+	}
+	return nil
 }
 
 func (h *UserHandler) Get(r repository.RepositoryLayer, opts ...utils.QueryOption) (err error) {
 	h.User, err = r.GetUser(h.User, opts...)
-	return err
+	if err != nil {
+		return utils.Wrap(fmt.Errorf("UserHandler.Get"), err)
+	}
+	return nil
 }
 
 func (h *UserHandler) Update(r repository.RepositoryLayer) (err error) {
 	h.User, err = r.UpdateUser(h.User)
-	return err
+	if err != nil {
+		return utils.Wrap(fmt.Errorf("UserHandler.Update"), err)
+	}
+	return nil
 }
 
 func (h *UserHandler) Delete(r repository.RepositoryLayer) (err error) {
 	h.User, err = r.DeleteUser(h.User.ID)
-	return err
+	if err != nil {
+		return utils.Wrap(fmt.Errorf("UserHandler.Delete"), err)
+	}
+	return nil
 }
 
 func (h *UserHandler) Exists(r repository.RepositoryLayer) bool {

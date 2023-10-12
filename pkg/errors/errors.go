@@ -3,23 +3,23 @@ package errors
 import "fmt"
 
 type Error struct {
-	Message string
-	Err     error // This is the wrapped error
+	message string
+	err     error // This is the wrapped error
 }
 
 func New(err error) *Error {
 	return &Error{
-		Message: err.Error(),
-		Err:     err,
+		message: err.Error(),
+		err:     err,
 	}
 }
 
 func (e *Error) Error() string {
-	return e.Message
+	return e.message
 }
 
 func (e *Error) Unwrap() error {
-	return e.Err
+	return e.err
 }
 
 var (
@@ -38,10 +38,9 @@ var (
 	ErrUserNotFound                = New(fmt.Errorf("error, user not found"))
 	ErrUserAlreadyDeleted          = New(fmt.Errorf("error, user already deleted"))
 	ErrUsernameOrEmailAlreadyInUse = New(fmt.Errorf("error, username or email already in use"))
-
-	ErrInvalidEmailFormat    = New(fmt.Errorf("error, invalid email format"))
-	ErrInvalidUsernameLength = New(fmt.Errorf("error, username either too short or too long"))
-	ErrInvalidPasswordLength = New(fmt.Errorf("error, password either too short or too long"))
-	ErrPasswordsDontMatch    = New(fmt.Errorf("error, passwords don't match"))
-	ErrWrongPassword         = New(fmt.Errorf("error, wrong password"))
+	ErrInvalidEmailFormat          = New(fmt.Errorf("error, invalid email format"))
+	ErrInvalidUsernameLength       = New(fmt.Errorf("error, username either too short or too long"))
+	ErrInvalidPasswordLength       = New(fmt.Errorf("error, password either too short or too long"))
+	ErrPasswordsDontMatch          = New(fmt.Errorf("error, passwords don't match"))
+	ErrWrongPassword               = New(fmt.Errorf("error, wrong password"))
 )

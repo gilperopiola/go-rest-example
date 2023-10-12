@@ -35,12 +35,6 @@ func NewTransport(service service.ServiceLayer, errorsMapper errorsMapperI) Tran
 	}
 }
 
-type HTTPResponse struct {
-	Success bool        `json:"success"`
-	Content interface{} `json:"content"`
-	Error   string      `json:"error"`
-}
-
 // HandleRequest takes:
 //
 //   - a transport and a gin context
@@ -87,4 +81,11 @@ type Response interface {
 		responses.GetUserResponse |
 		responses.UpdateUserResponse |
 		responses.DeleteUserResponse
+}
+
+// HTTPResponse also lives on token_validation.go
+type HTTPResponse struct {
+	Success bool        `json:"success"`
+	Content interface{} `json:"content"`
+	Error   string      `json:"error"`
 }
