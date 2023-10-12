@@ -1,107 +1,68 @@
 package service
 
 import (
-	"github.com/gilperopiola/go-rest-example/pkg/entities"
+	"fmt"
+
+	"github.com/gilperopiola/go-rest-example/pkg/common"
+	customErrors "github.com/gilperopiola/go-rest-example/pkg/errors"
+	"github.com/gilperopiola/go-rest-example/pkg/handlers"
 	"github.com/gilperopiola/go-rest-example/pkg/repository"
-	"github.com/gilperopiola/go-rest-example/pkg/utils"
 )
 
 // CreateUser is an admins only endpoint
-func (s *Service) CreateUser(createUserRequest entities.CreateUserRequest) (entities.CreateUserResponse, error) {
+func (s *Service) CreateUser(createUserRequest common.CreateUserRequest) (common.CreateUserResponse, error) {
+	user := handlers.New(createUserRequest.ToUserModel())
 
-	// Codec functions
-	var (
-		toModel  = s.Codec.FromCreateUserRequestToUserModel
-		toEntity = s.Codec.FromUserModelToEntities
-	)
-
-	// Validate user doesn't exist
-	if s.Repository.UserExists(createUserRequest.Email, createUserRequest.Username) {
-		return entities.CreateUserResponse{}, entities.ErrUsernameOrEmailAlreadyInUse
+	if user.Exists(s.Repository) {
+		return common.CreateUserResponse{}, common.Wrap(fmt.Errorf("user.Exists"), customErrors.ErrUsernameOrEmailAlreadyInUse)
 	}
 
-	// Hash password
-	hashedPassword := utils.Hash(createUserRequest.Email, createUserRequest.Password)
+	user.HashPassword()
 
-	// Transform request to model
-	userToCreate := toModel(createUserRequest, hashedPassword)
-
-	// Create user model on the database
-	createdUser, err := s.Repository.CreateUser(userToCreate)
-	if err != nil {
-		return entities.CreateUserResponse{}, s.ErrorsMapper.Map(err)
+	if err := user.Create(s.Repository); err != nil {
+		return common.CreateUserResponse{}, common.Wrap(fmt.Errorf("user.Create"), err)
 	}
 
-	// Return response
-	return entities.CreateUserResponse{User: toEntity(createdUser)}, nil
+	return common.CreateUserResponse{User: user.ToEntity()}, nil
 }
 
-func (s *Service) GetUser(getUserRequest entities.GetUserRequest) (entities.GetUserResponse, error) {
+func (s *Service) GetUser(getUserRequest common.GetUserRequest) (common.GetUserResponse, error) {
+	user := handlers.New(getUserRequest.ToUserModel())
 
-	// Codec functions
-	var (
-		toModel  = s.Codec.FromGetUserRequestToUserModel
-		toEntity = s.Codec.FromUserModelToEntities
-	)
-
-	// Create userToGet model for DB searching
-	userToGet := toModel(getUserRequest)
-
-	// Get user from database
-	userToGet, err := s.Repository.GetUser(userToGet, repository.WithoutDeleted)
-	if err != nil {
-		return entities.GetUserResponse{}, s.ErrorsMapper.Map(err)
+	if err := user.Get(s.Repository, repository.WithoutDeleted); err != nil {
+		return common.GetUserResponse{}, common.Wrap(fmt.Errorf("user.Get"), err)
 	}
 
-	// Return user
-	return entities.GetUserResponse{User: toEntity(userToGet)}, nil
+	return common.GetUserResponse{User: user.ToEntity()}, nil
 }
 
-func (s *Service) UpdateUser(updateUserRequest entities.UpdateUserRequest) (entities.UpdateUserResponse, error) {
+func (s *Service) UpdateUser(updateUserRequest common.UpdateUserRequest) (common.UpdateUserResponse, error) {
+	user := handlers.New(updateUserRequest.ToUserModel())
 
-	// Codec functions
-	var (
-		toModel  = s.Codec.FromUpdateUserRequestToUserModel
-		toEntity = s.Codec.FromUserModelToEntities
-	)
-
-	// Check if username and/or email are available
-	if s.Repository.UserExists(updateUserRequest.Email, updateUserRequest.Username) {
-		return entities.UpdateUserResponse{}, entities.ErrUsernameOrEmailAlreadyInUse
+	if user.Exists(s.Repository) {
+		return common.UpdateUserResponse{}, common.Wrap(fmt.Errorf("user.Exists"), customErrors.ErrUsernameOrEmailAlreadyInUse)
 	}
 
-	// Get user from database
-	userToUpdate, err := s.Repository.GetUser(toModel(updateUserRequest), repository.WithoutDeleted)
-	if err != nil {
-		return entities.UpdateUserResponse{}, s.ErrorsMapper.Map(err)
+	if err := user.Get(s.Repository, repository.WithoutDeleted); err != nil {
+		return common.UpdateUserResponse{}, common.Wrap(fmt.Errorf("user.Get"), err)
 	}
 
-	// Replace fields
-	userToUpdate.OverwriteFields(updateUserRequest.Username, updateUserRequest.Email)
+	user.OverwriteFields(updateUserRequest.Username, updateUserRequest.Email, "")
 
-	// Update user on the DB
-	if userToUpdate, err = s.Repository.UpdateUser(userToUpdate); err != nil {
-		return entities.UpdateUserResponse{}, s.ErrorsMapper.Map(err)
+	if err := user.Update(s.Repository); err != nil {
+		return common.UpdateUserResponse{}, common.Wrap(fmt.Errorf("user.Update"), err)
 	}
 
-	// Return user
-	return entities.UpdateUserResponse{User: toEntity(userToUpdate)}, nil
+	return common.UpdateUserResponse{User: user.ToEntity()}, nil
 }
 
-func (s *Service) DeleteUser(deleteUserRequest entities.DeleteUserRequest) (entities.DeleteUserResponse, error) {
+func (s *Service) DeleteUser(deleteUserRequest common.DeleteUserRequest) (common.DeleteUserResponse, error) {
+	user := handlers.New(deleteUserRequest.ToUserModel())
 
-	// Codec functions
-	var (
-		toEntity = s.Codec.FromUserModelToEntities
-	)
-
-	// Set the user's Deleted field to true
 	// This returns an error if the user is already deleted
-	userModel, err := s.Repository.DeleteUser(deleteUserRequest.ID)
-	if err != nil {
-		return entities.DeleteUserResponse{}, s.ErrorsMapper.Map(err)
+	if err := user.Delete(s.Repository); err != nil {
+		return common.DeleteUserResponse{}, common.Wrap(fmt.Errorf("user.Delete"), err)
 	}
 
-	// Return user
-	return entities.DeleteUserResponse{User: toEntity(userModel)}, nil
+	return common.DeleteUserResponse{User: user.ToEntity()}, nil
 }

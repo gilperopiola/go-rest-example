@@ -1,93 +1,119 @@
 package transport
 
 import (
-	"github.com/gilperopiola/go-rest-example/pkg/entities"
-	"github.com/gilperopiola/go-rest-example/pkg/utils"
+	"fmt"
+	"strconv"
+
+	"github.com/gilperopiola/go-rest-example/pkg/common"
+	customErrors "github.com/gilperopiola/go-rest-example/pkg/errors"
 
 	"github.com/gin-gonic/gin"
 )
 
-func makeSignupRequest(c *gin.Context) (request entities.SignupRequest, err error) {
+func makeSignupRequest(c *gin.Context) (request common.SignupRequest, err error) {
 	if err = c.ShouldBindJSON(&request); err != nil {
-		return entities.SignupRequest{}, utils.Wrap(err, entities.ErrBindingRequest)
+		return common.SignupRequest{}, common.Wrap(err, customErrors.ErrBindingRequest)
 	}
 
 	if err = request.Validate(); err != nil {
-		return entities.SignupRequest{}, err
+		return common.SignupRequest{}, err
 	}
 
 	return request, nil
 }
 
-func makeLoginRequest(c *gin.Context) (request entities.LoginRequest, err error) {
+func makeLoginRequest(c *gin.Context) (request common.LoginRequest, err error) {
 	if err = c.ShouldBindJSON(&request); err != nil {
-		return entities.LoginRequest{}, utils.Wrap(err, entities.ErrBindingRequest)
+		return common.LoginRequest{}, common.Wrap(err, customErrors.ErrBindingRequest)
 	}
 
 	if err = request.Validate(); err != nil {
-		return entities.LoginRequest{}, err
+		return common.LoginRequest{}, err
 	}
 
 	return request, nil
 }
 
-func makeCreateUserRequest(c *gin.Context) (request entities.CreateUserRequest, err error) {
+func makeCreateUserRequest(c *gin.Context) (request common.CreateUserRequest, err error) {
 	if err = c.ShouldBindJSON(&request); err != nil {
-		return entities.CreateUserRequest{}, utils.Wrap(err, entities.ErrBindingRequest)
+		return common.CreateUserRequest{}, common.Wrap(err, customErrors.ErrBindingRequest)
 	}
 
 	if err = request.Validate(); err != nil {
-		return entities.CreateUserRequest{}, err
+		return common.CreateUserRequest{}, err
 	}
 
 	return request, nil
 }
 
-func makeGetUserRequest(c *gin.Context) (request entities.GetUserRequest, err error) {
-	userToGetID, err := utils.GetIntFromContext(c, "ID")
+func makeGetUserRequest(c *gin.Context) (request common.GetUserRequest, err error) {
+	userToGetID, err := getIntFromContext(c, "ID")
 	if err != nil {
-		return entities.GetUserRequest{}, err
+		return common.GetUserRequest{}, err
 	}
 
 	request.ID = userToGetID
 
 	if err = request.Validate(); err != nil {
-		return entities.GetUserRequest{}, err
+		return common.GetUserRequest{}, err
 	}
 
 	return request, nil
 }
 
-func makeUpdateUserRequest(c *gin.Context) (request entities.UpdateUserRequest, err error) {
+func makeUpdateUserRequest(c *gin.Context) (request common.UpdateUserRequest, err error) {
 	if err = c.ShouldBindJSON(&request); err != nil {
-		return entities.UpdateUserRequest{}, utils.Wrap(err, entities.ErrBindingRequest)
+		return common.UpdateUserRequest{}, common.Wrap(err, customErrors.ErrBindingRequest)
 	}
 
-	userToUpdateID, err := utils.GetIntFromContext(c, "ID")
+	userToUpdateID, err := getIntFromContext(c, "ID")
 	if err != nil {
-		return entities.UpdateUserRequest{}, err
+		return common.UpdateUserRequest{}, err
 	}
 
 	request.ID = userToUpdateID
 
 	if err = request.Validate(); err != nil {
-		return entities.UpdateUserRequest{}, err
+		return common.UpdateUserRequest{}, err
 	}
 
 	return request, nil
 }
 
-func makeDeleteUserRequest(c *gin.Context) (request entities.DeleteUserRequest, err error) {
-	userToDeleteID, err := utils.GetIntFromContext(c, "ID")
+func makeDeleteUserRequest(c *gin.Context) (request common.DeleteUserRequest, err error) {
+	userToDeleteID, err := getIntFromContext(c, "ID")
 	if err != nil {
-		return entities.DeleteUserRequest{}, err
+		return common.DeleteUserRequest{}, err
 	}
 
 	request.ID = userToDeleteID
 
 	if err = request.Validate(); err != nil {
-		return entities.DeleteUserRequest{}, err
+		return common.DeleteUserRequest{}, err
 	}
 
 	return request, nil
+}
+
+func getIntFromContext(c *gin.Context, key string) (int, error) {
+
+	// Get from context
+	value, ok := c.Get(key)
+	if value == nil || !ok {
+		return 0, fmt.Errorf("error getting %s from context", key)
+	}
+
+	// Cast to string
+	valueStr, ok := value.(string)
+	if !ok {
+		return 0, fmt.Errorf("error casting %s from context to string", key)
+	}
+
+	// Convert to int
+	valueInt, err := strconv.Atoi(valueStr)
+	if err != nil {
+		return 0, fmt.Errorf("error converting %s from string to int", key)
+	}
+
+	return valueInt, nil
 }

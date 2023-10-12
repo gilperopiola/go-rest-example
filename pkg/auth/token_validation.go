@@ -3,10 +3,12 @@ package auth
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 
+	"github.com/gilperopiola/go-rest-example/pkg/common"
 	"github.com/gilperopiola/go-rest-example/pkg/entities"
-	"github.com/gilperopiola/go-rest-example/pkg/utils"
+	customErrors "github.com/gilperopiola/go-rest-example/pkg/errors"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
@@ -37,7 +39,7 @@ func (auth *Auth) ValidateToken(role entities.Role, shouldMatchUserID bool) gin.
 
 		// Check if user ID in URL matches user ID in token
 		if shouldMatchUserID {
-			urlUserID, err := utils.GetIntFromContextURLParams(c.Params, "user_id")
+			urlUserID, err := getIntFromContextURLParams(c.Params, "user_id")
 			if err != nil {
 				abortRequest(c)
 			}
@@ -50,11 +52,6 @@ func (auth *Auth) ValidateToken(role entities.Role, shouldMatchUserID bool) gin.
 		// If OK, set ID, Username and Email inside of context
 		addUserInfoToContext(c, customClaims)
 	}
-}
-
-func abortRequest(c *gin.Context) {
-	c.JSON(http.StatusUnauthorized, "unauthorized")
-	c.Abort()
 }
 
 func (auth *Auth) getTokenStructFromContext(c *gin.Context) (*jwt.Token, error) {
@@ -77,7 +74,7 @@ func (auth *Auth) decodeTokenString(tokenString string) (*jwt.Token, error) {
 
 	// Check length
 	if len(tokenString) < 40 {
-		return &jwt.Token{}, entities.ErrUnauthorized
+		return &jwt.Token{}, customErrors.ErrUnauthorized
 	}
 
 	// Make key function
@@ -99,4 +96,30 @@ func getJWTStringFromHeader(header http.Header) string {
 
 func removeBearerPrefix(token string) string {
 	return strings.TrimPrefix(token, "Bearer ")
+}
+
+func abortRequest(c *gin.Context) {
+	c.JSON(http.StatusUnauthorized, common.HTTPResponse{
+		Success: false,
+		Content: nil,
+		Error:   "unauthorized",
+	})
+	c.Abort()
+}
+
+func getIntFromContextURLParams(params gin.Params, key string) (int, error) {
+
+	// Get from params
+	value, ok := params.Get(key)
+	if !ok {
+		return 0, fmt.Errorf("error getting %s from URL params", key)
+	}
+
+	// Convert to int
+	valueInt, err := strconv.Atoi(value)
+	if err != nil {
+		return 0, fmt.Errorf("error converting %s from string to int", key)
+	}
+
+	return valueInt, nil
 }

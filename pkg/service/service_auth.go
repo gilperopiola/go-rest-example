@@ -1,74 +1,43 @@
 package service
 
 import (
-	"github.com/gilperopiola/go-rest-example/pkg/entities"
+	"github.com/gilperopiola/go-rest-example/pkg/common"
+	customErrors "github.com/gilperopiola/go-rest-example/pkg/errors"
+	"github.com/gilperopiola/go-rest-example/pkg/handlers"
 	"github.com/gilperopiola/go-rest-example/pkg/repository"
-	"github.com/gilperopiola/go-rest-example/pkg/utils"
 )
 
-func (s *Service) Signup(signupRequest entities.SignupRequest) (entities.SignupResponse, error) {
-	// Codec functions
-	var (
-		toModel  = s.Codec.FromSignupRequestToUserModel
-		toEntity = s.Codec.FromUserModelToEntities
-	)
+func (s *Service) Signup(signupRequest common.SignupRequest) (common.SignupResponse, error) {
+	user := handlers.New(signupRequest.ToUserModel())
 
-	// Validate user doesn't exist
-	if s.Repository.UserExists(signupRequest.Email, signupRequest.Username) {
-		return entities.SignupResponse{}, entities.ErrUsernameOrEmailAlreadyInUse
+	if user.Exists(s.Repository) {
+		return common.SignupResponse{}, customErrors.ErrUsernameOrEmailAlreadyInUse
 	}
 
-	// Hash password, transform request + hash to model
-	hashedPassword := utils.Hash(signupRequest.Email, signupRequest.Password)
-	userToSignup := toModel(signupRequest, hashedPassword)
+	user.HashPassword()
 
-	// Create user model on the database
-	createdUser, err := s.Repository.CreateUser(userToSignup)
-	if err != nil {
-		return entities.SignupResponse{}, s.ErrorsMapper.Map(err)
+	if err := user.Create(s.Repository); err != nil {
+		return common.SignupResponse{}, err
 	}
 
-	// Return response
-	return entities.SignupResponse{User: toEntity(createdUser)}, nil
+	return common.SignupResponse{User: user.ToEntity()}, nil
 }
 
-func (s *Service) Login(loginRequest entities.LoginRequest) (entities.LoginResponse, error) {
+func (s *Service) Login(loginRequest common.LoginRequest) (common.LoginResponse, error) {
+	user := handlers.New(loginRequest.ToUserModel())
 
-	// Codec functions
-	var (
-		toModel  = s.Codec.FromLoginRequestToUserModel
-		toEntity = s.Codec.FromUserModelToEntities
-	)
+	if err := user.Get(s.Repository, repository.WithoutDeleted); err != nil {
+		return common.LoginResponse{}, err
+	}
 
-	// Transform LoginRequest to user model
-	userToLogin := toModel(loginRequest)
+	if !user.PasswordMatches(loginRequest.Password) {
+		return common.LoginResponse{}, customErrors.ErrWrongPassword
+	}
 
-	// Get user from database
-	userFromDB, err := s.Repository.GetUser(userToLogin, repository.WithoutDeleted)
+	tokenString, err := user.GenerateTokenString(s.Auth)
 	if err != nil {
-		return entities.LoginResponse{}, s.ErrorsMapper.Map(err)
+		return common.LoginResponse{}, customErrors.ErrUnauthorized
 	}
 
-	// Check if passwords hashes match, if not return error
-	if !userFromDB.PasswordMatches(loginRequest.Password) {
-		return entities.LoginResponse{}, entities.ErrWrongPassword
-	}
-
-	// Transform user model to entity
-	userEntity := toEntity(userFromDB)
-
-	// Set the appropriate role
-	authRole := entities.UserRole
-	if userEntity.IsAdmin {
-		authRole = entities.AdminRole
-	}
-
-	// Generate token string
-	tokenString, err := s.Auth.GenerateToken(userEntity, authRole)
-	if err != nil {
-		return entities.LoginResponse{}, entities.ErrUnauthorized
-	}
-
-	// Return generated token on the response
-	return entities.LoginResponse{Token: tokenString}, nil
+	return common.LoginResponse{Token: tokenString}, nil
 }

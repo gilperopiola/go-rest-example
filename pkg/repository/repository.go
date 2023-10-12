@@ -1,8 +1,6 @@
 package repository
 
 import (
-	"errors"
-
 	"github.com/gilperopiola/go-rest-example/pkg/models"
 )
 
@@ -13,8 +11,8 @@ type Repository struct {
 type RepositoryLayer interface {
 	CreateUser(user models.User) (models.User, error)
 	UpdateUser(user models.User) (models.User, error)
-	GetUser(user models.User, opts ...queryOption) (models.User, error)
-	UserExists(email, username string, opts ...queryOption) bool
+	GetUser(user models.User, opts ...QueryOption) (models.User, error)
+	UserExists(email, username string, opts ...QueryOption) bool
 	DeleteUser(id int) (models.User, error)
 }
 
@@ -22,13 +20,8 @@ func NewRepository(database Database) *Repository {
 	return &Repository{Database: database}
 }
 
-var (
-	// - General errors
-	ErrUnknown = errors.New("error unknown")
+type QueryOption func(*string)
 
-	// - User errors
-	ErrCreatingUser       = errors.New("error creating user")
-	ErrUpdatingUser       = errors.New("error updating user")
-	ErrUserNotFound       = errors.New("error, user not found")
-	ErrUserAlreadyDeleted = errors.New("error, user already deleted")
-)
+func WithoutDeleted(query *string) {
+	*query += " AND deleted = false"
+}

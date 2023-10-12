@@ -3,8 +3,8 @@ package transport
 import (
 	"log"
 
+	"github.com/gilperopiola/go-rest-example/pkg/common"
 	"github.com/gilperopiola/go-rest-example/pkg/config"
-	"github.com/gilperopiola/go-rest-example/pkg/logger"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -14,21 +14,21 @@ import (
 
 // This is exported because the monitoring is initialized in the main.go file
 func NewMonitoringMiddleware(config config.ConfigI) gin.HandlerFunc {
-	cfg := config.GetMonitoringConfig()
+	monitoringConfig := config.GetMonitoringConfig()
 
 	// If monitoring is not enabled, return empty middleware
-	if !cfg.ENABLED {
+	if !monitoringConfig.ENABLED {
 		return gin.HandlerFunc(func(c *gin.Context) {})
 	}
 
 	// If monitoring is enabled, use license to create New Relic app
-	license := cfg.SECRET
+	license := monitoringConfig.SECRET
 	if license == "" {
 		log.Fatalf("New Relic license not found")
 	}
 
 	newRelicApp, err := newrelic.NewApplication(
-		newrelic.ConfigAppName(cfg.APP_NAME),
+		newrelic.ConfigAppName(monitoringConfig.APP_NAME),
 		newrelic.ConfigLicense(license),
 		newrelic.ConfigAppLogForwardingEnabled(true),
 	)
@@ -41,7 +41,7 @@ func NewMonitoringMiddleware(config config.ConfigI) gin.HandlerFunc {
 	return nrgin.Middleware(newRelicApp)
 }
 
-func newLoggerToContextMiddleware(logger logger.LoggerI) gin.HandlerFunc {
+func newLoggerToContextMiddleware(logger common.LoggerI) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Set("logger", logger)
 		c.Next()

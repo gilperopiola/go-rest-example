@@ -2,36 +2,31 @@ package service
 
 import (
 	"github.com/gilperopiola/go-rest-example/pkg/auth"
-	"github.com/gilperopiola/go-rest-example/pkg/codec"
+	"github.com/gilperopiola/go-rest-example/pkg/common"
 	"github.com/gilperopiola/go-rest-example/pkg/config"
-	"github.com/gilperopiola/go-rest-example/pkg/entities"
 	"github.com/gilperopiola/go-rest-example/pkg/repository"
 )
 
 type Service struct {
-	Config       config.ConfigI
-	Auth         auth.AuthI
-	Codec        codec.CodecI
-	Repository   repository.RepositoryLayer
-	ErrorsMapper errorsMapperI
+	Config     config.ConfigI
+	Auth       auth.AuthI
+	Repository repository.RepositoryLayer
 }
 
 type ServiceLayer interface {
-	Signup(signupRequest entities.SignupRequest) (entities.SignupResponse, error)
-	Login(loginRequest entities.LoginRequest) (entities.LoginResponse, error)
+	Signup(signupRequest common.SignupRequest) (common.SignupResponse, error)
+	Login(loginRequest common.LoginRequest) (common.LoginResponse, error)
 
-	CreateUser(createUserRequest entities.CreateUserRequest) (entities.CreateUserResponse, error)
-	GetUser(getUserRequest entities.GetUserRequest) (entities.GetUserResponse, error)
-	UpdateUser(updateUserRequest entities.UpdateUserRequest) (entities.UpdateUserResponse, error)
-	DeleteUser(deleteUserRequest entities.DeleteUserRequest) (entities.DeleteUserResponse, error)
+	CreateUser(createUserRequest common.CreateUserRequest) (common.CreateUserResponse, error)
+	GetUser(getUserRequest common.GetUserRequest) (common.GetUserResponse, error)
+	UpdateUser(updateUserRequest common.UpdateUserRequest) (common.UpdateUserResponse, error)
+	DeleteUser(deleteUserRequest common.DeleteUserRequest) (common.DeleteUserResponse, error)
 }
 
-func NewService(repository repository.RepositoryLayer, auth auth.AuthI, codec codec.CodecI, config config.ConfigI, errorsMapper errorsMapperI) *Service {
+func NewService(repository repository.RepositoryLayer, auth auth.AuthI, config config.ConfigI) *Service {
 	return &Service{
-		Repository:   repository,
-		Auth:         auth,
-		Codec:        codec,
-		Config:       config,
-		ErrorsMapper: errorsMapper,
+		Repository: repository,
+		Auth:       auth,
+		Config:     config,
 	}
 }

@@ -4,17 +4,16 @@ import (
 	"os"
 	"time"
 
+	"github.com/gilperopiola/go-rest-example/pkg/common"
 	"github.com/gilperopiola/go-rest-example/pkg/config"
-	"github.com/gilperopiola/go-rest-example/pkg/logger"
 	"github.com/gilperopiola/go-rest-example/pkg/models"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
-	"github.com/sirupsen/logrus"
 )
 
 type DatabaseInterface interface {
-	Setup(config config.DatabaseConfig, logger *logrus.Logger)
+	Setup(config config.DatabaseConfig, logger common.LoggerI)
 	Purge()
 	Migrate()
 	Close()
@@ -24,13 +23,13 @@ type Database struct {
 	DB *gorm.DB
 }
 
-func NewDatabase(config config.DatabaseConfig, logger logger.LoggerI) Database {
+func NewDatabase(config config.DatabaseConfig, logger common.LoggerI) Database {
 	var database Database
 	database.Setup(config, logger)
 	return database
 }
 
-func (database *Database) Setup(config config.DatabaseConfig, logger logger.LoggerI) {
+func (database *Database) Setup(config config.DatabaseConfig, logger common.LoggerI) {
 
 	// Create connection
 	var err error

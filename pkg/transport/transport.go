@@ -3,8 +3,7 @@ package transport
 import (
 	"net/http"
 
-	"github.com/gilperopiola/go-rest-example/pkg/codec"
-	"github.com/gilperopiola/go-rest-example/pkg/entities"
+	"github.com/gilperopiola/go-rest-example/pkg/common"
 	"github.com/gilperopiola/go-rest-example/pkg/service"
 
 	"github.com/gin-gonic/gin"
@@ -12,7 +11,6 @@ import (
 
 type Transport struct {
 	Service      service.ServiceLayer
-	Codec        codec.CodecI
 	ErrorsMapper errorsMapperI
 }
 
@@ -29,18 +27,11 @@ type TransportLayer interface {
 	DeleteUser(c *gin.Context)
 }
 
-func NewTransport(service service.ServiceLayer, codec codec.CodecI, errorsMapper errorsMapperI) Transport {
+func NewTransport(service service.ServiceLayer, errorsMapper errorsMapperI) Transport {
 	return Transport{
 		Service:      service,
-		Codec:        codec,
 		ErrorsMapper: errorsMapper,
 	}
-}
-
-type HTTPResponse struct {
-	Success bool        `json:"success"`
-	Content interface{} `json:"content"`
-	Error   string      `json:"error"`
 }
 
 // HandleRequest takes:
@@ -68,25 +59,25 @@ func HandleRequest[req Request, resp Response](t Transport, c *gin.Context,
 	}
 
 	// Return OK
-	c.JSON(http.StatusOK, HTTPResponse{
+	c.JSON(http.StatusOK, common.HTTPResponse{
 		Success: true,
 		Content: response,
 	})
 }
 
 type Request interface {
-	entities.SignupRequest |
-		entities.LoginRequest |
-		entities.CreateUserRequest |
-		entities.GetUserRequest |
-		entities.UpdateUserRequest |
-		entities.DeleteUserRequest
+	common.SignupRequest |
+		common.LoginRequest |
+		common.CreateUserRequest |
+		common.GetUserRequest |
+		common.UpdateUserRequest |
+		common.DeleteUserRequest
 }
 type Response interface {
-	entities.SignupResponse |
-		entities.LoginResponse |
-		entities.CreateUserResponse |
-		entities.GetUserResponse |
-		entities.UpdateUserResponse |
-		entities.DeleteUserResponse
+	common.SignupResponse |
+		common.LoginResponse |
+		common.CreateUserResponse |
+		common.GetUserResponse |
+		common.UpdateUserResponse |
+		common.DeleteUserResponse
 }

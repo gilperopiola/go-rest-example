@@ -1,8 +1,9 @@
-package logger
+package common
 
 import "github.com/sirupsen/logrus"
 
 type LoggerI interface {
+	Info(args ...interface{})
 	Warn(args ...interface{})
 	Error(args ...interface{})
 	Fatalf(format string, args ...interface{})
@@ -11,6 +12,6 @@ type LoggerI interface {
 func NewLogger() LoggerI {
 	logger := logrus.New()
 	logger.SetFormatter(&logrus.JSONFormatter{})
-	logger.SetLevel(logrus.ErrorLevel)
+	logger.SetLevel(logrus.InfoLevel)
 	return logger
 }
