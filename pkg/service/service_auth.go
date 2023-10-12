@@ -1,44 +1,43 @@
 package service
 
 import (
+	"github.com/gilperopiola/go-rest-example/pkg/common"
 	customErrors "github.com/gilperopiola/go-rest-example/pkg/errors"
 	"github.com/gilperopiola/go-rest-example/pkg/handlers"
 	"github.com/gilperopiola/go-rest-example/pkg/repository"
-	"github.com/gilperopiola/go-rest-example/pkg/requests"
-	"github.com/gilperopiola/go-rest-example/pkg/responses"
 )
 
-func (s *Service) Signup(signupRequest requests.SignupRequest) (responses.SignupResponse, error) {
+func (s *Service) Signup(signupRequest common.SignupRequest) (common.SignupResponse, error) {
 	user := handlers.New(signupRequest.ToUserModel())
 
 	if user.Exists(s.Repository) {
-		return responses.SignupResponse{}, customErrors.ErrUsernameOrEmailAlreadyInUse
+		return common.SignupResponse{}, customErrors.ErrUsernameOrEmailAlreadyInUse
 	}
 
 	user.HashPassword()
 
 	if err := user.Create(s.Repository); err != nil {
-		return responses.SignupResponse{}, err
+		return common.SignupResponse{}, err
 	}
 
-	return responses.SignupResponse{User: user.ToEntity()}, nil
+	return common.SignupResponse{User: user.ToEntity()}, nil
 }
 
-func (s *Service) Login(loginRequest requests.LoginRequest) (responses.LoginResponse, error) {
+func (s *Service) Login(loginRequest common.LoginRequest) (common.LoginResponse, error) {
 	user := handlers.New(loginRequest.ToUserModel())
 
 	if err := user.Get(s.Repository, repository.WithoutDeleted); err != nil {
-		return responses.LoginResponse{}, err
+		return common.LoginResponse{}, err
 	}
 
 	if !user.PasswordMatches(loginRequest.Password) {
-		return responses.LoginResponse{}, customErrors.ErrWrongPassword
+		return common.LoginResponse{}, customErrors.ErrWrongPassword
 	}
 
 	tokenString, err := user.GenerateTokenString(s.Auth)
 	if err != nil {
-		return responses.LoginResponse{}, customErrors.ErrUnauthorized
+		return common.LoginResponse{}, customErrors.ErrUnauthorized
 	}
 
-	return responses.LoginResponse{Token: tokenString}, nil
+	return common.LoginResponse{Token: tokenString}, nil
 }

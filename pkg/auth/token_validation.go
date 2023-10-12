@@ -6,18 +6,13 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/gilperopiola/go-rest-example/pkg/common"
 	"github.com/gilperopiola/go-rest-example/pkg/entities"
 	customErrors "github.com/gilperopiola/go-rest-example/pkg/errors"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 )
-
-type HTTPResponse struct {
-	Success bool        `json:"success"`
-	Content interface{} `json:"content"`
-	Error   string      `json:"error"`
-}
 
 // ValidateToken validates a token for a specific role and sets ID and Email in context
 func (auth *Auth) ValidateToken(role entities.Role, shouldMatchUserID bool) gin.HandlerFunc {
@@ -104,7 +99,7 @@ func removeBearerPrefix(token string) string {
 }
 
 func abortRequest(c *gin.Context) {
-	c.JSON(http.StatusUnauthorized, HTTPResponse{
+	c.JSON(http.StatusUnauthorized, common.HTTPResponse{
 		Success: false,
 		Content: nil,
 		Error:   "unauthorized",
@@ -112,11 +107,7 @@ func abortRequest(c *gin.Context) {
 	c.Abort()
 }
 
-type ParamsGetter interface {
-	Get(name string) (string, bool)
-}
-
-func getIntFromContextURLParams(params ParamsGetter, key string) (int, error) {
+func getIntFromContextURLParams(params gin.Params, key string) (int, error) {
 
 	// Get from params
 	value, ok := params.Get(key)

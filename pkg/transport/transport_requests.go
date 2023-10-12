@@ -6,101 +6,96 @@ import (
 
 	"github.com/gilperopiola/go-rest-example/pkg/common"
 	customErrors "github.com/gilperopiola/go-rest-example/pkg/errors"
-	"github.com/gilperopiola/go-rest-example/pkg/requests"
 
 	"github.com/gin-gonic/gin"
 )
 
-func makeSignupRequest(c *gin.Context) (request requests.SignupRequest, err error) {
+func makeSignupRequest(c *gin.Context) (request common.SignupRequest, err error) {
 	if err = c.ShouldBindJSON(&request); err != nil {
-		return requests.SignupRequest{}, common.Wrap(err, customErrors.ErrBindingRequest)
+		return common.SignupRequest{}, common.Wrap(err, customErrors.ErrBindingRequest)
 	}
 
 	if err = request.Validate(); err != nil {
-		return requests.SignupRequest{}, err
+		return common.SignupRequest{}, err
 	}
 
 	return request, nil
 }
 
-func makeLoginRequest(c *gin.Context) (request requests.LoginRequest, err error) {
+func makeLoginRequest(c *gin.Context) (request common.LoginRequest, err error) {
 	if err = c.ShouldBindJSON(&request); err != nil {
-		return requests.LoginRequest{}, common.Wrap(err, customErrors.ErrBindingRequest)
+		return common.LoginRequest{}, common.Wrap(err, customErrors.ErrBindingRequest)
 	}
 
 	if err = request.Validate(); err != nil {
-		return requests.LoginRequest{}, err
+		return common.LoginRequest{}, err
 	}
 
 	return request, nil
 }
 
-func makeCreateUserRequest(c *gin.Context) (request requests.CreateUserRequest, err error) {
+func makeCreateUserRequest(c *gin.Context) (request common.CreateUserRequest, err error) {
 	if err = c.ShouldBindJSON(&request); err != nil {
-		return requests.CreateUserRequest{}, common.Wrap(err, customErrors.ErrBindingRequest)
+		return common.CreateUserRequest{}, common.Wrap(err, customErrors.ErrBindingRequest)
 	}
 
 	if err = request.Validate(); err != nil {
-		return requests.CreateUserRequest{}, err
+		return common.CreateUserRequest{}, err
 	}
 
 	return request, nil
 }
 
-func makeGetUserRequest(c *gin.Context) (request requests.GetUserRequest, err error) {
+func makeGetUserRequest(c *gin.Context) (request common.GetUserRequest, err error) {
 	userToGetID, err := getIntFromContext(c, "ID")
 	if err != nil {
-		return requests.GetUserRequest{}, err
+		return common.GetUserRequest{}, err
 	}
 
 	request.ID = userToGetID
 
 	if err = request.Validate(); err != nil {
-		return requests.GetUserRequest{}, err
+		return common.GetUserRequest{}, err
 	}
 
 	return request, nil
 }
 
-func makeUpdateUserRequest(c *gin.Context) (request requests.UpdateUserRequest, err error) {
+func makeUpdateUserRequest(c *gin.Context) (request common.UpdateUserRequest, err error) {
 	if err = c.ShouldBindJSON(&request); err != nil {
-		return requests.UpdateUserRequest{}, common.Wrap(err, customErrors.ErrBindingRequest)
+		return common.UpdateUserRequest{}, common.Wrap(err, customErrors.ErrBindingRequest)
 	}
 
 	userToUpdateID, err := getIntFromContext(c, "ID")
 	if err != nil {
-		return requests.UpdateUserRequest{}, err
+		return common.UpdateUserRequest{}, err
 	}
 
 	request.ID = userToUpdateID
 
 	if err = request.Validate(); err != nil {
-		return requests.UpdateUserRequest{}, err
+		return common.UpdateUserRequest{}, err
 	}
 
 	return request, nil
 }
 
-func makeDeleteUserRequest(c *gin.Context) (request requests.DeleteUserRequest, err error) {
+func makeDeleteUserRequest(c *gin.Context) (request common.DeleteUserRequest, err error) {
 	userToDeleteID, err := getIntFromContext(c, "ID")
 	if err != nil {
-		return requests.DeleteUserRequest{}, err
+		return common.DeleteUserRequest{}, err
 	}
 
 	request.ID = userToDeleteID
 
 	if err = request.Validate(); err != nil {
-		return requests.DeleteUserRequest{}, err
+		return common.DeleteUserRequest{}, err
 	}
 
 	return request, nil
 }
 
-type ContextGetter interface {
-	Get(key string) (interface{}, bool)
-}
-
-func getIntFromContext(c ContextGetter, key string) (int, error) {
+func getIntFromContext(c *gin.Context, key string) (int, error) {
 
 	// Get from context
 	value, ok := c.Get(key)

@@ -10,8 +10,6 @@ import (
 	customErrors "github.com/gilperopiola/go-rest-example/pkg/errors"
 	"github.com/gilperopiola/go-rest-example/pkg/models"
 	"github.com/gilperopiola/go-rest-example/pkg/repository"
-	"github.com/gilperopiola/go-rest-example/pkg/requests"
-	"github.com/gilperopiola/go-rest-example/pkg/responses"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -50,7 +48,7 @@ func TestSignup(t *testing.T) {
 	tests := []struct {
 		name           string
 		mockRepository *repository.RepositoryMock
-		want           responses.SignupResponse
+		want           common.SignupResponse
 		wantErr        error
 	}{
 		{
@@ -66,14 +64,14 @@ func TestSignup(t *testing.T) {
 		{
 			name:           "success",
 			mockRepository: makeMockRepositoryWithCreateUser(models.User{}, nil),
-			want:           responses.SignupResponse{},
+			want:           common.SignupResponse{},
 			wantErr:        nil,
 		},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			got, err := newTestService(tc.mockRepository).Signup(requests.SignupRequest{})
+			got, err := newTestService(tc.mockRepository).Signup(common.SignupRequest{})
 			assertTC(t, tc.want, tc.wantErr, got, err, tc.mockRepository)
 		})
 	}
@@ -85,7 +83,7 @@ func TestLogin(t *testing.T) {
 
 	tests := []struct {
 		name            string
-		request         requests.LoginRequest
+		request         common.LoginRequest
 		mockRepository  *repository.RepositoryMock
 		wantTokenLength int
 		wantErr         error
@@ -98,13 +96,13 @@ func TestLogin(t *testing.T) {
 		{
 			name:           "error_mismatched_passwords",
 			mockRepository: makeMockRepositoryWithGetUser(modelUser, nil),
-			request:        requests.LoginRequest{Password: INVALID_PASSWORD},
+			request:        common.LoginRequest{Password: INVALID_PASSWORD},
 			wantErr:        customErrors.ErrWrongPassword,
 		},
 		{
 			name:            "success",
 			mockRepository:  makeMockRepositoryWithGetUser(modelUser, nil),
-			request:         requests.LoginRequest{Password: VALID_PASSWORD},
+			request:         common.LoginRequest{Password: VALID_PASSWORD},
 			wantErr:         nil,
 			wantTokenLength: 212,
 		},
@@ -129,7 +127,7 @@ func TestCreateUser(t *testing.T) {
 	tests := []struct {
 		name           string
 		mockRepository *repository.RepositoryMock
-		want           responses.CreateUserResponse
+		want           common.CreateUserResponse
 		wantErr        error
 	}{
 		{
@@ -145,14 +143,14 @@ func TestCreateUser(t *testing.T) {
 		{
 			name:           "success",
 			mockRepository: makeMockRepositoryWithCreateUser(modelUser, nil),
-			want:           responses.CreateUserResponse{User: entityUser},
+			want:           common.CreateUserResponse{User: entityUser},
 			wantErr:        nil,
 		},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			got, err := newTestService(tc.mockRepository).CreateUser(requests.CreateUserRequest{})
+			got, err := newTestService(tc.mockRepository).CreateUser(common.CreateUserRequest{})
 			assertTC(t, tc.want, tc.wantErr, got, err, tc.mockRepository)
 		})
 	}
@@ -162,9 +160,9 @@ func TestGetUser(t *testing.T) {
 
 	tests := []struct {
 		name           string
-		request        requests.GetUserRequest
+		request        common.GetUserRequest
 		mockRepository *repository.RepositoryMock
-		want           responses.GetUserResponse
+		want           common.GetUserResponse
 		wantErr        error
 	}{
 		{
@@ -175,7 +173,7 @@ func TestGetUser(t *testing.T) {
 		{
 			name:           "success",
 			mockRepository: makeMockRepositoryWithGetUser(modelUser, nil),
-			want:           responses.GetUserResponse{User: entityUser},
+			want:           common.GetUserResponse{User: entityUser},
 			wantErr:        nil,
 		},
 	}
@@ -205,7 +203,7 @@ func TestUpdateUser(t *testing.T) {
 	tests := []struct {
 		name           string
 		mockRepository *repository.RepositoryMock
-		want           responses.UpdateUserResponse
+		want           common.UpdateUserResponse
 		wantErr        error
 	}{
 		{
@@ -226,14 +224,14 @@ func TestUpdateUser(t *testing.T) {
 		{
 			name:           "success",
 			mockRepository: makeMockRepositoryWithUpdateUser(modelUser, nil),
-			want:           responses.UpdateUserResponse{User: entityUser},
+			want:           common.UpdateUserResponse{User: entityUser},
 			wantErr:        nil,
 		},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			got, err := newTestService(tc.mockRepository).UpdateUser(requests.UpdateUserRequest{})
+			got, err := newTestService(tc.mockRepository).UpdateUser(common.UpdateUserRequest{})
 			assertTC(t, tc.want, tc.wantErr, got, err, tc.mockRepository)
 		})
 	}
@@ -243,7 +241,7 @@ func TestDeleteUser(t *testing.T) {
 	tests := []struct {
 		name           string
 		mockRepository *repository.RepositoryMock
-		want           responses.DeleteUserResponse
+		want           common.DeleteUserResponse
 		wantErr        error
 	}{
 		{
@@ -254,13 +252,13 @@ func TestDeleteUser(t *testing.T) {
 		{
 			name:           "success",
 			mockRepository: makeMockRepositoryWithDeleteUser(modelUser, nil),
-			want:           responses.DeleteUserResponse{User: entityUser},
+			want:           common.DeleteUserResponse{User: entityUser},
 		},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			got, err := newTestService(tc.mockRepository).DeleteUser(requests.DeleteUserRequest{ID: VALID_ID})
+			got, err := newTestService(tc.mockRepository).DeleteUser(common.DeleteUserRequest{ID: VALID_ID})
 			assertTC(t, tc.want, tc.wantErr, got, err, tc.mockRepository)
 		})
 	}

@@ -2,34 +2,35 @@ package transport
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 
+	"github.com/gilperopiola/go-rest-example/pkg/common"
 	customErrors "github.com/gilperopiola/go-rest-example/pkg/errors"
-	"github.com/gilperopiola/go-rest-example/pkg/logger"
 )
 
 // The errorsMapper maps errors to HTTP status codes
 // It also logs errors and warnings
 
 type errorsMapper struct {
-	logger logger.LoggerI
+	logger common.LoggerI
 }
 
 type errorsMapperI interface {
-	Map(err error) (status int, response HTTPResponse)
+	Map(err error) (status int, response common.HTTPResponse)
 }
 
-func NewErrorsMapper(logger logger.LoggerI) errorsMapper {
+func NewErrorsMapper(logger common.LoggerI) errorsMapper {
 	return errorsMapper{logger: logger}
 }
 
 // This method will define the response of the transport layer
-func (e errorsMapper) Map(err error) (statusCode int, response HTTPResponse) {
+func (e errorsMapper) Map(err error) (statusCode int, response common.HTTPResponse) {
 
 	// If we're here we shouldn't have a nil error
 	if err == nil {
-		err = customErrors.ErrNilError // TODO fix
+		err = customErrors.ErrNilError
 	}
 
 	// We get the HTTP code depending on the error, defaulting to 500
@@ -38,7 +39,7 @@ func (e errorsMapper) Map(err error) (statusCode int, response HTTPResponse) {
 	// We log 500's as errors, and 400's as warnings
 	e.logWarningOrError(err, statusCode)
 
-	return statusCode, HTTPResponse{
+	return statusCode, common.HTTPResponse{
 		Success: false,
 		Content: nil,
 		Error:   getFirstError(err),
@@ -92,16 +93,18 @@ var errorsMapToHTTPCode = map[error]int{
 	customErrors.ErrCreatingUser: 500,
 	customErrors.ErrGettingUser:  500,
 	customErrors.ErrUpdatingUser: 500,
+	customErrors.ErrDeletingUser: 500,
 	customErrors.ErrUnknown:      500,
+	customErrors.ErrNilError:     500,
 }
 
 func (e errorsMapper) logWarningOrError(err error, responseStatusCode int) {
 	chain := err.Error()
 
-	logFn := e.logger.Warn
+	logFn := e.logger.Info
 	if responseStatusCode >= 500 {
 		logFn = e.logger.Error
 	}
 
-	logFn(chain)
+	logFn(fmt.Sprint(responseStatusCode) + ": " + chain)
 }

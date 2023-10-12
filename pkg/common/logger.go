@@ -1,8 +1,9 @@
-package logger
+package common
 
 import "github.com/sirupsen/logrus"
 
 type LoggerI interface {
+	Info(args ...interface{})
 	Warn(args ...interface{})
 	Error(args ...interface{})
 	Fatalf(format string, args ...interface{})

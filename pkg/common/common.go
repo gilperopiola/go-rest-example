@@ -6,14 +6,16 @@ import (
 	"fmt"
 )
 
-type QueryOption func(*string)
+type HTTPResponse struct {
+	Success bool        `json:"success"`
+	Content interface{} `json:"content"`
+	Error   string      `json:"error"`
+}
 
-// Wrap should actaully be called WrapError, but it's too long
 func Wrap(err1, err2 error) error {
 	return fmt.Errorf("%s: %w", err1.Error(), err2)
 }
 
-// Hash hashes
 func Hash(salt string, data string) string {
 	hasher := sha256.New()
 	hasher.Write([]byte(salt + data))

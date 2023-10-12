@@ -10,10 +10,6 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-func WithoutDeleted(q *string) {
-	*q += " AND deleted = false"
-}
-
 // CreateUser creates a user on the database. Id, username and email are unique
 func (r *Repository) CreateUser(user models.User) (models.User, error) {
 	if err := r.Database.DB.Create(&user).Error; err != nil {
@@ -33,7 +29,7 @@ func (r *Repository) UpdateUser(user models.User) (models.User, error) {
 }
 
 // UserExists checks if a user exists on the database
-func (r *Repository) UserExists(email, username string, opts ...common.QueryOption) bool {
+func (r *Repository) UserExists(email, username string, opts ...QueryOption) bool {
 	query := "(email = ? OR username = ?)"
 
 	for _, opt := range opts {
@@ -49,7 +45,7 @@ func (r *Repository) UserExists(email, username string, opts ...common.QueryOpti
 }
 
 // GetUser retrieves a user from the database, if it exists
-func (r *Repository) GetUser(user models.User, opts ...common.QueryOption) (models.User, error) {
+func (r *Repository) GetUser(user models.User, opts ...QueryOption) (models.User, error) {
 	query := "(id = ? OR username = ? OR email = ?)"
 
 	for _, opt := range opts {

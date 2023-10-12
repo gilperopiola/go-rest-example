@@ -2,10 +2,9 @@ package service
 
 import (
 	"github.com/gilperopiola/go-rest-example/pkg/auth"
+	"github.com/gilperopiola/go-rest-example/pkg/common"
 	"github.com/gilperopiola/go-rest-example/pkg/config"
 	"github.com/gilperopiola/go-rest-example/pkg/repository"
-	"github.com/gilperopiola/go-rest-example/pkg/requests"
-	"github.com/gilperopiola/go-rest-example/pkg/responses"
 )
 
 type Service struct {
@@ -15,13 +14,13 @@ type Service struct {
 }
 
 type ServiceLayer interface {
-	Signup(signupRequest requests.SignupRequest) (responses.SignupResponse, error)
-	Login(loginRequest requests.LoginRequest) (responses.LoginResponse, error)
+	Signup(signupRequest common.SignupRequest) (common.SignupResponse, error)
+	Login(loginRequest common.LoginRequest) (common.LoginResponse, error)
 
-	CreateUser(createUserRequest requests.CreateUserRequest) (responses.CreateUserResponse, error)
-	GetUser(getUserRequest requests.GetUserRequest) (responses.GetUserResponse, error)
-	UpdateUser(updateUserRequest requests.UpdateUserRequest) (responses.UpdateUserResponse, error)
-	DeleteUser(deleteUserRequest requests.DeleteUserRequest) (responses.DeleteUserResponse, error)
+	CreateUser(createUserRequest common.CreateUserRequest) (common.CreateUserResponse, error)
+	GetUser(getUserRequest common.GetUserRequest) (common.GetUserResponse, error)
+	UpdateUser(updateUserRequest common.UpdateUserRequest) (common.UpdateUserResponse, error)
+	DeleteUser(deleteUserRequest common.DeleteUserRequest) (common.DeleteUserResponse, error)
 }
 
 func NewService(repository repository.RepositoryLayer, auth auth.AuthI, config config.ConfigI) *Service {

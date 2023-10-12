@@ -1,4 +1,4 @@
-package responses
+package common
 
 import (
 	"github.com/gilperopiola/go-rest-example/pkg/entities"

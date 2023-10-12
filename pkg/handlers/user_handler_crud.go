@@ -15,7 +15,7 @@ func (h *UserHandler) Create(r repository.RepositoryLayer) (err error) {
 	return nil
 }
 
-func (h *UserHandler) Get(r repository.RepositoryLayer, opts ...common.QueryOption) (err error) {
+func (h *UserHandler) Get(r repository.RepositoryLayer, opts ...repository.QueryOption) (err error) {
 	h.User, err = r.GetUser(h.User, opts...)
 	if err != nil {
 		return common.Wrap(fmt.Errorf("UserHandler.Get"), err)

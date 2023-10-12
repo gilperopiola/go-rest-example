@@ -13,7 +13,7 @@ type UserHandlerI interface {
 
 	// DB Methods
 	Create(r repository.RepositoryLayer) error
-	Get(r repository.RepositoryLayer, opts ...common.QueryOption) error
+	Get(r repository.RepositoryLayer, opts ...repository.QueryOption) error
 	Update(r repository.RepositoryLayer) error
 	Delete(r repository.RepositoryLayer) error
 	Exists(r repository.RepositoryLayer) bool

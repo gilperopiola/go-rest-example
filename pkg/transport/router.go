@@ -2,8 +2,8 @@ package transport
 
 import (
 	"github.com/gilperopiola/go-rest-example/pkg/auth"
+	"github.com/gilperopiola/go-rest-example/pkg/common"
 	"github.com/gilperopiola/go-rest-example/pkg/config"
-	"github.com/gilperopiola/go-rest-example/pkg/logger"
 
 	"github.com/gin-gonic/gin"
 )
@@ -12,13 +12,13 @@ type Router struct {
 	*gin.Engine
 }
 
-func NewRouter(transport TransportLayer, config config.ConfigI, auth auth.AuthI, logger logger.LoggerI, monitoring gin.HandlerFunc) Router {
+func NewRouter(transport TransportLayer, config config.ConfigI, auth auth.AuthI, logger common.LoggerI, monitoring gin.HandlerFunc) Router {
 	var router Router
 	router.Setup(transport, config.GetDebugMode(), auth, logger, monitoring)
 	return router
 }
 
-func (router *Router) Setup(transport TransportLayer, debugMode bool, auth auth.AuthI, logger logger.LoggerI, monitoring gin.HandlerFunc) {
+func (router *Router) Setup(transport TransportLayer, debugMode bool, auth auth.AuthI, logger common.LoggerI, monitoring gin.HandlerFunc) {
 
 	// Create router. Set debug/release mode
 	router.Prepare(!debugMode)

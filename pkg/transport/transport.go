@@ -3,8 +3,7 @@ package transport
 import (
 	"net/http"
 
-	"github.com/gilperopiola/go-rest-example/pkg/requests"
-	"github.com/gilperopiola/go-rest-example/pkg/responses"
+	"github.com/gilperopiola/go-rest-example/pkg/common"
 	"github.com/gilperopiola/go-rest-example/pkg/service"
 
 	"github.com/gin-gonic/gin"
@@ -60,32 +59,25 @@ func HandleRequest[req Request, resp Response](t Transport, c *gin.Context,
 	}
 
 	// Return OK
-	c.JSON(http.StatusOK, HTTPResponse{
+	c.JSON(http.StatusOK, common.HTTPResponse{
 		Success: true,
 		Content: response,
 	})
 }
 
 type Request interface {
-	requests.SignupRequest |
-		requests.LoginRequest |
-		requests.CreateUserRequest |
-		requests.GetUserRequest |
-		requests.UpdateUserRequest |
-		requests.DeleteUserRequest
+	common.SignupRequest |
+		common.LoginRequest |
+		common.CreateUserRequest |
+		common.GetUserRequest |
+		common.UpdateUserRequest |
+		common.DeleteUserRequest
 }
 type Response interface {
-	responses.SignupResponse |
-		responses.LoginResponse |
-		responses.CreateUserResponse |
-		responses.GetUserResponse |
-		responses.UpdateUserResponse |
-		responses.DeleteUserResponse
-}
-
-// HTTPResponse also lives on token_validation.go
-type HTTPResponse struct {
-	Success bool        `json:"success"`
-	Content interface{} `json:"content"`
-	Error   string      `json:"error"`
+	common.SignupResponse |
+		common.LoginResponse |
+		common.CreateUserResponse |
+		common.GetUserResponse |
+		common.UpdateUserResponse |
+		common.DeleteUserResponse
 }
