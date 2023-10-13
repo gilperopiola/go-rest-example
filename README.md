@@ -1,123 +1,116 @@
 # Go REST Example
 
-**Hey kiddo!** If you're reading this, take a few seconds to be mindful of your body and your surroundings, feeling your breath as it enters and exits your lungs. We are now out of the auto-pilot state we were in, and are fully ready to continue.
+**`Hey kiddo!`** Now that you're here, please take a few seconds to breathe. In & out. Slowly... Gently... Yeah, right there!
 
-This repository is just a template or example of a **medium-sized microservice** that exposes a simple yet elegant and extensible **HTTP REST API**.
+Try to be mindful of your body and your surroundings... are you comfortable? Are you tense? **Untense those muscles!** 
 
-Using Gin, it provides a clean and layered architecture complete with User Management, JWT Authentication, MySQL Storage, Easy Configuration, Logging, Monitoring and much more.
+...And now that your auto-pilot mode is turned off, let's dive in! 🐙
 
-Go's best practices and standards are followed most of the time, using techniques as Dependency Injection and Table Driven Tests and applying the holy proverbs 🙏.
+---
+
+This project is a template ~ example ~ boilerplate of a `large-sized microservice` exposing an elegant and extensible `HTTP REST API`. If you're going for a simpler microservice you should check out [v1.2.0](https://github.com/gilperopiola/go-rest-example/releases/tag/v1.2.0), it's much simpler.
+
+Using **Gin**, it provides a **clean and layered architecture** complete with:
+
+|User Management|Unit Tests|JWT Auth|
+|:-------------:|:-------------:|:-------------:|
+|**Mature Error Handling**|**Easy Config**|**Logrus Logging**|
+|**NewRelic Monitoring**|**MySQL Storage**|**Design Patterns**|
+|**Follows Best Practices**|**Inversion of Control**|**Dependency Injection**|
+|**Entities & DB Models**|**Dockerized**|**Modular Interfaces**|
 
 ## Table of Contents
 
-- [Prerequisites](#prerequisites)
 - [Installation and Usage](#installation-and-usage)
 - [Project Architecture](#project-architecture)
 - [Request Flow Overview](#request-flow-overview)
 - [Contributing and License](#contributing-and-license)
 
-## Prerequisites
-
-- Go 1.x
-- A suitable database (MySQL, PostgreSQL, etc)
-- Having a keyboard idk
-
 ## Installation and Usage
+
+You'll need to have **Go 1.x.x** installed, as well as a **MySQL Database** running.
 
 1. Clone the repository:
    ```bash
    git clone https://github.com/gilperopiola/go-rest-example.git
    ```
 
-2. Navigate to the project directory:
+2. Navigate to the project directory and install dependencies:
    ```bash
    cd go-rest-example
-   ```
-
-3. Install the required dependencies:
-   ```bash
    go mod download
    ```
 
-4. Set up your database and update your env vars as you see fit. See `config.go` for more info.
+3. Set up your database _(you can use XAMPP)_ and your environment variables. **You should read the `config.go` file before going further**.
 
-5. Build the project:
+4. Run the project:
    ```bash
-   go build -o go-rest-example
+   go run cmd/main.go
    ```
 
-6. Run the built binary:
-    ```bash
-    ./go-rest-example
-    ```
+This will start the server and you'll (hopefully 🛐) be able to hit the endpoints.
 
-This will start the server and you'll hopefully be able to hit the endpoints.
-
-You can also use Docker :)
+**You can also use Docker :)**
 
 ## Project Architecture
 
-| Package | Description |
+On `cmd/main.go` we have the app's entrypoint as well as the initialization of the dependencies.
+
+Then, it's basically divided into 3 layers: `Transport, Service and Repository`.
+
+`Transport` handles routing, validations, error management and logging.
+
+`Service` handles the business logic, it receives the requests created by the previous layer, calls the next one, and returns the appropiate responses. The `handlers` package is also part of this layer.
+
+`Repository` handles connections with external dependencies, such as the database.
+
+| Package | 👀 |
 |---------|-------------|
-| **cmd** | Contains the main application entry point. |
-| **pkg > auth** | Handles authentication logic. |
-| **pkg > codec** | Responsible for encoding and decoding tasks. |
-| **pkg > entities** | Defines various entities and custom errors. |
-| **pkg > logger** | Just a logger idk. |
-| **pkg > repository** | Manages database connections and operations. |
-| **pkg > service** | Contains the core business logic. |
-| **pkg > transport** | Sets up routes and manages the transport layer. |
-| **pkg > utils** | Houses utility functions used across the project. |
+| `auth` | Token creation and validation. |
+| `common` | Things used across the project. Logger, requests & responses. |
+| `config` | Self explanatory. |
+| `entities` | Our structs, uncoupled of the database models. |
+| `errors` | Our custom errors. |
+| `handlers` | Interfaces used to interact with our models. Part of the service layer. |
+| `models` | Our database models. |
 
 ## Request Flow Overview
 
-1. **Entry Point**: 
+1. **Entrypoint & Token Validation**: 
    
-   All requests start at `router.go`, where the URL is matched.
+   All requests start at `router.go`, where the URL is matched with a transport function. For private endpoints, the request is routed through `token_validation.go` for authentication. Each token contains a Role, some endpoints require a specific Role to work.
 
-2. **Token Validation**: 
+2. **Endpoint Call, Request Handling**: 
    
-   For private endpoints, the request is routed through `token_validation.go` for authentication.
+   The corresponding function in `transport_endpoints.go` is invoked based on the matched URL. This function then calls `HandleRequest` from `transport.go`. This function orchestrates everything.
 
-3. **Endpoint Matching**: 
+3. **Request Typification & Validation**: 
    
-   The corresponding function in `transport_endpoints.go` is invoked based on the matched URL.
+   Inside `transport.go`, the appropriate function from `transport_requests.go` is called. This step involves typifying and validating the incoming request, returning it back to the previous file.
 
-4. **Request Handling**: 
+4. **Service Layer Invocation**: 
    
-   This function then calls `HandleRequest` from `transport.go`.
+   Upon successful validation, `HandleRequest` invokes the corresponding method in `service.go`. The actual implementation of these methods resides in `service_xxx.go`, divided by domain.
 
-5. **Request Typification & Validation**: 
+5. **Requests to Models to Handlers**: 
    
-   Inside `transport.go`, the appropriate function from `transport_requests.go` is called. This step involves typifying and validating the incoming request.
+   The service layer receives requests and transforms them into **models**. With a model, the handler is then created and the business functions can be called. These will interact with the last layer, the Repository.
 
-6. **Service Layer Invocation**: 
+6. **Repository Layer**: 
    
-   Upon successful validation, `HandleRequest` invokes the corresponding method in `service.go`.
+   Here, the matching `repository_xxx.go` file is invoked. This layer handles outside dependencies such as database operations. Then, the backtracking begins.
 
-7. **Service Implementation**: 
-   
-   The actual implementation of these methods resides in `service_xxx.go`, organized by domain.
-
-8. **Entity to Model Conversion**: 
-   
-   The service layer operates using **entities**. If needed, the `codec` is used to convert these entities into **models** before interacting with the `repository` layer.
-
-9. **Repository Layer**: 
-   
-   Here, the matching `repository_xxx.go` file is invoked. This layer handles database operations and returns data or errors as required.
-
-10. **Backtracking & Response Handling**: 
+7. **Backtracking & Response Handling**: 
    
    The system then retraces its steps. If the repository layer returned a model, it's converted back to an entity in `service_xxx.go`. This file also handles any errors or continues execution if there are none.
 
-11. **Finalizing Response**: 
+8. **Finalizing Response**: 
    
-   The process returns to `HandleRequest` in `transport.go`, where the service's response is processed. If there's an error, it's mapped using `errors_mapper.go`.
+   The process returns to `HandleRequest` in `transport.go`, where the service's response is processed. If there's an error, it's mapped and logged using `errors_mapper.go`. The HTTP response is User Friendly, but the logs contain the whole stacktrace of the request.
 
-12. **Sending HTTP Response**: 
+9. **Voilá**: 
    
-   Finally, the HTTP response is sent back to the client.
+   And voilá 🌞
 
 ## Contributing and License
 
@@ -137,5 +130,5 @@ This project is licensed under the MIT License. See the `LICENSE` file for more 
 
 ---
 
-# 🐿️
+# Thanks for reading! 🐿️
 
