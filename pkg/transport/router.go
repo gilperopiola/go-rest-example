@@ -2,8 +2,8 @@ package transport
 
 import (
 	"github.com/gilperopiola/go-rest-example/pkg/auth"
+	"github.com/gilperopiola/go-rest-example/pkg/common/config"
 	"github.com/gilperopiola/go-rest-example/pkg/common/logger"
-	"github.com/gilperopiola/go-rest-example/pkg/config"
 
 	"github.com/gin-gonic/gin"
 )

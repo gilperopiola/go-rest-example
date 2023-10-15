@@ -4,9 +4,9 @@ import (
 	"os"
 	"time"
 
+	"github.com/gilperopiola/go-rest-example/pkg/common/config"
 	"github.com/gilperopiola/go-rest-example/pkg/common/logger"
 	"github.com/gilperopiola/go-rest-example/pkg/common/models"
-	"github.com/gilperopiola/go-rest-example/pkg/config"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"

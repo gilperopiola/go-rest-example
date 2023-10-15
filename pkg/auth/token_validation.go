@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/gilperopiola/go-rest-example/pkg/common"
-	customErrors "github.com/gilperopiola/go-rest-example/pkg/errors"
+	customErrors "github.com/gilperopiola/go-rest-example/pkg/common/errors"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"

@@ -7,8 +7,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	customErrors "github.com/gilperopiola/go-rest-example/pkg/common/errors"
 	"github.com/gilperopiola/go-rest-example/pkg/common/requests"
-	customErrors "github.com/gilperopiola/go-rest-example/pkg/errors"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"

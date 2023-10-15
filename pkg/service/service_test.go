@@ -5,11 +5,11 @@ import (
 
 	"github.com/gilperopiola/go-rest-example/pkg/auth"
 	"github.com/gilperopiola/go-rest-example/pkg/common"
+	"github.com/gilperopiola/go-rest-example/pkg/common/config"
+	customErrors "github.com/gilperopiola/go-rest-example/pkg/common/errors"
 	"github.com/gilperopiola/go-rest-example/pkg/common/models"
 	"github.com/gilperopiola/go-rest-example/pkg/common/requests"
 	"github.com/gilperopiola/go-rest-example/pkg/common/responses"
-	"github.com/gilperopiola/go-rest-example/pkg/config"
-	customErrors "github.com/gilperopiola/go-rest-example/pkg/errors"
 	"github.com/gilperopiola/go-rest-example/pkg/repository"
 
 	"github.com/stretchr/testify/assert"

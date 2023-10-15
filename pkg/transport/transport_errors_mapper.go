@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	"github.com/gilperopiola/go-rest-example/pkg/common"
+	customErrors "github.com/gilperopiola/go-rest-example/pkg/common/errors"
 	"github.com/gilperopiola/go-rest-example/pkg/common/logger"
-	customErrors "github.com/gilperopiola/go-rest-example/pkg/errors"
 )
 
 // The errorsMapper maps errors to HTTP status codes

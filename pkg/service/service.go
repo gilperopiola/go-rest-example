@@ -2,9 +2,9 @@ package service
 
 import (
 	"github.com/gilperopiola/go-rest-example/pkg/auth"
+	"github.com/gilperopiola/go-rest-example/pkg/common/config"
 	"github.com/gilperopiola/go-rest-example/pkg/common/requests"
 	"github.com/gilperopiola/go-rest-example/pkg/common/responses"
-	"github.com/gilperopiola/go-rest-example/pkg/config"
 	"github.com/gilperopiola/go-rest-example/pkg/repository"
 )
 

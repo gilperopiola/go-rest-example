@@ -5,8 +5,8 @@ import (
 	"strconv"
 
 	"github.com/gilperopiola/go-rest-example/pkg/common"
+	customErrors "github.com/gilperopiola/go-rest-example/pkg/common/errors"
 	"github.com/gilperopiola/go-rest-example/pkg/common/requests"
-	customErrors "github.com/gilperopiola/go-rest-example/pkg/errors"
 
 	"github.com/gin-gonic/gin"
 )

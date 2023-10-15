@@ -3,7 +3,7 @@ package requests
 import (
 	"regexp"
 
-	customErrors "github.com/gilperopiola/go-rest-example/pkg/errors"
+	customErrors "github.com/gilperopiola/go-rest-example/pkg/common/errors"
 )
 
 const (

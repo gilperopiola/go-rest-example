@@ -4,8 +4,8 @@ import (
 	"log"
 
 	"github.com/gilperopiola/go-rest-example/pkg/auth"
+	"github.com/gilperopiola/go-rest-example/pkg/common/config"
 	"github.com/gilperopiola/go-rest-example/pkg/common/logger"
-	"github.com/gilperopiola/go-rest-example/pkg/config"
 	"github.com/gilperopiola/go-rest-example/pkg/repository"
 	"github.com/gilperopiola/go-rest-example/pkg/service"
 	"github.com/gilperopiola/go-rest-example/pkg/transport"

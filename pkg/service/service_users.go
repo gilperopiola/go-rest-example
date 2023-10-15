@@ -4,9 +4,9 @@ import (
 	"fmt"
 
 	"github.com/gilperopiola/go-rest-example/pkg/common"
+	customErrors "github.com/gilperopiola/go-rest-example/pkg/common/errors"
 	"github.com/gilperopiola/go-rest-example/pkg/common/requests"
 	"github.com/gilperopiola/go-rest-example/pkg/common/responses"
-	customErrors "github.com/gilperopiola/go-rest-example/pkg/errors"
 	"github.com/gilperopiola/go-rest-example/pkg/repository"
 	"github.com/gilperopiola/go-rest-example/pkg/service/handlers"
 )

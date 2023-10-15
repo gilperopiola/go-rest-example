@@ -3,8 +3,8 @@ package transport
 import (
 	"log"
 
+	"github.com/gilperopiola/go-rest-example/pkg/common/config"
 	"github.com/gilperopiola/go-rest-example/pkg/common/logger"
-	"github.com/gilperopiola/go-rest-example/pkg/config"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
