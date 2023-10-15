@@ -3,8 +3,8 @@ package handlers
 import (
 	"github.com/gilperopiola/go-rest-example/pkg/auth"
 	"github.com/gilperopiola/go-rest-example/pkg/common"
-	"github.com/gilperopiola/go-rest-example/pkg/entities"
-	"github.com/gilperopiola/go-rest-example/pkg/models"
+	"github.com/gilperopiola/go-rest-example/pkg/common/entities"
+	"github.com/gilperopiola/go-rest-example/pkg/common/models"
 	"github.com/gilperopiola/go-rest-example/pkg/repository"
 )
 

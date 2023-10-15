@@ -4,8 +4,8 @@ import (
 	"errors"
 
 	"github.com/gilperopiola/go-rest-example/pkg/common"
+	"github.com/gilperopiola/go-rest-example/pkg/common/models"
 	customErrors "github.com/gilperopiola/go-rest-example/pkg/errors"
-	"github.com/gilperopiola/go-rest-example/pkg/models"
 
 	"github.com/jinzhu/gorm"
 )

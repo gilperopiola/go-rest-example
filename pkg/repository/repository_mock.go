@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"github.com/gilperopiola/go-rest-example/pkg/models"
+	"github.com/gilperopiola/go-rest-example/pkg/common/models"
 
 	"github.com/stretchr/testify/mock"
 )

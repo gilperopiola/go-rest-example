@@ -1,9 +1,9 @@
-package common
+package requests
 
 import (
 	"time"
 
-	"github.com/gilperopiola/go-rest-example/pkg/models"
+	"github.com/gilperopiola/go-rest-example/pkg/common/models"
 )
 
 // Here live the input requests that are used in the transport & service layers.

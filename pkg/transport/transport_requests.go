@@ -5,91 +5,92 @@ import (
 	"strconv"
 
 	"github.com/gilperopiola/go-rest-example/pkg/common"
+	"github.com/gilperopiola/go-rest-example/pkg/common/requests"
 	customErrors "github.com/gilperopiola/go-rest-example/pkg/errors"
 
 	"github.com/gin-gonic/gin"
 )
 
-func makeSignupRequest(c *gin.Context) (request common.SignupRequest, err error) {
+func makeSignupRequest(c *gin.Context) (request requests.SignupRequest, err error) {
 	if err = c.ShouldBindJSON(&request); err != nil {
-		return common.SignupRequest{}, common.Wrap(err, customErrors.ErrBindingRequest)
+		return requests.SignupRequest{}, common.Wrap(fmt.Errorf("makeSignupRequest"), customErrors.ErrBindingRequest)
 	}
 
 	if err = request.Validate(); err != nil {
-		return common.SignupRequest{}, err
+		return requests.SignupRequest{}, common.Wrap(fmt.Errorf("makeSignupRequest"), err)
 	}
 
 	return request, nil
 }
 
-func makeLoginRequest(c *gin.Context) (request common.LoginRequest, err error) {
+func makeLoginRequest(c *gin.Context) (request requests.LoginRequest, err error) {
 	if err = c.ShouldBindJSON(&request); err != nil {
-		return common.LoginRequest{}, common.Wrap(err, customErrors.ErrBindingRequest)
+		return requests.LoginRequest{}, common.Wrap(fmt.Errorf("makeLoginRequest"), customErrors.ErrBindingRequest)
 	}
 
 	if err = request.Validate(); err != nil {
-		return common.LoginRequest{}, err
+		return requests.LoginRequest{}, common.Wrap(fmt.Errorf("makeLoginRequest"), err)
 	}
 
 	return request, nil
 }
 
-func makeCreateUserRequest(c *gin.Context) (request common.CreateUserRequest, err error) {
+func makeCreateUserRequest(c *gin.Context) (request requests.CreateUserRequest, err error) {
 	if err = c.ShouldBindJSON(&request); err != nil {
-		return common.CreateUserRequest{}, common.Wrap(err, customErrors.ErrBindingRequest)
+		return requests.CreateUserRequest{}, common.Wrap(fmt.Errorf("makeCreateUserRequest"), customErrors.ErrBindingRequest)
 	}
 
 	if err = request.Validate(); err != nil {
-		return common.CreateUserRequest{}, err
+		return requests.CreateUserRequest{}, common.Wrap(fmt.Errorf("makeCreateUserRequest"), err)
 	}
 
 	return request, nil
 }
 
-func makeGetUserRequest(c *gin.Context) (request common.GetUserRequest, err error) {
+func makeGetUserRequest(c *gin.Context) (request requests.GetUserRequest, err error) {
 	userToGetID, err := getIntFromContext(c, "ID")
 	if err != nil {
-		return common.GetUserRequest{}, err
+		return requests.GetUserRequest{}, common.Wrap(fmt.Errorf("makeGetUserRequest"), err)
 	}
 
 	request.ID = userToGetID
 
 	if err = request.Validate(); err != nil {
-		return common.GetUserRequest{}, err
+		return requests.GetUserRequest{}, common.Wrap(fmt.Errorf("makeGetUserRequest"), err)
 	}
 
 	return request, nil
 }
 
-func makeUpdateUserRequest(c *gin.Context) (request common.UpdateUserRequest, err error) {
+func makeUpdateUserRequest(c *gin.Context) (request requests.UpdateUserRequest, err error) {
 	if err = c.ShouldBindJSON(&request); err != nil {
-		return common.UpdateUserRequest{}, common.Wrap(err, customErrors.ErrBindingRequest)
+		return requests.UpdateUserRequest{}, common.Wrap(fmt.Errorf("makeUpdateUserRequest"), customErrors.ErrBindingRequest)
 	}
 
 	userToUpdateID, err := getIntFromContext(c, "ID")
 	if err != nil {
-		return common.UpdateUserRequest{}, err
+		return requests.UpdateUserRequest{}, common.Wrap(fmt.Errorf("makeUpdateUserRequest"), err)
 	}
 
 	request.ID = userToUpdateID
 
 	if err = request.Validate(); err != nil {
-		return common.UpdateUserRequest{}, err
+		return requests.UpdateUserRequest{}, common.Wrap(fmt.Errorf("makeUpdateUserRequest"), err)
 	}
 
 	return request, nil
 }
 
-func makeDeleteUserRequest(c *gin.Context) (request common.DeleteUserRequest, err error) {
+func makeDeleteUserRequest(c *gin.Context) (request requests.DeleteUserRequest, err error) {
 	userToDeleteID, err := getIntFromContext(c, "ID")
 	if err != nil {
-		return common.DeleteUserRequest{}, err
+		return requests.DeleteUserRequest{}, common.Wrap(fmt.Errorf("makeDeleteUserRequest"), err)
 	}
 
 	request.ID = userToDeleteID
 
 	if err = request.Validate(); err != nil {
-		return common.DeleteUserRequest{}, err
+		return requests.DeleteUserRequest{}, common.Wrap(fmt.Errorf("makeDeleteUserRequest"), err)
 	}
 
 	return request, nil

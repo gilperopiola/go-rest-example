@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/gilperopiola/go-rest-example/pkg/common"
+	"github.com/gilperopiola/go-rest-example/pkg/common/logger"
 	customErrors "github.com/gilperopiola/go-rest-example/pkg/errors"
 )
 
@@ -14,14 +15,14 @@ import (
 // It also logs errors and warnings
 
 type errorsMapper struct {
-	logger common.LoggerI
+	logger logger.LoggerI
 }
 
 type errorsMapperI interface {
 	Map(err error) (status int, response common.HTTPResponse)
 }
 
-func NewErrorsMapper(logger common.LoggerI) errorsMapper {
+func NewErrorsMapper(logger logger.LoggerI) errorsMapper {
 	return errorsMapper{logger: logger}
 }
 

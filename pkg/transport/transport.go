@@ -4,6 +4,8 @@ import (
 	"net/http"
 
 	"github.com/gilperopiola/go-rest-example/pkg/common"
+	"github.com/gilperopiola/go-rest-example/pkg/common/requests"
+	"github.com/gilperopiola/go-rest-example/pkg/common/responses"
 	"github.com/gilperopiola/go-rest-example/pkg/service"
 
 	"github.com/gin-gonic/gin"
@@ -66,18 +68,18 @@ func HandleRequest[req Request, resp Response](t Transport, c *gin.Context,
 }
 
 type Request interface {
-	common.SignupRequest |
-		common.LoginRequest |
-		common.CreateUserRequest |
-		common.GetUserRequest |
-		common.UpdateUserRequest |
-		common.DeleteUserRequest
+	requests.SignupRequest |
+		requests.LoginRequest |
+		requests.CreateUserRequest |
+		requests.GetUserRequest |
+		requests.UpdateUserRequest |
+		requests.DeleteUserRequest
 }
 type Response interface {
-	common.SignupResponse |
-		common.LoginResponse |
-		common.CreateUserResponse |
-		common.GetUserResponse |
-		common.UpdateUserResponse |
-		common.DeleteUserResponse
+	responses.SignupResponse |
+		responses.LoginResponse |
+		responses.CreateUserResponse |
+		responses.GetUserResponse |
+		responses.UpdateUserResponse |
+		responses.DeleteUserResponse
 }

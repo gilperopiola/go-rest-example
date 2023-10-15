@@ -3,7 +3,7 @@ package transport
 import (
 	"log"
 
-	"github.com/gilperopiola/go-rest-example/pkg/common"
+	"github.com/gilperopiola/go-rest-example/pkg/common/logger"
 	"github.com/gilperopiola/go-rest-example/pkg/config"
 
 	"github.com/gin-contrib/cors"
@@ -41,7 +41,7 @@ func NewMonitoringMiddleware(config config.ConfigI) gin.HandlerFunc {
 	return nrgin.Middleware(newRelicApp)
 }
 
-func newLoggerToContextMiddleware(logger common.LoggerI) gin.HandlerFunc {
+func newLoggerToContextMiddleware(logger logger.LoggerI) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Set("logger", logger)
 		c.Next()

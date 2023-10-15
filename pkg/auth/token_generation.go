@@ -4,8 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/gilperopiola/go-rest-example/pkg/entities"
-
+	"github.com/gilperopiola/go-rest-example/pkg/common/entities"
 	"github.com/golang-jwt/jwt/v4"
 )
 

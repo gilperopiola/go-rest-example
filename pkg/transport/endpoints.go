@@ -2,7 +2,7 @@ package transport
 
 import (
 	"github.com/gilperopiola/go-rest-example/pkg/auth"
-	"github.com/gilperopiola/go-rest-example/pkg/entities"
+	"github.com/gilperopiola/go-rest-example/pkg/common/entities"
 	"github.com/gin-gonic/gin"
 )
 

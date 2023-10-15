@@ -4,65 +4,67 @@ import (
 	"fmt"
 
 	"github.com/gilperopiola/go-rest-example/pkg/common"
+	"github.com/gilperopiola/go-rest-example/pkg/common/requests"
+	"github.com/gilperopiola/go-rest-example/pkg/common/responses"
 	customErrors "github.com/gilperopiola/go-rest-example/pkg/errors"
 	"github.com/gilperopiola/go-rest-example/pkg/handlers"
 	"github.com/gilperopiola/go-rest-example/pkg/repository"
 )
 
 // CreateUser is an admins only endpoint
-func (s *Service) CreateUser(createUserRequest common.CreateUserRequest) (common.CreateUserResponse, error) {
+func (s *Service) CreateUser(createUserRequest requests.CreateUserRequest) (responses.CreateUserResponse, error) {
 	user := handlers.New(createUserRequest.ToUserModel())
 
 	if user.Exists(s.Repository) {
-		return common.CreateUserResponse{}, common.Wrap(fmt.Errorf("user.Exists"), customErrors.ErrUsernameOrEmailAlreadyInUse)
+		return responses.CreateUserResponse{}, common.Wrap(fmt.Errorf("CreateUser: user.Exists"), customErrors.ErrUsernameOrEmailAlreadyInUse)
 	}
 
 	user.HashPassword()
 
 	if err := user.Create(s.Repository); err != nil {
-		return common.CreateUserResponse{}, common.Wrap(fmt.Errorf("user.Create"), err)
+		return responses.CreateUserResponse{}, common.Wrap(fmt.Errorf("CreateUser: user.Create"), err)
 	}
 
-	return common.CreateUserResponse{User: user.ToEntity()}, nil
+	return responses.CreateUserResponse{User: user.ToEntity()}, nil
 }
 
-func (s *Service) GetUser(getUserRequest common.GetUserRequest) (common.GetUserResponse, error) {
+func (s *Service) GetUser(getUserRequest requests.GetUserRequest) (responses.GetUserResponse, error) {
 	user := handlers.New(getUserRequest.ToUserModel())
 
 	if err := user.Get(s.Repository, repository.WithoutDeleted); err != nil {
-		return common.GetUserResponse{}, common.Wrap(fmt.Errorf("user.Get"), err)
+		return responses.GetUserResponse{}, common.Wrap(fmt.Errorf("GetUser: user.Get"), err)
 	}
 
-	return common.GetUserResponse{User: user.ToEntity()}, nil
+	return responses.GetUserResponse{User: user.ToEntity()}, nil
 }
 
-func (s *Service) UpdateUser(updateUserRequest common.UpdateUserRequest) (common.UpdateUserResponse, error) {
+func (s *Service) UpdateUser(updateUserRequest requests.UpdateUserRequest) (responses.UpdateUserResponse, error) {
 	user := handlers.New(updateUserRequest.ToUserModel())
 
 	if user.Exists(s.Repository) {
-		return common.UpdateUserResponse{}, common.Wrap(fmt.Errorf("user.Exists"), customErrors.ErrUsernameOrEmailAlreadyInUse)
+		return responses.UpdateUserResponse{}, common.Wrap(fmt.Errorf("UpdateUser: user.Exists"), customErrors.ErrUsernameOrEmailAlreadyInUse)
 	}
 
 	if err := user.Get(s.Repository, repository.WithoutDeleted); err != nil {
-		return common.UpdateUserResponse{}, common.Wrap(fmt.Errorf("user.Get"), err)
+		return responses.UpdateUserResponse{}, common.Wrap(fmt.Errorf("UpdateUser: user.Get"), err)
 	}
 
 	user.OverwriteFields(updateUserRequest.Username, updateUserRequest.Email, "")
 
 	if err := user.Update(s.Repository); err != nil {
-		return common.UpdateUserResponse{}, common.Wrap(fmt.Errorf("user.Update"), err)
+		return responses.UpdateUserResponse{}, common.Wrap(fmt.Errorf("UpdateUser: user.Update"), err)
 	}
 
-	return common.UpdateUserResponse{User: user.ToEntity()}, nil
+	return responses.UpdateUserResponse{User: user.ToEntity()}, nil
 }
 
-func (s *Service) DeleteUser(deleteUserRequest common.DeleteUserRequest) (common.DeleteUserResponse, error) {
+func (s *Service) DeleteUser(deleteUserRequest requests.DeleteUserRequest) (responses.DeleteUserResponse, error) {
 	user := handlers.New(deleteUserRequest.ToUserModel())
 
 	// This returns an error if the user is already deleted
 	if err := user.Delete(s.Repository); err != nil {
-		return common.DeleteUserResponse{}, common.Wrap(fmt.Errorf("user.Delete"), err)
+		return responses.DeleteUserResponse{}, common.Wrap(fmt.Errorf("DeleteUser: user.Delete"), err)
 	}
 
-	return common.DeleteUserResponse{User: user.ToEntity()}, nil
+	return responses.DeleteUserResponse{User: user.ToEntity()}, nil
 }

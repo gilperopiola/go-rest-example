@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/gilperopiola/go-rest-example/pkg/auth"
-	"github.com/gilperopiola/go-rest-example/pkg/common"
+	"github.com/gilperopiola/go-rest-example/pkg/common/logger"
 	"github.com/gilperopiola/go-rest-example/pkg/config"
 	"github.com/gilperopiola/go-rest-example/pkg/repository"
 	"github.com/gilperopiola/go-rest-example/pkg/service"
@@ -22,7 +22,7 @@ func main() {
 		config = config.NewConfig()
 
 		// Initialize logger
-		logger = common.NewLogger()
+		logger = logger.NewLogger()
 
 		// Initialize monitoring as middleware (New Relic)
 		monitoringMiddleware = transport.NewMonitoringMiddleware(config)

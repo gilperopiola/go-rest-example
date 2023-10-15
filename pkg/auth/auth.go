@@ -1,8 +1,7 @@
 package auth
 
 import (
-	"github.com/gilperopiola/go-rest-example/pkg/entities"
-
+	"github.com/gilperopiola/go-rest-example/pkg/common/entities"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 )
