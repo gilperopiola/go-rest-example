@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/gilperopiola/go-rest-example/pkg/common"
-	"github.com/gilperopiola/go-rest-example/pkg/common/entities"
 	customErrors "github.com/gilperopiola/go-rest-example/pkg/errors"
 
 	"github.com/gin-gonic/gin"
@@ -15,7 +14,7 @@ import (
 )
 
 // ValidateToken validates a token for a specific role and sets ID and Email in context
-func (auth *Auth) ValidateToken(role entities.Role, shouldMatchUserID bool) gin.HandlerFunc {
+func (auth *Auth) ValidateToken(role Role, shouldMatchUserID bool) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		// Get token string and then convert it to a *jwt.Token
@@ -33,7 +32,7 @@ func (auth *Auth) ValidateToken(role entities.Role, shouldMatchUserID bool) gin.
 		}
 
 		// Check if role is valid
-		if role != entities.AnyRole && customClaims.Role != role {
+		if role != AnyRole && customClaims.Role != role {
 			abortRequest(c)
 		}
 

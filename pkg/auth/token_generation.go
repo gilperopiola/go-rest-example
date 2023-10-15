@@ -4,11 +4,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/gilperopiola/go-rest-example/pkg/common/entities"
 	"github.com/golang-jwt/jwt/v4"
 )
 
-func (auth *Auth) GenerateToken(user entities.User, role entities.Role) (string, error) {
+func (auth *Auth) GenerateToken(user User, role Role) (string, error) {
 
 	var (
 		// Session duration can be set in the config

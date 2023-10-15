@@ -25,7 +25,7 @@ func (s *Service) CreateUser(createUserRequest requests.CreateUserRequest) (resp
 		return responses.CreateUserResponse{}, common.Wrap(fmt.Errorf("CreateUser: user.Create"), err)
 	}
 
-	return responses.CreateUserResponse{User: user.ToEntity()}, nil
+	return responses.CreateUserResponse{User: user.ToResponseModel()}, nil
 }
 
 func (s *Service) GetUser(getUserRequest requests.GetUserRequest) (responses.GetUserResponse, error) {
@@ -35,7 +35,7 @@ func (s *Service) GetUser(getUserRequest requests.GetUserRequest) (responses.Get
 		return responses.GetUserResponse{}, common.Wrap(fmt.Errorf("GetUser: user.Get"), err)
 	}
 
-	return responses.GetUserResponse{User: user.ToEntity()}, nil
+	return responses.GetUserResponse{User: user.ToResponseModel()}, nil
 }
 
 func (s *Service) UpdateUser(updateUserRequest requests.UpdateUserRequest) (responses.UpdateUserResponse, error) {
@@ -55,7 +55,7 @@ func (s *Service) UpdateUser(updateUserRequest requests.UpdateUserRequest) (resp
 		return responses.UpdateUserResponse{}, common.Wrap(fmt.Errorf("UpdateUser: user.Update"), err)
 	}
 
-	return responses.UpdateUserResponse{User: user.ToEntity()}, nil
+	return responses.UpdateUserResponse{User: user.ToResponseModel()}, nil
 }
 
 func (s *Service) DeleteUser(deleteUserRequest requests.DeleteUserRequest) (responses.DeleteUserResponse, error) {
@@ -66,5 +66,5 @@ func (s *Service) DeleteUser(deleteUserRequest requests.DeleteUserRequest) (resp
 		return responses.DeleteUserResponse{}, common.Wrap(fmt.Errorf("DeleteUser: user.Delete"), err)
 	}
 
-	return responses.DeleteUserResponse{User: user.ToEntity()}, nil
+	return responses.DeleteUserResponse{User: user.ToResponseModel()}, nil
 }

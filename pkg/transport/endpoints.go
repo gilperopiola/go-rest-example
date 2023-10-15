@@ -2,7 +2,6 @@ package transport
 
 import (
 	"github.com/gilperopiola/go-rest-example/pkg/auth"
-	"github.com/gilperopiola/go-rest-example/pkg/common/entities"
 	"github.com/gin-gonic/gin"
 )
 
@@ -16,8 +15,8 @@ func (router *Router) SetPublicEndpoints(transport TransportLayer) {
 	}
 }
 
-func (router *Router) SetUserEndpoints(transport TransportLayer, auth auth.AuthI) {
-	users := router.Group("/users", auth.ValidateToken(entities.AnyRole, true))
+func (router *Router) SetUserEndpoints(transport TransportLayer, authI auth.AuthI) {
+	users := router.Group("/users", authI.ValidateToken(auth.AnyRole, true))
 	{
 		users.GET("/:user_id", transport.GetUser)
 		users.PATCH("/:user_id", transport.UpdateUser)
@@ -25,8 +24,8 @@ func (router *Router) SetUserEndpoints(transport TransportLayer, auth auth.AuthI
 	}
 }
 
-func (router *Router) SetAdminEndpoints(transport TransportLayer, auth auth.AuthI) {
-	admin := router.Group("/admin", auth.ValidateToken(entities.AdminRole, false))
+func (router *Router) SetAdminEndpoints(transport TransportLayer, authI auth.AuthI) {
+	admin := router.Group("/admin", authI.ValidateToken(auth.AdminRole, false))
 	{
 		admin.POST("/user", transport.CreateUser)
 	}

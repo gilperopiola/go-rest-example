@@ -3,9 +3,10 @@ package handlers
 import (
 	"testing"
 
+	"github.com/gilperopiola/go-rest-example/pkg/auth"
 	"github.com/gilperopiola/go-rest-example/pkg/common"
-	"github.com/gilperopiola/go-rest-example/pkg/common/entities"
 	"github.com/gilperopiola/go-rest-example/pkg/common/models"
+	"github.com/gilperopiola/go-rest-example/pkg/common/responses"
 	"github.com/gilperopiola/go-rest-example/pkg/repository"
 
 	"github.com/stretchr/testify/assert"
@@ -19,7 +20,13 @@ var (
 		Email:    "email@email.com",
 		Password: "password",
 	}
-	testEntity = entities.User{
+	testResponseModel = responses.User{
+		ID:       1,
+		Username: "username",
+		Email:    "email@email.com",
+		Password: "password",
+	}
+	testAuthEntity = auth.User{
 		ID:       1,
 		Username: "username",
 		Email:    "email@email.com",
@@ -27,10 +34,17 @@ var (
 	}
 )
 
-func TestToEntity(t *testing.T) {
-	expected := testEntity
+func TestToResponseModel(t *testing.T) {
+	expected := testResponseModel
 	expected.Password = ""
-	got := New(testModel).ToEntity()
+	got := New(testModel).ToResponseModel()
+	assert.Equal(t, expected, got)
+}
+
+func TestToAuthEntity(t *testing.T) {
+	expected := testAuthEntity
+	expected.Password = ""
+	got := New(testModel).ToAuthEntity()
 	assert.Equal(t, expected, got)
 }
 
@@ -73,15 +87,15 @@ func TestExists(t *testing.T) {
 
 func TestGetAuthRole(t *testing.T) {
 	h := New(testModel)
-	assert.Equal(t, entities.UserRole, h.GetAuthRole())
+	assert.Equal(t, auth.UserRole, h.GetAuthRole())
 	h.User.IsAdmin = true
-	assert.Equal(t, entities.AdminRole, h.GetAuthRole())
+	assert.Equal(t, auth.AdminRole, h.GetAuthRole())
 }
 
 func TestGenerateTokenString(t *testing.T) {
 	h := New(testModel)
-	mockAuth := new(mockAuth)
-	mockAuth.On("GenerateToken", mock.Anything, entities.UserRole).Return("testToken", nil).Once()
+	mockAuth := new(auth.MockAuth)
+	mockAuth.On("GenerateToken", mock.Anything, auth.UserRole).Return("testToken", nil).Once()
 
 	token, err := h.GenerateTokenString(mockAuth)
 	assert.NoError(t, err)
@@ -111,7 +125,7 @@ func TestOverwriteFields(t *testing.T) {
 	assert.Equal(t, "new_password", h.User.Password)
 }
 
-// -
+// - Helpers
 
 func getMockRepoWithFnCall(fnName string, userToReturn models.User) *repository.RepositoryMock {
 	mockRepo := repository.NewRepositoryMock()

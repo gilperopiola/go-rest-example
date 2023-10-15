@@ -24,7 +24,7 @@ func (s *Service) Signup(signupRequest requests.SignupRequest) (responses.Signup
 		return responses.SignupResponse{}, common.Wrap(fmt.Errorf("Signup: user.Create"), err)
 	}
 
-	return responses.SignupResponse{User: user.ToEntity()}, nil
+	return responses.SignupResponse{User: user.ToResponseModel()}, nil
 }
 
 func (s *Service) Login(loginRequest requests.LoginRequest) (responses.LoginResponse, error) {
