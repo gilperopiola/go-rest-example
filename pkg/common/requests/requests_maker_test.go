@@ -1,4 +1,4 @@
-package transport
+package requests
 
 import (
 	"bytes"
@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	customErrors "github.com/gilperopiola/go-rest-example/pkg/common/errors"
-	"github.com/gilperopiola/go-rest-example/pkg/common/requests"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
@@ -38,7 +37,7 @@ func TestMakeSignupRequest(t *testing.T) {
 		RepeatPassword: VALID_PASSWORD,
 	}
 
-	successResponse := requests.SignupRequest{
+	successResponse := SignupRequest{
 		Username:       VALID_USERNAME,
 		Email:          VALID_EMAIL,
 		Password:       VALID_PASSWORD,
@@ -48,19 +47,19 @@ func TestMakeSignupRequest(t *testing.T) {
 	tests := []struct {
 		name    string
 		body    SignupBody
-		want    requests.SignupRequest
+		want    SignupRequest
 		wantErr error
 	}{
 		{
 			name:    "error_binding_request",
 			body:    SignupBody{Email: 5},
-			want:    requests.SignupRequest{},
+			want:    SignupRequest{},
 			wantErr: customErrors.ErrBindingRequest,
 		},
 		{
 			name:    "error_validating_request",
 			body:    SignupBody{Email: "invalid"},
-			want:    requests.SignupRequest{},
+			want:    SignupRequest{},
 			wantErr: customErrors.ErrAllFieldsRequired,
 		},
 		{
@@ -78,7 +77,7 @@ func TestMakeSignupRequest(t *testing.T) {
 			context := makeTestContextWithHTTPRequest(tt.body)
 
 			// Act
-			got, err := makeSignupRequest(context)
+			got, err := MakeSignupRequest(context)
 
 			// Assert
 			assert.Equal(t, tt.want, got)
@@ -98,7 +97,7 @@ func TestMakeLoginRequest(t *testing.T) {
 		Password:        VALID_PASSWORD,
 	}
 
-	successResponse := requests.LoginRequest{
+	successResponse := LoginRequest{
 		UsernameOrEmail: VALID_USERNAME,
 		Password:        VALID_PASSWORD,
 	}
@@ -106,19 +105,19 @@ func TestMakeLoginRequest(t *testing.T) {
 	tests := []struct {
 		name    string
 		body    LoginBody
-		want    requests.LoginRequest
+		want    LoginRequest
 		wantErr error
 	}{
 		{
 			name:    "error_binding_request",
 			body:    LoginBody{UsernameOrEmail: 5},
-			want:    requests.LoginRequest{},
+			want:    LoginRequest{},
 			wantErr: customErrors.ErrBindingRequest,
 		},
 		{
 			name:    "error_validating_request",
 			body:    LoginBody{UsernameOrEmail: "invalid"},
-			want:    requests.LoginRequest{},
+			want:    LoginRequest{},
 			wantErr: customErrors.ErrAllFieldsRequired,
 		},
 		{
@@ -136,7 +135,7 @@ func TestMakeLoginRequest(t *testing.T) {
 			context := makeTestContextWithHTTPRequest(tt.body)
 
 			// Act
-			got, err := makeLoginRequest(context)
+			got, err := MakeLoginRequest(context)
 
 			// Assert
 			assert.Equal(t, tt.want, got)
@@ -150,21 +149,21 @@ func TestMakeGetUserRequest(t *testing.T) {
 		name      string
 		ctxUserID string
 		urlUserID string
-		want      requests.GetUserRequest
+		want      GetUserRequest
 		wantErr   error
 	}{
 		{
 			name:      "error_invalid_id",
 			ctxUserID: "0",
 			urlUserID: "0",
-			want:      requests.GetUserRequest{},
+			want:      GetUserRequest{},
 			wantErr:   customErrors.ErrAllFieldsRequired,
 		},
 		{
 			name:      "success",
 			ctxUserID: "1",
 			urlUserID: "1",
-			want:      requests.GetUserRequest{ID: 1},
+			want:      GetUserRequest{ID: 1},
 			wantErr:   nil,
 		},
 	}
@@ -173,11 +172,11 @@ func TestMakeGetUserRequest(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 
 			// Prepare
-			context := makeTestContextWithHTTPRequest(requests.GetUserRequest{})
+			context := makeTestContextWithHTTPRequest(GetUserRequest{})
 			addValueAndParamToContext(context, CTX_KEY_USER_ID, tt.ctxUserID, PARAM_KEY_USER_ID, tt.urlUserID)
 
 			// Act
-			got, err := makeGetUserRequest(context)
+			got, err := MakeGetUserRequest(context)
 
 			// Assert
 			assert.Equal(t, tt.want, got)
@@ -194,14 +193,14 @@ func TestMakeUpdateUserRequest(t *testing.T) {
 	}
 
 	successBody := UpdateUserBody{Username: VALID_USERNAME}
-	successResponse := requests.UpdateUserRequest{ID: 1, Username: VALID_USERNAME}
+	successResponse := UpdateUserRequest{ID: 1, Username: VALID_USERNAME}
 
 	tests := []struct {
 		name      string
 		ctxUserID string
 		urlUserID string
 		body      UpdateUserBody
-		want      requests.UpdateUserRequest
+		want      UpdateUserRequest
 		wantErr   error
 	}{
 		{
@@ -209,7 +208,7 @@ func TestMakeUpdateUserRequest(t *testing.T) {
 			ctxUserID: "1",
 			urlUserID: "1",
 			body:      UpdateUserBody{Username: 5},
-			want:      requests.UpdateUserRequest{},
+			want:      UpdateUserRequest{},
 			wantErr:   customErrors.ErrBindingRequest,
 		},
 		{
@@ -217,7 +216,7 @@ func TestMakeUpdateUserRequest(t *testing.T) {
 			ctxUserID: "0",
 			urlUserID: "0",
 			body:      UpdateUserBody{Username: VALID_USERNAME},
-			want:      requests.UpdateUserRequest{},
+			want:      UpdateUserRequest{},
 			wantErr:   customErrors.ErrAllFieldsRequired,
 		},
 		{
@@ -238,7 +237,7 @@ func TestMakeUpdateUserRequest(t *testing.T) {
 			addValueAndParamToContext(context, CTX_KEY_USER_ID, tt.ctxUserID, PARAM_KEY_USER_ID, tt.urlUserID)
 
 			// Act
-			got, err := makeUpdateUserRequest(context)
+			got, err := MakeUpdateUserRequest(context)
 
 			// Assert
 			assert.Equal(t, tt.want, got)

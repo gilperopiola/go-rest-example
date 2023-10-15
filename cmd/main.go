@@ -6,6 +6,7 @@ import (
 	"github.com/gilperopiola/go-rest-example/pkg/auth"
 	"github.com/gilperopiola/go-rest-example/pkg/common/config"
 	"github.com/gilperopiola/go-rest-example/pkg/common/logger"
+	"github.com/gilperopiola/go-rest-example/pkg/common/middleware"
 	"github.com/gilperopiola/go-rest-example/pkg/repository"
 	"github.com/gilperopiola/go-rest-example/pkg/service"
 	"github.com/gilperopiola/go-rest-example/pkg/transport"
@@ -25,7 +26,7 @@ func main() {
 		logger = logger.NewLogger()
 
 		// Initialize monitoring as middleware (New Relic)
-		monitoringMiddleware = transport.NewMonitoringMiddleware(config)
+		monitoringMiddleware = middleware.NewMonitoringMiddleware(config.MONITORING)
 
 		// Initialize authentication module
 		auth = auth.NewAuth(config.JWT.SECRET, config.JWT.SESSION_DURATION_DAYS)

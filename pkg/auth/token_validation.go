@@ -84,7 +84,8 @@ func (auth *Auth) decodeTokenString(tokenString string) (*jwt.Token, error) {
 }
 
 func addUserInfoToContext(c *gin.Context, claims *CustomClaims) {
-	c.Set("ID", claims.ID)
+	idInt, _ := strconv.Atoi(claims.ID)
+	c.Set("ID", idInt)
 	c.Set("Username", claims.Username)
 	c.Set("Email", claims.Email)
 }
@@ -107,14 +108,11 @@ func abortRequest(c *gin.Context) {
 }
 
 func getIntFromContextURLParams(params gin.Params, key string) (int, error) {
-
-	// Get from params
 	value, ok := params.Get(key)
 	if !ok {
 		return 0, fmt.Errorf("error getting %s from URL params", key)
 	}
 
-	// Convert to int
 	valueInt, err := strconv.Atoi(value)
 	if err != nil {
 		return 0, fmt.Errorf("error converting %s from string to int", key)

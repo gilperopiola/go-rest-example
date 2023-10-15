@@ -4,6 +4,7 @@ import (
 	"github.com/gilperopiola/go-rest-example/pkg/auth"
 	"github.com/gilperopiola/go-rest-example/pkg/common/config"
 	"github.com/gilperopiola/go-rest-example/pkg/common/logger"
+	"github.com/gilperopiola/go-rest-example/pkg/common/middleware"
 
 	"github.com/gin-gonic/gin"
 )
@@ -24,10 +25,10 @@ func (router *Router) Setup(transport TransportLayer, debugMode bool, auth auth.
 	router.Prepare(!debugMode)
 
 	// Add middleware
-	router.Use(monitoring)                           // Monitoring
-	router.Use(gin.Recovery())                       // Panic recovery
-	router.Use(newCORSConfigMiddleware())            // CORS
-	router.Use(newLoggerToContextMiddleware(logger)) // Logger to context
+	router.Use(monitoring)                                      // Monitoring
+	router.Use(gin.Recovery())                                  // Panic recovery
+	router.Use(middleware.NewCORSConfigMiddleware())            // CORS
+	router.Use(middleware.NewLoggerToContextMiddleware(logger)) // Logger to context
 
 	// Set endpoints
 	router.SetPublicEndpoints(transport)

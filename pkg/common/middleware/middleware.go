@@ -1,4 +1,4 @@
-package transport
+package middleware
 
 import (
 	"log"
@@ -12,23 +12,20 @@ import (
 	"github.com/newrelic/go-agent/v3/newrelic"
 )
 
-// This is exported because the monitoring is initialized in the main.go file
-func NewMonitoringMiddleware(config config.ConfigI) gin.HandlerFunc {
-	monitoringConfig := config.GetMonitoringConfig()
-
+func NewMonitoringMiddleware(config config.MonitoringConfig) gin.HandlerFunc {
 	// If monitoring is not enabled, return empty middleware
-	if !monitoringConfig.ENABLED {
+	if !config.ENABLED {
 		return gin.HandlerFunc(func(c *gin.Context) {})
 	}
 
 	// If monitoring is enabled, use license to create New Relic app
-	license := monitoringConfig.SECRET
+	license := config.SECRET
 	if license == "" {
 		log.Fatalf("New Relic license not found")
 	}
 
 	newRelicApp, err := newrelic.NewApplication(
-		newrelic.ConfigAppName(monitoringConfig.APP_NAME),
+		newrelic.ConfigAppName(config.APP_NAME),
 		newrelic.ConfigLicense(license),
 		newrelic.ConfigAppLogForwardingEnabled(true),
 	)
@@ -41,14 +38,14 @@ func NewMonitoringMiddleware(config config.ConfigI) gin.HandlerFunc {
 	return nrgin.Middleware(newRelicApp)
 }
 
-func newLoggerToContextMiddleware(logger logger.LoggerI) gin.HandlerFunc {
+func NewLoggerToContextMiddleware(logger logger.LoggerI) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Set("logger", logger)
 		c.Next()
 	}
 }
 
-func newCORSConfigMiddleware() gin.HandlerFunc {
+func NewCORSConfigMiddleware() gin.HandlerFunc {
 	return cors.New(cors.Config{
 		AllowAllOrigins:  true,
 		AllowCredentials: true,

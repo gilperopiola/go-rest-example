@@ -44,7 +44,7 @@ func NewTransport(service service.ServiceLayer, errorsMapper errorsMapperI) Tran
 //
 // It returns a response with the result of the service call.
 func HandleRequest[req Request, resp Response](t Transport, c *gin.Context,
-	makeRequest func(*gin.Context) (req, error), serviceCall func(req) (resp, error)) {
+	makeRequest func(requests.GinI) (req, error), serviceCall func(req) (resp, error)) {
 
 	// Make, validate and get request
 	request, err := makeRequest(c)
