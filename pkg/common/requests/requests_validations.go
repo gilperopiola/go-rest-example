@@ -17,7 +17,29 @@ var (
 	validEmailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`)
 )
 
-// Users
+// - Auth
+
+func (req SignupRequest) Validate() error {
+	if err := validateUsernameEmailAndPassword(req.Username, req.Email, req.Password); err != nil {
+		return err
+	}
+
+	if req.Password != req.RepeatPassword {
+		return customErrors.ErrPasswordsDontMatch
+	}
+
+	return nil
+}
+
+func (req LoginRequest) Validate() error {
+	if req.UsernameOrEmail == "" || req.Password == "" {
+		return customErrors.ErrAllFieldsRequired
+	}
+
+	return nil
+}
+
+// - Users
 
 func (req CreateUserRequest) Validate() error {
 	return validateUsernameEmailAndPassword(req.Username, req.Email, req.Password)
@@ -71,28 +93,6 @@ func validateUsernameEmailAndPassword(username, email, password string) error {
 
 	if len(password) < passwordMinLength || len(password) > passwordMaxLength {
 		return customErrors.ErrInvalidPasswordLength
-	}
-
-	return nil
-}
-
-// Auth
-
-func (req SignupRequest) Validate() error {
-	if err := validateUsernameEmailAndPassword(req.Username, req.Email, req.Password); err != nil {
-		return err
-	}
-
-	if req.Password != req.RepeatPassword {
-		return customErrors.ErrPasswordsDontMatch
-	}
-
-	return nil
-}
-
-func (req LoginRequest) Validate() error {
-	if req.UsernameOrEmail == "" || req.Password == "" {
-		return customErrors.ErrAllFieldsRequired
 	}
 
 	return nil

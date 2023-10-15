@@ -7,8 +7,8 @@ import (
 	"github.com/gilperopiola/go-rest-example/pkg/common/requests"
 	"github.com/gilperopiola/go-rest-example/pkg/common/responses"
 	customErrors "github.com/gilperopiola/go-rest-example/pkg/errors"
-	"github.com/gilperopiola/go-rest-example/pkg/handlers"
 	"github.com/gilperopiola/go-rest-example/pkg/repository"
+	"github.com/gilperopiola/go-rest-example/pkg/service/handlers"
 )
 
 func (s *Service) Signup(signupRequest requests.SignupRequest) (responses.SignupResponse, error) {

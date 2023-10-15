@@ -4,7 +4,7 @@ import (
 	"time"
 )
 
-// Models are the representation of the entities in the database.
+// Models are the representation of the database schema. They are used in the Service & Repository Layers.
 // If you add a new one, remember to add it to the Purge and Migrate functions in pkg/repository/database.go
 
 type User struct {
