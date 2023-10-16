@@ -5,9 +5,9 @@ import (
 
 	"github.com/gilperopiola/go-rest-example/pkg/auth"
 	"github.com/gilperopiola/go-rest-example/pkg/common"
+	"github.com/gilperopiola/go-rest-example/pkg/common/mocks"
 	"github.com/gilperopiola/go-rest-example/pkg/common/models"
 	"github.com/gilperopiola/go-rest-example/pkg/common/responses"
-	"github.com/gilperopiola/go-rest-example/pkg/repository"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -78,7 +78,7 @@ func TestDelete(t *testing.T) {
 
 func TestExists(t *testing.T) {
 	h := New(testModel)
-	mockRepo := repository.NewRepositoryMock()
+	mockRepo := mocks.NewRepositoryMock()
 	mockRepo.On("UserExists", mock.Anything, mock.Anything).Return(true).Once()
 	exists := h.Exists(mockRepo)
 	assert.True(t, exists)
@@ -94,7 +94,7 @@ func TestGetAuthRole(t *testing.T) {
 
 func TestGenerateTokenString(t *testing.T) {
 	h := New(testModel)
-	mockAuth := new(auth.MockAuth)
+	mockAuth := new(mocks.MockAuth)
 	mockAuth.On("GenerateToken", mock.Anything, auth.UserRole).Return("testToken", nil).Once()
 
 	token, err := h.GenerateTokenString(mockAuth)
@@ -127,13 +127,13 @@ func TestOverwriteFields(t *testing.T) {
 
 // - Helpers
 
-func getMockRepoWithFnCall(fnName string, userToReturn models.User) *repository.RepositoryMock {
-	mockRepo := repository.NewRepositoryMock()
+func getMockRepoWithFnCall(fnName string, userToReturn models.User) *mocks.RepositoryMock {
+	mockRepo := mocks.NewRepositoryMock()
 	mockRepo.On(fnName, mock.Anything).Return(userToReturn, nil).Once()
 	return mockRepo
 }
 
-func assertUserTC(t *testing.T, mock *repository.RepositoryMock, model1 models.User, model2 models.User, err error) {
+func assertUserTC(t *testing.T, mock *mocks.RepositoryMock, model1 models.User, model2 models.User, err error) {
 	assert.NoError(t, err)
 	assert.Equal(t, model1, model2)
 	mock.AssertExpectations(t)

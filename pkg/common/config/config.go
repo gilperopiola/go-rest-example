@@ -5,17 +5,14 @@ import (
 	"strconv"
 )
 
-// Env vars prefix => GO_REST_EXAMPLE_PORT, GO_REST_EXAMPLE_DATABASE_TYPE, etc.
+// Env vars prefix, likely your app's name => GO_REST_EXAMPLE_PORT, GO_REST_EXAMPLE_DATABASE_TYPE, etc.
 const prefix = "GO_REST_EXAMPLE_"
 
-type ConfigI interface {
-	Setup()
-
-	GetDebugMode() bool
-	GetPort() string
-	GetDatabaseConfig() DatabaseConfig
-	GetJWTConfig() JWTConfig
-	GetMonitoringConfig() MonitoringConfig
+type Config struct {
+	general    GeneralConfig
+	database   DatabaseConfig
+	jwt        JWTConfig
+	monitoring MonitoringConfig
 }
 
 func NewConfig() *Config {
@@ -37,30 +34,31 @@ func (config *Config) Setup() {
 }
 
 func (config *Config) loadGeneralVars() {
-	config.PORT = getEnv(prefix+"PORT", defaultPort)
-	config.DEBUG = getEnvBool(prefix+"DEBUG", defaultDebug)
+	config.general.Port = getEnv(prefix+"PORT", defaultPort)
+	config.general.Debug = getEnvBool(prefix+"DEBUG", defaultDebug)
+	config.general.Timeout = getEnvInt(prefix+"TIMEOUT_SECONDS", defaultTimeoutSeconds)
 }
 
 func (config *Config) loadDatabaseVars() {
-	config.DATABASE.TYPE = getEnv(prefix+"DATABASE_TYPE", defaultDatabaseType)
-	config.DATABASE.USERNAME = getEnv(prefix+"DATABASE_USERNAME", defaultDatabaseUsername)
-	config.DATABASE.PASSWORD = getEnv(prefix+"DATABASE_PASSWORD", defaultDatabasePassword)
-	config.DATABASE.HOSTNAME = getEnv(prefix+"DATABASE_HOSTNAME", defaultDatabaseHostname)
-	config.DATABASE.PORT = getEnv(prefix+"DATABASE_PORT", defaultDatabasePort)
-	config.DATABASE.SCHEMA = getEnv(prefix+"DATABASE_SCHEMA", defaultDatabaseSchema)
-	config.DATABASE.PURGE = getEnvBool(prefix+"DATABASE_PURGE", defaultDatabasePurge)
-	config.DATABASE.DEBUG = getEnvBool(prefix+"DATABASE_DEBUG", defaultDatabaseDebug)
+	config.database.Type = getEnv(prefix+"DATABASE_TYPE", defaultDatabaseType)
+	config.database.Username = getEnv(prefix+"DATABASE_USERNAME", defaultDatabaseUsername)
+	config.database.Password = getEnv(prefix+"DATABASE_PASSWORD", defaultDatabasePassword)
+	config.database.Hostname = getEnv(prefix+"DATABASE_HOSTNAME", defaultDatabaseHostname)
+	config.database.Port = getEnv(prefix+"DATABASE_PORT", defaultDatabasePort)
+	config.database.Schema = getEnv(prefix+"DATABASE_SCHEMA", defaultDatabaseSchema)
+	config.database.Purge = getEnvBool(prefix+"DATABASE_PURGE", defaultDatabasePurge)
+	config.database.Debug = getEnvBool(prefix+"DATABASE_DEBUG", defaultDatabaseDebug)
 }
 
 func (config *Config) loadJWTVars() {
-	config.JWT.SECRET = getEnv(prefix+"JWT_SECRET", defaultJWTSecret)
-	config.JWT.SESSION_DURATION_DAYS = getEnvInt(prefix+"JWT_SESSION_DURATION_DAYS", defaultJWTSessionDurationDays)
+	config.jwt.Secret = getEnv(prefix+"JWT_SECRET", defaultJWTSecret)
+	config.jwt.SessionDurationDays = getEnvInt(prefix+"JWT_SESSION_DURATION_DAYS", defaultJWTSessionDurationDays)
 }
 
 func (config *Config) loadMonitoringVars() {
-	config.MONITORING.ENABLED = getEnvBool(prefix+"MONITORING_ENABLED", defaultMonitoringEnabled)
-	config.MONITORING.APP_NAME = getEnv(prefix+"MONITORING_APP_NAME", defaultMonitoringAppName)
-	config.MONITORING.SECRET = getEnv(prefix+"MONITORING_SECRET", defaultMonitoringSecret)
+	config.monitoring.Enabled = getEnvBool(prefix+"MONITORING_ENABLED", defaultMonitoringEnabled)
+	config.monitoring.AppName = getEnv(prefix+"MONITORING_APP_NAME", defaultMonitoringAppName)
+	config.monitoring.Secret = getEnv(prefix+"MONITORING_SECRET", defaultMonitoringSecret)
 }
 
 func getEnv(key, fallback string) string {

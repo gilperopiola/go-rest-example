@@ -31,9 +31,9 @@ func NewDatabase(config config.DatabaseConfig, logger logger.LoggerI) Database {
 
 func (database *Database) Setup(config config.DatabaseConfig, logger logger.LoggerI) {
 
-	// Create connection
+	// Create connection. It's deferred closed in main.go
 	var err error
-	if database.DB, err = gorm.Open(config.TYPE, config.GetConnectionString()); err != nil {
+	if database.DB, err = gorm.Open(config.Type, config.GetConnectionString()); err != nil {
 		logger.Fatalf("error connecting to database: %v", err)
 		os.Exit(1)
 	}
@@ -44,12 +44,12 @@ func (database *Database) Setup(config config.DatabaseConfig, logger logger.Logg
 	database.DB.DB().SetConnMaxLifetime(time.Hour)
 
 	// Log queries
-	if config.DEBUG {
+	if config.Debug {
 		database.DB.LogMode(true)
 	}
 
 	// Clean database
-	if config.PURGE {
+	if config.Purge {
 		database.Purge()
 	}
 

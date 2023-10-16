@@ -3,8 +3,9 @@ package config
 // Config Defaults - TODO - Move to config file
 
 var (
-	defaultPort  = "8040"
-	defaultDebug = true
+	defaultPort           = "8040"
+	defaultDebug          = true
+	defaultTimeoutSeconds = 15
 
 	defaultDatabaseType     = "mysql"
 	defaultDatabaseUsername = "root"

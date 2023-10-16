@@ -1,64 +1,65 @@
 package config
 
-type Config struct {
-	PORT  string
-	DEBUG bool
+import "fmt"
 
-	DATABASE   DatabaseConfig
-	JWT        JWTConfig
-	MONITORING MonitoringConfig
+type GeneralConfig struct {
+	Debug   bool
+	Port    string
+	Timeout int
 }
 
 type DatabaseConfig struct {
-	TYPE     string
-	USERNAME string
-	PASSWORD string
-	HOSTNAME string
-	PORT     string
-	SCHEMA   string
+	Type     string
+	Username string
+	Password string
+	Hostname string
+	Port     string
+	Schema   string
 
-	PURGE bool
-	DEBUG bool
+	Purge bool
+	Debug bool
 }
 
 type JWTConfig struct {
-	SECRET                string
-	SESSION_DURATION_DAYS int
+	Secret              string
+	SessionDurationDays int
 }
 
 type MonitoringConfig struct {
-	ENABLED  bool
-	APP_NAME string
-	SECRET   string
+	Enabled bool
+	AppName string
+	Secret  string
 }
 
-func (config *Config) GetPort() string {
-	return config.PORT
+func (config *Config) General() GeneralConfig {
+	return config.general
 }
 
-func (config *Config) GetDebugMode() bool {
-	return config.DEBUG
+func (config *Config) Database() DatabaseConfig {
+	return config.database
 }
 
-func (config *Config) GetDatabaseConfig() DatabaseConfig {
-	return config.DATABASE
+func (config *Config) JWT() JWTConfig {
+	return config.jwt
 }
 
-func (config *Config) GetJWTConfig() JWTConfig {
-	return config.JWT
-}
-
-func (config *Config) GetMonitoringConfig() MonitoringConfig {
-	return config.MONITORING
+func (config *Config) Monitoring() MonitoringConfig {
+	return config.monitoring
 }
 
 func (config *DatabaseConfig) GetConnectionString() string {
-	username := config.USERNAME
-	password := config.PASSWORD
-	hostname := config.HOSTNAME
-	port := config.PORT
-	schema := config.SCHEMA
-	params := "?charset=utf8&parseTime=True&loc=Local"
 
-	return username + ":" + password + "@tcp(" + hostname + ":" + port + ")/" + schema + params
+	var (
+		username = config.Username
+		password = config.Password
+		hostname = config.Hostname
+		port     = config.Port
+		schema   = config.Schema
+		params   = "?charset=utf8&parseTime=True&loc=Local"
+	)
+
+	return fmt.Sprintf(
+		"%s:%s@tcp(%s:%s)/%s%s",
+		username, password, hostname, port, schema, params,
+	)
 }

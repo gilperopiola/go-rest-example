@@ -7,16 +7,16 @@ import (
 	"github.com/gilperopiola/go-rest-example/pkg/common"
 	"github.com/gilperopiola/go-rest-example/pkg/common/config"
 	customErrors "github.com/gilperopiola/go-rest-example/pkg/common/errors"
+	"github.com/gilperopiola/go-rest-example/pkg/common/mocks"
 	"github.com/gilperopiola/go-rest-example/pkg/common/models"
 	"github.com/gilperopiola/go-rest-example/pkg/common/requests"
 	"github.com/gilperopiola/go-rest-example/pkg/common/responses"
-	"github.com/gilperopiola/go-rest-example/pkg/repository"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
 
-func newTestService(mockRepository *repository.RepositoryMock) *Service {
+func newTestService(mockRepository *mocks.RepositoryMock) *Service {
 	return NewService(mockRepository, &auth.Auth{}, &config.Config{})
 }
 
@@ -40,7 +40,7 @@ var (
 )
 
 func TestSignup(t *testing.T) {
-	makeMockRepositoryWithCreateUser := func(returnUser models.User, returnErr error) *repository.RepositoryMock {
+	makeMockRepositoryWithCreateUser := func(returnUser models.User, returnErr error) *mocks.RepositoryMock {
 		mockRepository := makeMockRepositoryWithUserExists(false)
 		mockRepository.On("CreateUser", mock.Anything).Return(returnUser, returnErr).Once()
 		return mockRepository
@@ -48,7 +48,7 @@ func TestSignup(t *testing.T) {
 
 	tests := []struct {
 		name           string
-		mockRepository *repository.RepositoryMock
+		mockRepository *mocks.RepositoryMock
 		want           responses.SignupResponse
 		wantErr        error
 	}{
@@ -85,7 +85,7 @@ func TestLogin(t *testing.T) {
 	tests := []struct {
 		name            string
 		request         requests.LoginRequest
-		mockRepository  *repository.RepositoryMock
+		mockRepository  *mocks.RepositoryMock
 		wantTokenLength int
 		wantErr         error
 	}{
@@ -119,7 +119,7 @@ func TestLogin(t *testing.T) {
 
 func TestCreateUser(t *testing.T) {
 
-	makeMockRepositoryWithCreateUser := func(returnUser models.User, returnErr error) *repository.RepositoryMock {
+	makeMockRepositoryWithCreateUser := func(returnUser models.User, returnErr error) *mocks.RepositoryMock {
 		mockRepository := makeMockRepositoryWithUserExists(false)
 		mockRepository.On("CreateUser", mock.Anything).Return(returnUser, returnErr).Once()
 		return mockRepository
@@ -127,7 +127,7 @@ func TestCreateUser(t *testing.T) {
 
 	tests := []struct {
 		name           string
-		mockRepository *repository.RepositoryMock
+		mockRepository *mocks.RepositoryMock
 		want           responses.CreateUserResponse
 		wantErr        error
 	}{
@@ -162,7 +162,7 @@ func TestGetUser(t *testing.T) {
 	tests := []struct {
 		name           string
 		request        requests.GetUserRequest
-		mockRepository *repository.RepositoryMock
+		mockRepository *mocks.RepositoryMock
 		want           responses.GetUserResponse
 		wantErr        error
 	}{
@@ -189,13 +189,13 @@ func TestGetUser(t *testing.T) {
 
 func TestUpdateUser(t *testing.T) {
 
-	makeMockRepositoryWithGetUser := func(returnUser models.User, returnErr error) *repository.RepositoryMock {
+	makeMockRepositoryWithGetUser := func(returnUser models.User, returnErr error) *mocks.RepositoryMock {
 		mockRepository := makeMockRepositoryWithUserExists(false)
 		mockRepository.On("GetUser", mock.Anything, mock.Anything).Return(returnUser, returnErr).Once()
 		return mockRepository
 	}
 
-	makeMockRepositoryWithUpdateUser := func(returnUser models.User, returnErr error) *repository.RepositoryMock {
+	makeMockRepositoryWithUpdateUser := func(returnUser models.User, returnErr error) *mocks.RepositoryMock {
 		mockRepository := makeMockRepositoryWithGetUser(returnUser, nil)
 		mockRepository.On("UpdateUser", mock.Anything).Return(returnUser, returnErr).Once()
 		return mockRepository
@@ -203,7 +203,7 @@ func TestUpdateUser(t *testing.T) {
 
 	tests := []struct {
 		name           string
-		mockRepository *repository.RepositoryMock
+		mockRepository *mocks.RepositoryMock
 		want           responses.UpdateUserResponse
 		wantErr        error
 	}{
@@ -241,7 +241,7 @@ func TestUpdateUser(t *testing.T) {
 func TestDeleteUser(t *testing.T) {
 	tests := []struct {
 		name           string
-		mockRepository *repository.RepositoryMock
+		mockRepository *mocks.RepositoryMock
 		want           responses.DeleteUserResponse
 		wantErr        error
 	}{
@@ -265,26 +265,26 @@ func TestDeleteUser(t *testing.T) {
 	}
 }
 
-func assertTC(t *testing.T, want interface{}, wantErr error, got interface{}, err error, mockRepository *repository.RepositoryMock) {
+func assertTC(t *testing.T, want interface{}, wantErr error, got interface{}, err error, mockRepository *mocks.RepositoryMock) {
 	assert.Equal(t, want, got)
 	assert.ErrorIs(t, err, wantErr)
 	mockRepository.AssertExpectations(t)
 }
 
-func makeMockRepositoryWithUserExists(exists bool) *repository.RepositoryMock {
-	mockRepository := repository.NewRepositoryMock()
+func makeMockRepositoryWithUserExists(exists bool) *mocks.RepositoryMock {
+	mockRepository := mocks.NewRepositoryMock()
 	mockRepository.On("UserExists", mock.Anything, mock.Anything).Return(exists).Once()
 	return mockRepository
 }
 
-func makeMockRepositoryWithGetUser(returnUser models.User, returnErr error) *repository.RepositoryMock {
-	mockRepository := repository.NewRepositoryMock()
+func makeMockRepositoryWithGetUser(returnUser models.User, returnErr error) *mocks.RepositoryMock {
+	mockRepository := mocks.NewRepositoryMock()
 	mockRepository.On("GetUser", mock.Anything).Return(returnUser, returnErr).Once()
 	return mockRepository
 }
 
-func makeMockRepositoryWithDeleteUser(returnUser models.User, returnErr error) *repository.RepositoryMock {
-	mockRepository := repository.NewRepositoryMock()
+func makeMockRepositoryWithDeleteUser(returnUser models.User, returnErr error) *mocks.RepositoryMock {
+	mockRepository := mocks.NewRepositoryMock()
 	mockRepository.On("DeleteUser", mock.Anything).Return(returnUser, returnErr).Once()
 	return mockRepository
 }

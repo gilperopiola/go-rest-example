@@ -12,6 +12,18 @@ import (
 	"github.com/gilperopiola/go-rest-example/pkg/transport"
 )
 
+// TODO
+// - Interfaces pkg
+// - Connection pooling MySQL
+// - Redis
+// - More tests
+// - Integration tests?
+// - Add postman collection
+// - Add swagger docs
+// - pprof -> check goroutine leaks
+// - Add another model (user 1-1)
+// - Add another model (user 1-n)
+
 func main() {
 
 	// It all starts here
@@ -26,13 +38,13 @@ func main() {
 		logger = logger.NewLogger()
 
 		// Initialize monitoring as middleware (New Relic)
-		monitoringMiddleware = middleware.NewMonitoringMiddleware(config.MONITORING)
+		monitoringMiddleware = middleware.NewMonitoringMiddleware(config.Monitoring())
 
 		// Initialize authentication module
-		auth = auth.NewAuth(config.JWT.SECRET, config.JWT.SESSION_DURATION_DAYS)
+		auth = auth.NewAuth(config.JWT().Secret, config.JWT().SessionDurationDays)
 
 		// Establish database connection
-		database = repository.NewDatabase(config.DATABASE, logger)
+		database = repository.NewDatabase(config.Database(), logger)
 
 		// Initialize repository layer with the database connection
 		repository = repository.NewRepository(database)
@@ -44,16 +56,17 @@ func main() {
 		endpoints = transport.NewTransport(service, transport.NewErrorsMapper(logger))
 
 		// Initialize the router with the endpoints
-		router = transport.NewRouter(endpoints, config, auth, logger, monitoringMiddleware)
+		router = transport.NewRouter(endpoints, config.General(), auth, logger, monitoringMiddleware)
 	)
 
 	// Defer closing open connections
 	defer database.Close()
 
 	// Start server
-	log.Println("Running server on port " + config.PORT)
+	port := config.General().Port
+	log.Println("Running server on port " + port)
 
-	err := router.Run(":" + config.PORT)
+	err := router.Run(":" + port)
 	if err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
