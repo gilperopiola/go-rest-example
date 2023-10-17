@@ -105,16 +105,16 @@ func TestGenerateTokenString(t *testing.T) {
 
 func TestHashPassword(t *testing.T) {
 	h := New(testModel)
-	h.HashPassword()
-	expected := common.Hash(testModel.Email, testModel.Password)
+	h.HashPassword("salt")
+	expected := common.Hash(testModel.Password, "salt")
 	assert.Equal(t, expected, h.User.Password)
 }
 
 func TestPasswordMatches(t *testing.T) {
 	h := New(testModel)
-	h.HashPassword()
-	assert.True(t, h.PasswordMatches("password"))
-	assert.False(t, h.PasswordMatches("wrong_password"))
+	h.HashPassword("salt")
+	assert.True(t, h.PasswordMatches("password", "salt"))
+	assert.False(t, h.PasswordMatches("wrong_password", "salt"))
 }
 
 func TestOverwriteFields(t *testing.T) {

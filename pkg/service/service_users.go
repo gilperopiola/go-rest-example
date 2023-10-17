@@ -19,7 +19,7 @@ func (s *Service) CreateUser(createUserRequest requests.CreateUserRequest) (resp
 		return responses.CreateUserResponse{}, common.Wrap(fmt.Errorf("CreateUser: user.Exists"), customErrors.ErrUsernameOrEmailAlreadyInUse)
 	}
 
-	user.HashPassword()
+	user.HashPassword(s.Config.JWT().HashSalt)
 
 	if err := user.Create(s.Repository); err != nil {
 		return responses.CreateUserResponse{}, common.Wrap(fmt.Errorf("CreateUser: user.Create"), err)

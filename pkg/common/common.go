@@ -16,8 +16,8 @@ func Wrap(err1, err2 error) error {
 	return fmt.Errorf("%s: %w", err1.Error(), err2)
 }
 
-func Hash(salt string, data string) string {
+func Hash(data string, salt string) string {
 	hasher := sha256.New()
-	hasher.Write([]byte(salt + data))
+	hasher.Write([]byte(data + salt))
 	return base64.URLEncoding.EncodeToString(hasher.Sum(nil))
 }

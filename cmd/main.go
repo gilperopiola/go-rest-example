@@ -13,8 +13,6 @@ import (
 )
 
 // TODO
-// - Interfaces pkg
-// - Connection pooling MySQL
 // - Redis
 // - More tests
 // - Integration tests?

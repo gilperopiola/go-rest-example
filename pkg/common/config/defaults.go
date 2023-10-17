@@ -15,9 +15,11 @@ var (
 	defaultDatabaseSchema   = "go-rest-example-db"
 	defaultDatabasePurge    = false
 	defaultDatabaseDebug    = false
+	defaultDatabaseDestroy  = true
 
 	defaultJWTSecret              = "a0#3ndl2"
 	defaultJWTSessionDurationDays = 14
+	defaultJWTHashSalt            = "e2#4ssa9"
 
 	defaultMonitoringEnabled = false
 	defaultMonitoringAppName = "go-rest-example"

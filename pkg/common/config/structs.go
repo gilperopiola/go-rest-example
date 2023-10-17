@@ -16,13 +16,15 @@ type DatabaseConfig struct {
 	Port     string
 	Schema   string
 
-	Purge bool
-	Debug bool
+	Purge   bool
+	Debug   bool
+	Destroy bool
 }
 
 type JWTConfig struct {
 	Secret              string
 	SessionDurationDays int
+	HashSalt            string
 }
 
 type MonitoringConfig struct {

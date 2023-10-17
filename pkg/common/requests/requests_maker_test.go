@@ -147,21 +147,21 @@ func TestMakeLoginRequest(t *testing.T) {
 func TestMakeGetUserRequest(t *testing.T) {
 	tests := []struct {
 		name      string
-		ctxUserID string
+		ctxUserID int
 		urlUserID string
 		want      GetUserRequest
 		wantErr   error
 	}{
 		{
 			name:      "error_invalid_id",
-			ctxUserID: "0",
+			ctxUserID: 0,
 			urlUserID: "0",
 			want:      GetUserRequest{},
-			wantErr:   customErrors.ErrAllFieldsRequired,
+			wantErr:   customErrors.ErrReadingValueFromCtx,
 		},
 		{
 			name:      "success",
-			ctxUserID: "1",
+			ctxUserID: 1,
 			urlUserID: "1",
 			want:      GetUserRequest{ID: 1},
 			wantErr:   nil,
@@ -197,7 +197,7 @@ func TestMakeUpdateUserRequest(t *testing.T) {
 
 	tests := []struct {
 		name      string
-		ctxUserID string
+		ctxUserID int
 		urlUserID string
 		body      UpdateUserBody
 		want      UpdateUserRequest
@@ -205,7 +205,7 @@ func TestMakeUpdateUserRequest(t *testing.T) {
 	}{
 		{
 			name:      "error_binding_request",
-			ctxUserID: "1",
+			ctxUserID: 1,
 			urlUserID: "1",
 			body:      UpdateUserBody{Username: 5},
 			want:      UpdateUserRequest{},
@@ -213,15 +213,15 @@ func TestMakeUpdateUserRequest(t *testing.T) {
 		},
 		{
 			name:      "error_validating_request",
-			ctxUserID: "0",
-			urlUserID: "0",
-			body:      UpdateUserBody{Username: VALID_USERNAME},
+			ctxUserID: 2,
+			urlUserID: "2",
+			body:      UpdateUserBody{Username: VALID_USERNAME, Email: "invalid"},
 			want:      UpdateUserRequest{},
-			wantErr:   customErrors.ErrAllFieldsRequired,
+			wantErr:   customErrors.ErrInvalidEmailFormat,
 		},
 		{
 			name:      "success",
-			ctxUserID: "1",
+			ctxUserID: 1,
 			urlUserID: "1",
 			body:      successBody,
 			want:      successResponse,
@@ -267,7 +267,8 @@ func makeTestContextWithHTTPRequest(body any) *gin.Context {
 	return addRequestToContext(httpReq)
 }
 
-func addValueAndParamToContext(context *gin.Context, ctxKey, ctxValue, paramKey, paramValue string) {
+// TODO make everything work with strings, not the ctxValue as an int
+func addValueAndParamToContext(context *gin.Context, ctxKey string, ctxValue int, paramKey, paramValue string) {
 	context.Set(ctxKey, ctxValue)
 	context.Params = append(context.Params, gin.Param{Key: paramKey, Value: paramValue})
 }

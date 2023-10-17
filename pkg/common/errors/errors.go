@@ -24,11 +24,12 @@ func (e *Error) Unwrap() error {
 
 var (
 	// - General errors
-	ErrUnknown           = New(fmt.Errorf("error unknown"))
-	ErrNilError          = New(fmt.Errorf("error, unexpected nil error"))
-	ErrUnauthorized      = New(fmt.Errorf("error, unauthorized"))
-	ErrBindingRequest    = New(fmt.Errorf("error binding request"))
-	ErrAllFieldsRequired = New(fmt.Errorf("error, all fields required"))
+	ErrUnknown             = New(fmt.Errorf("error unknown"))
+	ErrNilError            = New(fmt.Errorf("error, unexpected nil error"))
+	ErrUnauthorized        = New(fmt.Errorf("error, unauthorized"))
+	ErrBindingRequest      = New(fmt.Errorf("error binding request"))
+	ErrAllFieldsRequired   = New(fmt.Errorf("error, all fields required"))
+	ErrReadingValueFromCtx = New(fmt.Errorf("error reading value from context"))
 
 	// - User errors
 	ErrCreatingUser                = New(fmt.Errorf("error creating user"))

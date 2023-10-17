@@ -80,7 +80,8 @@ func TestSignup(t *testing.T) {
 
 func TestLogin(t *testing.T) {
 
-	modelUser.Password = common.Hash(VALID_EMAIL, VALID_PASSWORD)
+	// The hash here should match the one on the Configuration
+	modelUser.Password = common.Hash(VALID_PASSWORD, "")
 
 	tests := []struct {
 		name            string

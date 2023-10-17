@@ -12,13 +12,6 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-type DatabaseInterface interface {
-	Setup(config config.DatabaseConfig, logger logger.LoggerI)
-	Purge()
-	Migrate()
-	Close()
-}
-
 type Database struct {
 	DB *gorm.DB
 }
@@ -48,20 +41,17 @@ func (database *Database) Setup(config config.DatabaseConfig, logger logger.Logg
 		database.DB.LogMode(true)
 	}
 
-	// Clean database
+	// Clean tables
 	if config.Purge {
-		database.Purge()
+		database.DB.Delete(models.User{})
+	}
+
+	// Destroy tables
+	if config.Destroy {
+		database.DB.DropTable(&models.User{})
 	}
 
 	// Run migrations
-	database.Migrate()
-}
-
-func (database *Database) Purge() {
-	database.DB.Delete(models.User{})
-}
-
-func (database *Database) Migrate() {
 	database.DB.AutoMigrate(&models.User{})
 }
 

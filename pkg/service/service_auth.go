@@ -18,7 +18,7 @@ func (s *Service) Signup(signupRequest requests.SignupRequest) (responses.Signup
 		return responses.SignupResponse{}, common.Wrap(fmt.Errorf("Signup: user.Exists"), customErrors.ErrUsernameOrEmailAlreadyInUse)
 	}
 
-	user.HashPassword()
+	user.HashPassword(s.Config.JWT().HashSalt)
 
 	if err := user.Create(s.Repository); err != nil {
 		return responses.SignupResponse{}, common.Wrap(fmt.Errorf("Signup: user.Create"), err)
@@ -34,7 +34,7 @@ func (s *Service) Login(loginRequest requests.LoginRequest) (responses.LoginResp
 		return responses.LoginResponse{}, common.Wrap(fmt.Errorf("Login: user.Get"), err)
 	}
 
-	if !user.PasswordMatches(loginRequest.Password) {
+	if !user.PasswordMatches(loginRequest.Password, s.Config.JWT().HashSalt) {
 		return responses.LoginResponse{}, common.Wrap(fmt.Errorf("Login: !user.PasswordMatches"), customErrors.ErrWrongPassword)
 	}
 

@@ -102,7 +102,7 @@ func MakeDeleteUserRequest(c GinI) (request DeleteUserRequest, err error) {
 func getIntFromContext(c GinI, key string) (int, error) {
 	value := c.GetInt(key)
 	if value == 0 {
-		return 0, fmt.Errorf("error getting %s from context", key)
+		return 0, customErrors.ErrReadingValueFromCtx
 	}
 	return value, nil
 }

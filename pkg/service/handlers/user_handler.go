@@ -94,12 +94,12 @@ func (h *UserHandler) Exists(r repository.RepositoryLayer) bool {
 
 // - Misc
 
-func (h *UserHandler) HashPassword() {
-	h.User.Password = common.Hash(h.User.Email, h.User.Password)
+func (h *UserHandler) HashPassword(salt string) {
+	h.User.Password = common.Hash(h.User.Password, salt)
 }
 
-func (h *UserHandler) PasswordMatches(password string) bool {
-	return h.User.Password == common.Hash(h.User.Email, password)
+func (h *UserHandler) PasswordMatches(password, salt string) bool {
+	return h.User.Password == common.Hash(password, salt)
 }
 
 func (h *UserHandler) OverwriteFields(username, email, password string) {

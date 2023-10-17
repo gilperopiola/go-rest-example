@@ -21,6 +21,13 @@ func NewConfig() *Config {
 	return &config
 }
 
+func NewTestConfig() *Config {
+	config := Config{}
+	config.Setup()
+	config.database.Purge = true
+	return &config
+}
+
 func (config *Config) Setup() {
 
 	// Load variables
@@ -48,11 +55,13 @@ func (config *Config) loadDatabaseVars() {
 	config.database.Schema = getEnv(prefix+"DATABASE_SCHEMA", defaultDatabaseSchema)
 	config.database.Purge = getEnvBool(prefix+"DATABASE_PURGE", defaultDatabasePurge)
 	config.database.Debug = getEnvBool(prefix+"DATABASE_DEBUG", defaultDatabaseDebug)
+	config.database.Destroy = getEnvBool(prefix+"DATABASE_DESTROY", defaultDatabaseDestroy)
 }
 
 func (config *Config) loadJWTVars() {
 	config.jwt.Secret = getEnv(prefix+"JWT_SECRET", defaultJWTSecret)
 	config.jwt.SessionDurationDays = getEnvInt(prefix+"JWT_SESSION_DURATION_DAYS", defaultJWTSessionDurationDays)
+	config.jwt.HashSalt = getEnv(prefix+"JWT_HASH_SALT", defaultJWTHashSalt)
 }
 
 func (config *Config) loadMonitoringVars() {
