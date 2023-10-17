@@ -10,10 +10,14 @@ import (
 
 func (r *SignupRequest) ToUserModel() models.User {
 	return models.User{
-		Email:     r.Email,
-		Username:  r.Username,
-		Password:  r.Password,
-		Deleted:   false,
+		Email:    r.Email,
+		Username: r.Username,
+		Password: r.Password,
+		Deleted:  false,
+		Details: models.UserDetail{
+			FirstName: r.FirstName,
+			LastName:  r.LastName,
+		},
 		IsAdmin:   false,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
@@ -38,10 +42,14 @@ func (r *LoginRequest) ToUserModel() models.User {
 
 func (r *CreateUserRequest) ToUserModel() models.User {
 	return models.User{
-		Email:     r.Email,
-		Username:  r.Username,
-		Password:  r.Password,
-		Deleted:   false,
+		Email:    r.Email,
+		Username: r.Username,
+		Password: r.Password,
+		Deleted:  false,
+		Details: models.UserDetail{
+			FirstName: r.FirstName,
+			LastName:  r.LastName,
+		},
 		IsAdmin:   r.IsAdmin,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
@@ -53,7 +61,26 @@ func (r *GetUserRequest) ToUserModel() models.User {
 }
 
 func (r *UpdateUserRequest) ToUserModel() models.User {
-	return models.User{ID: r.ID, Username: r.Username, Email: r.Email}
+	var (
+		firstName = ""
+		lastName  = ""
+	)
+	if r.FirstName != nil {
+		firstName = *r.FirstName
+	}
+	if r.LastName != nil {
+		lastName = *r.LastName
+	}
+
+	return models.User{
+		ID:       r.ID,
+		Username: r.Username,
+		Email:    r.Email,
+		Details: models.UserDetail{
+			FirstName: firstName,
+			LastName:  lastName,
+		},
+	}
 }
 
 func (r *DeleteUserRequest) ToUserModel() models.User {

@@ -21,15 +21,7 @@ func New(user models.User) *UserHandler {
 }
 
 func (h *UserHandler) ToResponseModel() responses.User {
-	return responses.User{
-		ID:        h.User.ID,
-		Email:     h.User.Email,
-		Username:  h.User.Username,
-		IsAdmin:   h.User.IsAdmin,
-		Deleted:   h.User.Deleted,
-		CreatedAt: h.User.CreatedAt,
-		UpdatedAt: h.User.UpdatedAt,
-	}
+	return h.User.ToResponseModel()
 }
 
 func (h *UserHandler) ToAuthEntity() auth.User {
@@ -111,5 +103,14 @@ func (h *UserHandler) OverwriteFields(username, email, password string) {
 	}
 	if password != "" {
 		h.User.Password = password
+	}
+}
+
+func (h *UserHandler) OverwriteDetails(firstName, lastName *string) {
+	if firstName != nil {
+		h.User.Details.FirstName = *firstName
+	}
+	if lastName != nil {
+		h.User.Details.LastName = *lastName
 	}
 }

@@ -50,6 +50,7 @@ func (s *Service) UpdateUser(updateUserRequest requests.UpdateUserRequest) (resp
 	}
 
 	user.OverwriteFields(updateUserRequest.Username, updateUserRequest.Email, "")
+	user.OverwriteDetails(updateUserRequest.FirstName, updateUserRequest.LastName)
 
 	if err := user.Update(s.Repository); err != nil {
 		return responses.UpdateUserResponse{}, common.Wrap(fmt.Errorf("UpdateUser: user.Update"), err)

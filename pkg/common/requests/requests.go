@@ -11,6 +11,10 @@ type SignupRequest struct {
 	Email          string `json:"email"`
 	Password       string `json:"password"`
 	RepeatPassword string `json:"repeat_password"`
+
+	// User Detail
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
 }
 
 type LoginRequest struct {
@@ -25,6 +29,10 @@ type CreateUserRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 	IsAdmin  bool   `json:"is_admin"`
+
+	// User Detail
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
 }
 
 type GetUserRequest struct {
@@ -35,6 +43,10 @@ type UpdateUserRequest struct {
 	ID       int    `json:"id"`
 	Username string `json:"username"`
 	Email    string `json:"email"`
+
+	// User Detail
+	FirstName *string `json:"first_name"`
+	LastName  *string `json:"last_name"`
 }
 
 type DeleteUserRequest struct {

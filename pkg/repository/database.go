@@ -41,18 +41,18 @@ func (database *Database) Setup(config config.DatabaseConfig, logger logger.Logg
 		database.DB.LogMode(true)
 	}
 
-	// Clean tables
-	if config.Purge {
-		database.DB.Delete(models.User{})
-	}
-
-	// Destroy tables
+	// Destroy or clean tables
 	if config.Destroy {
 		database.DB.DropTable(&models.User{})
+		database.DB.DropTable(&models.UserDetail{})
+	} else if config.Purge {
+		database.DB.Delete(models.User{})
+		database.DB.Delete(models.UserDetail{})
 	}
 
 	// Run migrations
 	database.DB.AutoMigrate(&models.User{})
+	database.DB.AutoMigrate(&models.UserDetail{})
 }
 
 func (database *Database) Close() {

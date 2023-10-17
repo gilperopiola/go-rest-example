@@ -15,6 +15,23 @@ func (r *Repository) CreateUser(user models.User) (models.User, error) {
 	if err := r.Database.DB.Create(&user).Error; err != nil {
 		return models.User{}, common.Wrap(err, customErrors.ErrCreatingUser)
 	}
+	return user, nil
+}
+
+// GetUser retrieves a user from the database, if it exists
+func (r *Repository) GetUser(user models.User, opts ...QueryOption) (models.User, error) {
+	query := "(id = ? OR username = ? OR email = ?)"
+	for _, opt := range opts {
+		opt(&query)
+	}
+
+	err := r.Database.DB.Preload("Details").Where(query, user.ID, user.Username, user.Email).First(&user).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return models.User{}, common.Wrap(err, customErrors.ErrUserNotFound)
+		}
+		return models.User{}, common.Wrap(err, customErrors.ErrUnknown)
+	}
 
 	return user, nil
 }
@@ -24,42 +41,6 @@ func (r *Repository) UpdateUser(user models.User) (models.User, error) {
 	if err := r.Database.DB.Model(&user).Update(&user).Error; err != nil {
 		return models.User{}, common.Wrap(err, customErrors.ErrUpdatingUser)
 	}
-
-	return user, nil
-}
-
-// UserExists checks if a user exists on the database
-func (r *Repository) UserExists(email, username string, opts ...QueryOption) bool {
-	query := "(email = ? OR username = ?)"
-
-	for _, opt := range opts {
-		opt(&query)
-	}
-
-	var user models.User
-	if err := r.Database.DB.Where(query, email, username).First(&user).Error; err != nil {
-		return false
-	}
-
-	return true
-}
-
-// GetUser retrieves a user from the database, if it exists
-func (r *Repository) GetUser(user models.User, opts ...QueryOption) (models.User, error) {
-	query := "(id = ? OR username = ? OR email = ?)"
-
-	for _, opt := range opts {
-		opt(&query)
-	}
-
-	err := r.Database.DB.Where(query, user.ID, user.Username, user.Email).First(&user).Error
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return models.User{}, common.Wrap(err, customErrors.ErrUserNotFound)
-		}
-		return models.User{}, common.Wrap(err, customErrors.ErrUnknown)
-	}
-
 	return user, nil
 }
 
@@ -85,4 +66,16 @@ func (r *Repository) DeleteUser(id int) (models.User, error) {
 	}
 
 	return user, nil
+}
+
+// UserExists checks if a user exists on the database
+func (r *Repository) UserExists(email, username string, opts ...QueryOption) bool {
+	query := "(email = ? OR username = ?)"
+	for _, opt := range opts {
+		opt(&query)
+	}
+
+	var count int64
+	r.Database.DB.Model(&models.User{}).Where(query, email, username).Count(&count)
+	return count > 0
 }
