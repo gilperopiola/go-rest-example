@@ -78,6 +78,13 @@ func (req DeleteUserRequest) Validate() error {
 	return nil
 }
 
+func (req CreateUserPostRequest) Validate() error {
+	if req.UserID == 0 || req.Title == "" {
+		return customErrors.ErrAllFieldsRequired
+	}
+	return nil
+}
+
 func validateUsernameEmailAndPassword(username, email, password string) error {
 	if email == "" || username == "" || password == "" {
 		return customErrors.ErrAllFieldsRequired

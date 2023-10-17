@@ -27,6 +27,9 @@ type TransportLayer interface {
 	GetUser(c *gin.Context)
 	UpdateUser(c *gin.Context)
 	DeleteUser(c *gin.Context)
+
+	// - Posts
+	CreateUserPost(c *gin.Context)
 }
 
 func NewTransport(service service.ServiceLayer, errorsMapper errorsMapperI) Transport {
@@ -73,7 +76,8 @@ type Request interface {
 		requests.CreateUserRequest |
 		requests.GetUserRequest |
 		requests.UpdateUserRequest |
-		requests.DeleteUserRequest
+		requests.DeleteUserRequest |
+		requests.CreateUserPostRequest
 }
 type Response interface {
 	responses.SignupResponse |
@@ -81,5 +85,6 @@ type Response interface {
 		responses.CreateUserResponse |
 		responses.GetUserResponse |
 		responses.UpdateUserResponse |
-		responses.DeleteUserResponse
+		responses.DeleteUserResponse |
+		responses.CreateUserPostResponse
 }

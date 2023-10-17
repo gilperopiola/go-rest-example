@@ -18,11 +18,12 @@ import (
 // - Add postman collection
 // - Add swagger docs
 // - pprof -> check goroutine leaks
-// - Add another model (user 1-1)
 // - Add another model (user 1-n)
 // - batch insert?
 // - change password
 // - reset password
+// - roles to DB
+// - List users ep
 
 func main() {
 

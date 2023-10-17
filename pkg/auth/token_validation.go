@@ -21,6 +21,7 @@ func (auth *Auth) ValidateToken(role Role, shouldMatchUserID bool) gin.HandlerFu
 		token, err := auth.getTokenStructFromContext(c)
 		if err != nil {
 			abortRequest(c)
+			return
 		}
 
 		// Get custom claims from token
@@ -29,11 +30,13 @@ func (auth *Auth) ValidateToken(role Role, shouldMatchUserID bool) gin.HandlerFu
 		// Check if claims and token are valid
 		if !ok || !token.Valid || customClaims.Valid() != nil {
 			abortRequest(c)
+			return
 		}
 
 		// Check if role is valid
 		if role != AnyRole && customClaims.Role != role {
 			abortRequest(c)
+			return
 		}
 
 		// Check if user ID in URL matches user ID in token
@@ -41,10 +44,12 @@ func (auth *Auth) ValidateToken(role Role, shouldMatchUserID bool) gin.HandlerFu
 			urlUserID, err := getIntFromContextURLParams(c.Params, "user_id")
 			if err != nil {
 				abortRequest(c)
+				return
 			}
 
 			if customClaims.ID != fmt.Sprint(urlUserID) {
 				abortRequest(c)
+				return
 			}
 		}
 
@@ -99,12 +104,11 @@ func removeBearerPrefix(token string) string {
 }
 
 func abortRequest(c *gin.Context) {
-	c.JSON(http.StatusUnauthorized, common.HTTPResponse{
+	c.AbortWithStatusJSON(http.StatusUnauthorized, common.HTTPResponse{
 		Success: false,
 		Content: nil,
 		Error:   "unauthorized",
 	})
-	c.Abort()
 }
 
 func getIntFromContextURLParams(params gin.Params, key string) (int, error) {

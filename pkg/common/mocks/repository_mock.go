@@ -39,3 +39,8 @@ func (m *RepositoryMock) DeleteUser(id int) (models.User, error) {
 	args := m.Called(id)
 	return args.Get(0).(models.User), args.Error(1)
 }
+
+func (m *RepositoryMock) CreateUserPost(post models.UserPost) (models.UserPost, error) {
+	args := m.Called(post)
+	return args.Get(0).(models.UserPost), args.Error(1)
+}

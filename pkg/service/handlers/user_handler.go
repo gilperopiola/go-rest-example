@@ -14,14 +14,19 @@ import (
 
 type UserHandler struct {
 	User models.User
+	Post models.UserPost
 }
 
-func New(user models.User) *UserHandler {
-	return &UserHandler{User: user}
+func New(user models.User, post models.UserPost) *UserHandler {
+	return &UserHandler{User: user, Post: post}
 }
 
 func (h *UserHandler) ToResponseModel() responses.User {
 	return h.User.ToResponseModel()
+}
+
+func (h *UserHandler) ToUserPostResponseModel() responses.UserPost {
+	return h.Post.ToResponseModel()
 }
 
 func (h *UserHandler) ToAuthEntity() auth.User {

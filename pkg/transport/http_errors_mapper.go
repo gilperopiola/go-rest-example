@@ -91,12 +91,13 @@ var errorsMapToHTTPCode = map[error]int{
 	customErrors.ErrUsernameOrEmailAlreadyInUse: 409,
 
 	// 500 - Internal Server Error
-	customErrors.ErrCreatingUser: 500,
-	customErrors.ErrGettingUser:  500,
-	customErrors.ErrUpdatingUser: 500,
-	customErrors.ErrDeletingUser: 500,
-	customErrors.ErrUnknown:      500,
-	customErrors.ErrNilError:     500,
+	customErrors.ErrCreatingUser:     500,
+	customErrors.ErrGettingUser:      500,
+	customErrors.ErrUpdatingUser:     500,
+	customErrors.ErrDeletingUser:     500,
+	customErrors.ErrUnknown:          500,
+	customErrors.ErrNilError:         500,
+	customErrors.ErrCreatingUserPost: 500,
 }
 
 func (e errorsMapper) logWarningOrError(err error, responseStatusCode int) {

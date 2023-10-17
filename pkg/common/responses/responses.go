@@ -28,3 +28,9 @@ type UpdateUserResponse struct {
 type DeleteUserResponse struct {
 	User User `json:"user"`
 }
+
+// - Posts
+
+type CreateUserPostResponse struct {
+	UserPost UserPost `json:"user_post"`
+}

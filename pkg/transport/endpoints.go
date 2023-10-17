@@ -25,6 +25,11 @@ func (router *Router) SetUserEndpoints(transport TransportLayer, authI auth.Auth
 		users.PATCH("/:user_id", transport.UpdateUser)
 		users.DELETE("/:user_id", transport.DeleteUser)
 	}
+
+	posts := users.Group("/:user_id/posts")
+	{
+		posts.POST("", transport.CreateUserPost)
+	}
 }
 
 func (router *Router) SetAdminEndpoints(transport TransportLayer, authI auth.AuthI) {
@@ -64,4 +69,8 @@ func (t Transport) UpdateUser(c *gin.Context) {
 
 func (t Transport) DeleteUser(c *gin.Context) {
 	HandleRequest(t, c, requests.MakeDeleteUserRequest, t.Service.DeleteUser)
+}
+
+func (t Transport) CreateUserPost(c *gin.Context) {
+	HandleRequest(t, c, requests.MakeCreateUserPostRequest, t.Service.CreateUserPost)
 }

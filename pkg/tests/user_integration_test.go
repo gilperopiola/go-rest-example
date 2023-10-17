@@ -18,6 +18,23 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+/*
+	IMPORTANT: To run this you should enable the database destruction on the env vars or default config
+	IMPORTANT: To run this you should enable the database destruction on the env vars or default config
+	IMPORTANT: To run this you should enable the database destruction on the env vars or default config
+	IMPORTANT: To run this you should enable the database destruction on the env vars or default config
+	IMPORTANT: To run this you should enable the database destruction on the env vars or default config
+	IMPORTANT: To run this you should enable the database destruction on the env vars or default config
+	IMPORTANT: To run this you should enable the database destruction on the env vars or default config
+	IMPORTANT: To run this you should enable the database destruction on the env vars or default config
+	IMPORTANT: To run this you should enable the database destruction on the env vars or default config
+	IMPORTANT: To run this you should enable the database destruction on the env vars or default config
+	IMPORTANT: To run this you should enable the database destruction on the env vars or default config
+	IMPORTANT: To run this you should enable the database destruction on the env vars or default config
+	IMPORTANT: To run this you should enable the database destruction on the env vars or default config
+	IMPORTANT: To run this you should enable the database destruction on the env vars or default config
+*/
+
 func TestUsersCRUDIntegrationTest(t *testing.T) {
 
 	// Prepare
@@ -36,7 +53,7 @@ func TestUsersCRUDIntegrationTest(t *testing.T) {
 	testDeleteUser(t, endpoints)
 	testGetUser(t, endpoints, http.StatusNotFound)
 
-	// Admin run :)
+	// Admin run :o
 	testCreateUser(t, endpoints)
 	testLogin(t, endpoints, "admin")
 }

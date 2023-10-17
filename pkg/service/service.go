@@ -22,6 +22,8 @@ type ServiceLayer interface {
 	GetUser(getUserRequest requests.GetUserRequest) (responses.GetUserResponse, error)
 	UpdateUser(updateUserRequest requests.UpdateUserRequest) (responses.UpdateUserResponse, error)
 	DeleteUser(deleteUserRequest requests.DeleteUserRequest) (responses.DeleteUserResponse, error)
+
+	CreateUserPost(createUserPostRequest requests.CreateUserPostRequest) (responses.CreateUserPostResponse, error)
 }
 
 func NewService(repository repository.RepositoryLayer, auth auth.AuthI, config *config.Config) *Service {

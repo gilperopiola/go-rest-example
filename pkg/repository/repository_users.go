@@ -25,7 +25,7 @@ func (r *Repository) GetUser(user models.User, opts ...QueryOption) (models.User
 		opt(&query)
 	}
 
-	err := r.Database.DB.Preload("Details").Where(query, user.ID, user.Username, user.Email).First(&user).Error
+	err := r.Database.DB.Preload("Details").Preload("Posts").Where(query, user.ID, user.Username, user.Email).First(&user).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return models.User{}, common.Wrap(err, customErrors.ErrUserNotFound)
@@ -78,4 +78,11 @@ func (r *Repository) UserExists(email, username string, opts ...QueryOption) boo
 	var count int64
 	r.Database.DB.Model(&models.User{}).Where(query, email, username).Count(&count)
 	return count > 0
+}
+
+func (r *Repository) CreateUserPost(post models.UserPost) (models.UserPost, error) {
+	if err := r.Database.DB.Create(&post).Error; err != nil {
+		return models.UserPost{}, common.Wrap(err, customErrors.ErrCreatingUserPost)
+	}
+	return post, nil
 }

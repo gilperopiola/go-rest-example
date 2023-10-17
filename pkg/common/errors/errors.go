@@ -44,4 +44,7 @@ var (
 	ErrInvalidPasswordLength       = New(fmt.Errorf("error, password either too short or too long"))
 	ErrPasswordsDontMatch          = New(fmt.Errorf("error, passwords don't match"))
 	ErrWrongPassword               = New(fmt.Errorf("error, wrong password"))
+
+	// - User posts errors
+	ErrCreatingUserPost = New(fmt.Errorf("error creating user post"))
 )

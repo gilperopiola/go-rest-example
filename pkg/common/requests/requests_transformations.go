@@ -86,3 +86,16 @@ func (r *UpdateUserRequest) ToUserModel() models.User {
 func (r *DeleteUserRequest) ToUserModel() models.User {
 	return models.User{ID: r.ID}
 }
+
+func (r *CreateUserPostRequest) ToUserModel() models.User {
+	return models.User{
+		ID: r.UserID,
+	}
+}
+func (r *CreateUserPostRequest) ToUserPostModel() models.UserPost {
+	return models.UserPost{
+		UserID: r.UserID,
+		Title:  r.Title,
+		Body:   r.Body,
+	}
+}

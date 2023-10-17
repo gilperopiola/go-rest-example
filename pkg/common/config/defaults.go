@@ -14,7 +14,7 @@ var (
 	defaultDatabasePort     = "3306"
 	defaultDatabaseSchema   = "go-rest-example-db"
 	defaultDatabasePurge    = false
-	defaultDatabaseDebug    = false
+	defaultDatabaseDebug    = true
 	defaultDatabaseDestroy  = true
 
 	defaultJWTSecret              = "a0#3ndl2"

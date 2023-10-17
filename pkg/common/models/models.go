@@ -16,6 +16,7 @@ type User struct {
 	Password  string `gorm:"not null"`
 	IsAdmin   bool
 	Details   UserDetail
+	Posts     UserPosts `gorm:"foreignKey:UserID;references:ID"`
 	Deleted   bool
 	CreatedAt time.Time
 	UpdatedAt time.Time
@@ -28,6 +29,7 @@ func (u *User) ToResponseModel() responses.User {
 		Username:  u.Username,
 		IsAdmin:   u.IsAdmin,
 		Details:   u.Details.ToResponseModel(),
+		Posts:     u.Posts.ToResponseModel(),
 		Deleted:   u.Deleted,
 		CreatedAt: u.CreatedAt,
 		UpdatedAt: u.UpdatedAt,
@@ -48,4 +50,29 @@ func (u UserDetail) ToResponseModel() responses.UserDetail {
 		FirstName: u.FirstName,
 		LastName:  u.LastName,
 	}
+}
+
+type UserPost struct {
+	ID     int    `gorm:"primaryKey"`
+	Title  string `gorm:"not null"`
+	Body   string `gorm:"type:text"`
+	UserID int    `gorm:"not null"`
+}
+
+func (p UserPost) ToResponseModel() responses.UserPost {
+	return responses.UserPost{
+		ID:    p.ID,
+		Title: p.Title,
+		Body:  p.Body,
+	}
+}
+
+type UserPosts []UserPost
+
+func (p UserPosts) ToResponseModel() []responses.UserPost {
+	var posts []responses.UserPost
+	for _, post := range p {
+		posts = append(posts, post.ToResponseModel())
+	}
+	return posts
 }

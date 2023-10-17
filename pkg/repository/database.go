@@ -45,14 +45,17 @@ func (database *Database) Setup(config config.DatabaseConfig, logger logger.Logg
 	if config.Destroy {
 		database.DB.DropTable(&models.User{})
 		database.DB.DropTable(&models.UserDetail{})
+		database.DB.DropTable(&models.UserPost{})
 	} else if config.Purge {
 		database.DB.Delete(models.User{})
 		database.DB.Delete(models.UserDetail{})
+		database.DB.Delete(models.UserPost{})
 	}
 
 	// Run migrations
 	database.DB.AutoMigrate(&models.User{})
 	database.DB.AutoMigrate(&models.UserDetail{})
+	database.DB.AutoMigrate(&models.UserPost{})
 }
 
 func (database *Database) Close() {

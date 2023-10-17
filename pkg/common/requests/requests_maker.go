@@ -97,6 +97,25 @@ func MakeDeleteUserRequest(c GinI) (request DeleteUserRequest, err error) {
 	return request, nil
 }
 
+func MakeCreateUserPostRequest(c GinI) (request CreateUserPostRequest, err error) {
+	if err = c.ShouldBindJSON(&request); err != nil {
+		return CreateUserPostRequest{}, common.Wrap(fmt.Errorf("makeCreateUserPostRequest"), customErrors.ErrBindingRequest)
+	}
+
+	postOwnerID, err := getIntFromContext(c, "ID")
+	if err != nil {
+		return CreateUserPostRequest{}, common.Wrap(fmt.Errorf("makeCreateUserPostRequest"), err)
+	}
+
+	request.UserID = postOwnerID
+
+	if err = request.Validate(); err != nil {
+		return CreateUserPostRequest{}, common.Wrap(fmt.Errorf("makeCreateUserPostRequest"), err)
+	}
+
+	return request, nil
+}
+
 // - Helpers
 
 func getIntFromContext(c GinI, key string) (int, error) {

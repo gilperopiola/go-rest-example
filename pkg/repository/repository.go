@@ -14,6 +14,8 @@ type RepositoryLayer interface {
 	GetUser(user models.User, opts ...QueryOption) (models.User, error)
 	DeleteUser(id int) (models.User, error)
 	UserExists(email, username string, opts ...QueryOption) bool
+
+	CreateUserPost(post models.UserPost) (models.UserPost, error)
 }
 
 func NewRepository(database Database) *Repository {

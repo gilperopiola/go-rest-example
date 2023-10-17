@@ -52,3 +52,11 @@ type UpdateUserRequest struct {
 type DeleteUserRequest struct {
 	ID int `json:"id"`
 }
+
+// - Posts
+
+type CreateUserPostRequest struct {
+	UserID int    `json:"user_id"`
+	Title  string `json:"title"`
+	Body   string `json:"body"`
+}

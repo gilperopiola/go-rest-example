@@ -37,47 +37,47 @@ var (
 func TestToResponseModel(t *testing.T) {
 	expected := testResponseModel
 	expected.Password = ""
-	got := New(testModel).ToResponseModel()
+	got := New(testModel, models.UserPost{}).ToResponseModel()
 	assert.Equal(t, expected, got)
 }
 
 func TestToAuthEntity(t *testing.T) {
 	expected := testAuthEntity
 	expected.Password = ""
-	got := New(testModel).ToAuthEntity()
+	got := New(testModel, models.UserPost{}).ToAuthEntity()
 	assert.Equal(t, expected, got)
 }
 
 func TestCreate(t *testing.T) {
-	h := New(testModel)
+	h := New(testModel, models.UserPost{})
 	mockRepo := getMockRepoWithFnCall("CreateUser", testModel)
 	err := h.Create(mockRepo)
 	assertUserTC(t, mockRepo, testModel, h.User, err)
 }
 
 func TestGet(t *testing.T) {
-	h := New(testModel)
+	h := New(testModel, models.UserPost{})
 	mockRepo := getMockRepoWithFnCall("GetUser", testModel)
 	err := h.Get(mockRepo)
 	assertUserTC(t, mockRepo, testModel, h.User, err)
 }
 
 func TestUpdate(t *testing.T) {
-	h := New(testModel)
+	h := New(testModel, models.UserPost{})
 	mockRepo := getMockRepoWithFnCall("UpdateUser", testModel)
 	err := h.Update(mockRepo)
 	assertUserTC(t, mockRepo, testModel, h.User, err)
 }
 
 func TestDelete(t *testing.T) {
-	h := New(testModel)
+	h := New(testModel, models.UserPost{})
 	mockRepo := getMockRepoWithFnCall("DeleteUser", testModel)
 	err := h.Delete(mockRepo)
 	assertUserTC(t, mockRepo, testModel, h.User, err)
 }
 
 func TestExists(t *testing.T) {
-	h := New(testModel)
+	h := New(testModel, models.UserPost{})
 	mockRepo := mocks.NewRepositoryMock()
 	mockRepo.On("UserExists", mock.Anything, mock.Anything).Return(true).Once()
 	exists := h.Exists(mockRepo)
@@ -86,14 +86,14 @@ func TestExists(t *testing.T) {
 }
 
 func TestGetAuthRole(t *testing.T) {
-	h := New(testModel)
+	h := New(testModel, models.UserPost{})
 	assert.Equal(t, auth.UserRole, h.GetAuthRole())
 	h.User.IsAdmin = true
 	assert.Equal(t, auth.AdminRole, h.GetAuthRole())
 }
 
 func TestGenerateTokenString(t *testing.T) {
-	h := New(testModel)
+	h := New(testModel, models.UserPost{})
 	mockAuth := new(mocks.MockAuth)
 	mockAuth.On("GenerateToken", mock.Anything, auth.UserRole).Return("testToken", nil).Once()
 
@@ -104,21 +104,21 @@ func TestGenerateTokenString(t *testing.T) {
 }
 
 func TestHashPassword(t *testing.T) {
-	h := New(testModel)
+	h := New(testModel, models.UserPost{})
 	h.HashPassword("salt")
 	expected := common.Hash(testModel.Password, "salt")
 	assert.Equal(t, expected, h.User.Password)
 }
 
 func TestPasswordMatches(t *testing.T) {
-	h := New(testModel)
+	h := New(testModel, models.UserPost{})
 	h.HashPassword("salt")
 	assert.True(t, h.PasswordMatches("password", "salt"))
 	assert.False(t, h.PasswordMatches("wrong_password", "salt"))
 }
 
 func TestOverwriteFields(t *testing.T) {
-	h := New(testModel)
+	h := New(testModel, models.UserPost{})
 	h.OverwriteFields("new_username", "new_email@email.com", "new_password")
 	assert.Equal(t, "new_username", h.User.Username)
 	assert.Equal(t, "new_email@email.com", h.User.Email)
