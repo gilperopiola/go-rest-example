@@ -27,7 +27,21 @@ func TestUsersCRUDIntegrationTest(t *testing.T) {
 	service := service.NewService(repository, nopAuth{}, config)
 	endpoints := transport.NewTransport(service, transport.NewErrorsMapper(nopLogger{}))
 
-	// Signup
+	// Happy run :)
+	testSignup(t, endpoints)
+	testLogin(t, endpoints, "test")
+	testGetUser(t, endpoints, http.StatusOK)
+	testUpdateUser(t, endpoints)
+	testLogin(t, endpoints, "test2")
+	testDeleteUser(t, endpoints)
+	testGetUser(t, endpoints, http.StatusNotFound)
+
+	// Admin run :)
+	testCreateUser(t, endpoints)
+	testLogin(t, endpoints, "admin")
+}
+
+func testSignup(t *testing.T, endpoints transport.Transport) {
 	c := makeTestContextWithHTTPRequest(map[string]string{
 		"username":        "test",
 		"email":           "test@email.com",
@@ -35,57 +49,51 @@ func TestUsersCRUDIntegrationTest(t *testing.T) {
 		"repeat_password": "password",
 	})
 	transport.HandleRequest(endpoints, c, requests.MakeSignupRequest, endpoints.Service.Signup)
-	statusCode := c.Writer.Status()
-	assert.Equal(t, http.StatusOK, statusCode)
+	assert.Equal(t, http.StatusOK, c.Writer.Status())
+}
 
-	// Login
-	c = makeTestContextWithHTTPRequest(map[string]string{
-		"username_or_email": "test",
+func testLogin(t *testing.T, endpoints transport.Transport, username string) {
+	c := makeTestContextWithHTTPRequest(map[string]string{
+		"username_or_email": username,
 		"password":          "password",
 	})
 	transport.HandleRequest(endpoints, c, requests.MakeLoginRequest, endpoints.Service.Login)
-	statusCode = c.Writer.Status()
-	assert.Equal(t, http.StatusOK, statusCode)
+	assert.Equal(t, http.StatusOK, c.Writer.Status())
+}
 
-	// Get my user
-	c = makeTestContextWithHTTPRequest(map[string]string{})
+func testCreateUser(t *testing.T, endpoints transport.Transport) {
+	c := makeTestContextWithHTTPRequest(map[string]any{
+		"email":    "admin@email.com",
+		"username": "admin",
+		"password": "password",
+		"is_admin": true,
+	})
+	transport.HandleRequest(endpoints, c, requests.MakeCreateUserRequest, endpoints.Service.CreateUser)
+	assert.Equal(t, http.StatusOK, c.Writer.Status())
+}
+
+func testGetUser(t *testing.T, endpoints transport.Transport, status int) {
+	c := makeTestContextWithHTTPRequest(map[string]string{})
 	addValueAndParamToContext(c, "ID", 1, "user_id", "1")
 	transport.HandleRequest(endpoints, c, requests.MakeGetUserRequest, endpoints.Service.GetUser)
-	statusCode = c.Writer.Status()
-	assert.Equal(t, http.StatusOK, statusCode)
+	assert.Equal(t, status, c.Writer.Status())
+}
 
-	// Update my user
-	c = makeTestContextWithHTTPRequest(map[string]string{
+func testUpdateUser(t *testing.T, endpoints transport.Transport) {
+	c := makeTestContextWithHTTPRequest(map[string]string{
 		"username": "test2",
 		"email":    "test2@email.com",
 	})
 	addValueAndParamToContext(c, "ID", 1, "user_id", "1")
 	transport.HandleRequest(endpoints, c, requests.MakeUpdateUserRequest, endpoints.Service.UpdateUser)
-	statusCode = c.Writer.Status()
-	assert.Equal(t, http.StatusOK, statusCode)
+	assert.Equal(t, http.StatusOK, c.Writer.Status())
+}
 
-	// Login again
-	c = makeTestContextWithHTTPRequest(map[string]string{
-		"username_or_email": "test2",
-		"password":          "password",
-	})
-	transport.HandleRequest(endpoints, c, requests.MakeLoginRequest, endpoints.Service.Login)
-	statusCode = c.Writer.Status()
-	assert.Equal(t, http.StatusOK, statusCode)
-
-	// Delete my user
-	c = makeTestContextWithHTTPRequest(map[string]string{})
+func testDeleteUser(t *testing.T, endpoints transport.Transport) {
+	c := makeTestContextWithHTTPRequest(map[string]string{})
 	addValueAndParamToContext(c, "ID", 1, "user_id", "1")
 	transport.HandleRequest(endpoints, c, requests.MakeDeleteUserRequest, endpoints.Service.DeleteUser)
-	statusCode = c.Writer.Status()
-	assert.Equal(t, http.StatusOK, statusCode)
-
-	// Get my deleted user
-	c = makeTestContextWithHTTPRequest(map[string]string{})
-	addValueAndParamToContext(c, "ID", 1, "user_id", "1")
-	transport.HandleRequest(endpoints, c, requests.MakeGetUserRequest, endpoints.Service.GetUser)
-	statusCode = c.Writer.Status()
-	assert.Equal(t, http.StatusNotFound, statusCode)
+	assert.Equal(t, http.StatusOK, c.Writer.Status())
 }
 
 /* Helpers */

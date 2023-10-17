@@ -11,6 +11,8 @@ import (
 func (router *Router) SetPublicEndpoints(transport TransportLayer) {
 	public := router.Group("/")
 	{
+		public.POST("/health", healthCheck)
+
 		public.POST("/signup", transport.Signup)
 		public.POST("/login", transport.Login)
 	}
@@ -30,6 +32,10 @@ func (router *Router) SetAdminEndpoints(transport TransportLayer, authI auth.Aut
 	{
 		admin.POST("/user", transport.CreateUser)
 	}
+}
+
+func healthCheck(c *gin.Context) {
+	c.JSON(200, gin.H{"status": "API is up and running :)"})
 }
 
 /* Auth */

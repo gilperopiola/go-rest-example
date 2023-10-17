@@ -15,12 +15,14 @@ import (
 // TODO
 // - Redis
 // - More tests
-// - Integration tests?
 // - Add postman collection
 // - Add swagger docs
 // - pprof -> check goroutine leaks
 // - Add another model (user 1-1)
 // - Add another model (user 1-n)
+// - batch insert?
+// - change password
+// - reset password
 
 func main() {
 

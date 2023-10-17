@@ -22,7 +22,7 @@ func NewRouter(transport TransportLayer, cfg config.GeneralConfig, auth auth.Aut
 func (router *Router) Setup(transport TransportLayer, cfg config.GeneralConfig, auth auth.AuthI, logger logger.LoggerI, monitoring gin.HandlerFunc) {
 
 	// Create router. Set debug/release mode
-	router.Prepare(!cfg.Debug)
+	router.prepare(!cfg.Debug)
 
 	// Add middleware
 	router.Use(monitoring)                                      // Monitoring
@@ -37,7 +37,7 @@ func (router *Router) Setup(transport TransportLayer, cfg config.GeneralConfig, 
 	router.SetAdminEndpoints(transport, auth)
 }
 
-func (router *Router) Prepare(isProd bool) {
+func (router *Router) prepare(isProd bool) {
 	if isProd {
 		gin.SetMode(gin.ReleaseMode)
 	}
