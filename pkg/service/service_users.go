@@ -12,6 +12,10 @@ import (
 	"github.com/gilperopiola/go-rest-example/pkg/service/handlers"
 )
 
+//-------------------------
+//       CREATE USER
+//-------------------------
+
 // CreateUser is an admins only endpoint
 func (s *Service) CreateUser(createUserRequest requests.CreateUserRequest) (responses.CreateUserResponse, error) {
 	user := handlers.New(createUserRequest.ToUserModel(), models.UserPost{})
@@ -29,6 +33,10 @@ func (s *Service) CreateUser(createUserRequest requests.CreateUserRequest) (resp
 	return responses.CreateUserResponse{User: user.ToResponseModel()}, nil
 }
 
+//-----------------------
+//       GET USER
+//-----------------------
+
 func (s *Service) GetUser(getUserRequest requests.GetUserRequest) (responses.GetUserResponse, error) {
 	user := handlers.New(getUserRequest.ToUserModel(), models.UserPost{})
 
@@ -38,6 +46,10 @@ func (s *Service) GetUser(getUserRequest requests.GetUserRequest) (responses.Get
 
 	return responses.GetUserResponse{User: user.ToResponseModel()}, nil
 }
+
+//--------------------------
+//       UPDATE USER
+//--------------------------
 
 func (s *Service) UpdateUser(updateUserRequest requests.UpdateUserRequest) (responses.UpdateUserResponse, error) {
 	user := handlers.New(updateUserRequest.ToUserModel(), models.UserPost{})
@@ -60,6 +72,10 @@ func (s *Service) UpdateUser(updateUserRequest requests.UpdateUserRequest) (resp
 	return responses.UpdateUserResponse{User: user.ToResponseModel()}, nil
 }
 
+//--------------------------
+//       DELETE USER
+//--------------------------
+
 func (s *Service) DeleteUser(deleteUserRequest requests.DeleteUserRequest) (responses.DeleteUserResponse, error) {
 	user := handlers.New(deleteUserRequest.ToUserModel(), models.UserPost{})
 
@@ -69,17 +85,4 @@ func (s *Service) DeleteUser(deleteUserRequest requests.DeleteUserRequest) (resp
 	}
 
 	return responses.DeleteUserResponse{User: user.ToResponseModel()}, nil
-}
-
-func (s *Service) CreateUserPost(createUserPostRequest requests.CreateUserPostRequest) (responses.CreateUserPostResponse, error) {
-	handler := handlers.New(
-		models.User{},
-		createUserPostRequest.ToUserPostModel(),
-	)
-
-	if err := handler.CreatePost(s.Repository); err != nil {
-		return responses.CreateUserPostResponse{}, common.Wrap(fmt.Errorf("CreateUserPost: user.CreatePost"), err)
-	}
-
-	return responses.CreateUserPostResponse{UserPost: handler.ToUserPostResponseModel()}, nil
 }

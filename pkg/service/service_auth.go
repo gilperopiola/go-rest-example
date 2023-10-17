@@ -12,6 +12,10 @@ import (
 	"github.com/gilperopiola/go-rest-example/pkg/service/handlers"
 )
 
+//-----------------------
+//       SIGNUP
+//-----------------------
+
 func (s *Service) Signup(signupRequest requests.SignupRequest) (responses.SignupResponse, error) {
 	user := handlers.New(signupRequest.ToUserModel(), models.UserPost{})
 
@@ -27,6 +31,10 @@ func (s *Service) Signup(signupRequest requests.SignupRequest) (responses.Signup
 
 	return responses.SignupResponse{User: user.ToResponseModel()}, nil
 }
+
+//---------------------
+//       LOGIN
+//---------------------
 
 func (s *Service) Login(loginRequest requests.LoginRequest) (responses.LoginResponse, error) {
 	user := handlers.New(loginRequest.ToUserModel(), models.UserPost{})

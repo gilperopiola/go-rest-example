@@ -10,7 +10,7 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-// CreateUser creates a user on the database. Id, username and email are unique
+// CreateUser inserts a user. Table structure can be found on the models package
 func (r *Repository) CreateUser(user models.User) (models.User, error) {
 	if err := r.Database.DB.Create(&user).Error; err != nil {
 		return models.User{}, common.Wrap(err, customErrors.ErrCreatingUser)
@@ -18,7 +18,7 @@ func (r *Repository) CreateUser(user models.User) (models.User, error) {
 	return user, nil
 }
 
-// GetUser retrieves a user from the database, if it exists
+// GetUser retrieves a user, if it exists
 func (r *Repository) GetUser(user models.User, opts ...QueryOption) (models.User, error) {
 	query := "(id = ? OR username = ? OR email = ?)"
 	for _, opt := range opts {
@@ -36,7 +36,7 @@ func (r *Repository) GetUser(user models.User, opts ...QueryOption) (models.User
 	return user, nil
 }
 
-// UpdateUser updates the user on the database, skipping fields that are empty
+// UpdateUser updates the fields that are not empty on the model
 func (r *Repository) UpdateUser(user models.User) (models.User, error) {
 	if err := r.Database.DB.Model(&user).Update(&user).Error; err != nil {
 		return models.User{}, common.Wrap(err, customErrors.ErrUpdatingUser)
@@ -44,7 +44,7 @@ func (r *Repository) UpdateUser(user models.User) (models.User, error) {
 	return user, nil
 }
 
-// DeleteUser marks a user as deleted on the database, if it is already deleted it throws an error
+// DeleteUser soft-deletes a user. if it is already deleted it throws an error
 func (r *Repository) DeleteUser(id int) (models.User, error) {
 
 	// First, retrieve the user
@@ -68,21 +68,14 @@ func (r *Repository) DeleteUser(id int) (models.User, error) {
 	return user, nil
 }
 
-// UserExists checks if a user exists on the database
-func (r *Repository) UserExists(email, username string, opts ...QueryOption) bool {
-	query := "(email = ? OR username = ?)"
+// UserExists checks if a user with username or email exists
+func (r *Repository) UserExists(username, email string, opts ...QueryOption) bool {
+	query := "(username = ? OR email = ?)"
 	for _, opt := range opts {
 		opt(&query)
 	}
 
 	var count int64
-	r.Database.DB.Model(&models.User{}).Where(query, email, username).Count(&count)
+	r.Database.DB.Model(&models.User{}).Where(query, username, email).Count(&count)
 	return count > 0
-}
-
-func (r *Repository) CreateUserPost(post models.UserPost) (models.UserPost, error) {
-	if err := r.Database.DB.Create(&post).Error; err != nil {
-		return models.UserPost{}, common.Wrap(err, customErrors.ErrCreatingUserPost)
-	}
-	return post, nil
 }

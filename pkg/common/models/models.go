@@ -2,12 +2,10 @@ package models
 
 import (
 	"time"
-
-	"github.com/gilperopiola/go-rest-example/pkg/common/responses"
 )
 
 // Models are the representation of the database schema. They are used in the Service & Repository Layers.
-// If you add a new one, remember to add it in pkg/repository/database.go
+// If you add a new one, you should add it to the methods in pkg/repository/database.go
 
 type User struct {
 	ID        int    `gorm:"primaryKey"`
@@ -22,20 +20,6 @@ type User struct {
 	UpdatedAt time.Time
 }
 
-func (u *User) ToResponseModel() responses.User {
-	return responses.User{
-		ID:        u.ID,
-		Email:     u.Email,
-		Username:  u.Username,
-		IsAdmin:   u.IsAdmin,
-		Details:   u.Details.ToResponseModel(),
-		Posts:     u.Posts.ToResponseModel(),
-		Deleted:   u.Deleted,
-		CreatedAt: u.CreatedAt,
-		UpdatedAt: u.UpdatedAt,
-	}
-}
-
 type UserDetail struct {
 	ID        int    `gorm:"primaryKey"`
 	UserID    int    `gorm:"unique;not null"`
@@ -45,13 +29,6 @@ type UserDetail struct {
 	UpdatedAt time.Time
 }
 
-func (u UserDetail) ToResponseModel() responses.UserDetail {
-	return responses.UserDetail{
-		FirstName: u.FirstName,
-		LastName:  u.LastName,
-	}
-}
-
 type UserPost struct {
 	ID     int    `gorm:"primaryKey"`
 	Title  string `gorm:"not null"`
@@ -59,20 +36,4 @@ type UserPost struct {
 	UserID int    `gorm:"not null"`
 }
 
-func (p UserPost) ToResponseModel() responses.UserPost {
-	return responses.UserPost{
-		ID:    p.ID,
-		Title: p.Title,
-		Body:  p.Body,
-	}
-}
-
 type UserPosts []UserPost
-
-func (p UserPosts) ToResponseModel() []responses.UserPost {
-	var posts []responses.UserPost
-	for _, post := range p {
-		posts = append(posts, post.ToResponseModel())
-	}
-	return posts
-}
