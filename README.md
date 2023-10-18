@@ -1,8 +1,8 @@
 # Go REST Example
 
-**`Hey kiddo!`** Now that you're here, please take a few seconds to breathe. In & out. Slowly... Gently... Yeah, right there!
+**`Hey kiddo!`** Now that you're here, please take a few seconds to breathe. In & out. Slowly... Gently... Yeah, right there.
 
-Try to be mindful of your body and your surroundings... are you comfortable? Are you tense? **Untense those muscles!** 
+Try to be mindful of your body and your surroundings... Are you comfortable? Are you tense? **Untense those muscles!** 
 
 ...And now that your auto-pilot mode is turned off, let's dive in! 🐙
 
@@ -60,19 +60,23 @@ Then, it's basically divided into 3 layers: `Transport, Service and Repository`.
 
 `Transport` handles routing, validations, error management and logging.
 
-`Service` handles the business logic, it receives the requests created by the previous layer, calls the next one, and returns the appropiate responses. The `handlers` package is also part of this layer.
+`Service` handles the business logic, it receives the requests created by the previous layer, calls the next one, and returns the appropiate responses.
 
 `Repository` handles connections with external dependencies, such as the database.
 
 | Package | 👀 |
 |---------|-------------|
 | `auth` | Token creation and validation. |
-| `common` | Things used across the project. Logger, requests & responses. |
-| `config` | Self explanatory. |
-| `entities` | Our structs, uncoupled of the database models. |
-| `errors` | Our custom errors. |
-| `handlers` | Interfaces used to interact with our models. Part of the service layer. |
-| `models` | Our database models. |
+| `common` | Things used across the project. |
+| `common.config` | Configuration. |
+| `common.errors` | Our custom error type. |
+| `common.logger` | Our logger. |
+| `common.middleware` | Our middleware. |
+| `common.mocks` | Mocks for our dependencies. |
+| `common.models` | Database Models & Behaviours. |
+| `common.requests` | Our custom Requests & Behaviours. |
+| `common.responses` | Our custom Responses & Behaviours. |
+| `test` | Holds integration tests. |
 
 ## Request Flow Overview
 
