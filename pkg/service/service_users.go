@@ -5,11 +5,9 @@ import (
 
 	"github.com/gilperopiola/go-rest-example/pkg/common"
 	customErrors "github.com/gilperopiola/go-rest-example/pkg/common/errors"
-	"github.com/gilperopiola/go-rest-example/pkg/common/models"
 	"github.com/gilperopiola/go-rest-example/pkg/common/requests"
 	"github.com/gilperopiola/go-rest-example/pkg/common/responses"
-	"github.com/gilperopiola/go-rest-example/pkg/repository"
-	"github.com/gilperopiola/go-rest-example/pkg/service/handlers"
+	"github.com/gilperopiola/go-rest-example/pkg/repository/options"
 )
 
 //-------------------------
@@ -18,7 +16,7 @@ import (
 
 // CreateUser is an admins only endpoint
 func (s *Service) CreateUser(createUserRequest requests.CreateUserRequest) (responses.CreateUserResponse, error) {
-	user := handlers.New(createUserRequest.ToUserModel(), models.UserPost{})
+	user := createUserRequest.ToUserModel()
 
 	if user.Exists(s.Repository) {
 		return responses.CreateUserResponse{}, common.Wrap(fmt.Errorf("CreateUser: user.Exists"), customErrors.ErrUsernameOrEmailAlreadyInUse)
@@ -38,9 +36,9 @@ func (s *Service) CreateUser(createUserRequest requests.CreateUserRequest) (resp
 //-----------------------
 
 func (s *Service) GetUser(getUserRequest requests.GetUserRequest) (responses.GetUserResponse, error) {
-	user := handlers.New(getUserRequest.ToUserModel(), models.UserPost{})
+	user := getUserRequest.ToUserModel()
 
-	if err := user.Get(s.Repository, repository.WithoutDeleted); err != nil {
+	if err := user.Get(s.Repository, options.WithoutDeleted); err != nil {
 		return responses.GetUserResponse{}, common.Wrap(fmt.Errorf("GetUser: user.Get"), err)
 	}
 
@@ -52,13 +50,13 @@ func (s *Service) GetUser(getUserRequest requests.GetUserRequest) (responses.Get
 //--------------------------
 
 func (s *Service) UpdateUser(updateUserRequest requests.UpdateUserRequest) (responses.UpdateUserResponse, error) {
-	user := handlers.New(updateUserRequest.ToUserModel(), models.UserPost{})
+	user := updateUserRequest.ToUserModel()
 
 	if user.Exists(s.Repository) {
 		return responses.UpdateUserResponse{}, common.Wrap(fmt.Errorf("UpdateUser: user.Exists"), customErrors.ErrUsernameOrEmailAlreadyInUse)
 	}
 
-	if err := user.Get(s.Repository, repository.WithoutDeleted); err != nil {
+	if err := user.Get(s.Repository, options.WithoutDeleted); err != nil {
 		return responses.UpdateUserResponse{}, common.Wrap(fmt.Errorf("UpdateUser: user.Get"), err)
 	}
 
@@ -77,7 +75,7 @@ func (s *Service) UpdateUser(updateUserRequest requests.UpdateUserRequest) (resp
 //--------------------------
 
 func (s *Service) DeleteUser(deleteUserRequest requests.DeleteUserRequest) (responses.DeleteUserResponse, error) {
-	user := handlers.New(deleteUserRequest.ToUserModel(), models.UserPost{})
+	user := deleteUserRequest.ToUserModel()
 
 	// This returns an error if the user is already deleted
 	if err := user.Delete(s.Repository); err != nil {

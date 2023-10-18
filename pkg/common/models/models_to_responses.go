@@ -19,8 +19,8 @@ import (
 func (u User) ToResponseModel() responses.User {
 	return responses.User{
 		ID:        u.ID,
-		Email:     u.Email,
 		Username:  u.Username,
+		Email:     u.Email,
 		IsAdmin:   u.IsAdmin,
 		Details:   u.Details.ToResponseModel(),
 		Posts:     u.Posts.ToResponseModel(),

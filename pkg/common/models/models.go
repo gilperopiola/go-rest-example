@@ -2,6 +2,8 @@ package models
 
 import (
 	"time"
+
+	"github.com/gilperopiola/go-rest-example/pkg/repository/options"
 )
 
 // Models are the representation of the database schema. They are used in the Service & Repository Layers.
@@ -37,3 +39,13 @@ type UserPost struct {
 }
 
 type UserPosts []UserPost
+
+type RepositoryLayer interface {
+	CreateUser(user User) (User, error)
+	UpdateUser(user User) (User, error)
+	GetUser(user User, opts ...options.QueryOption) (User, error)
+	DeleteUser(id int) (User, error)
+	UserExists(username, email string, opts ...options.QueryOption) bool
+
+	CreateUserPost(post UserPost) (UserPost, error)
+}

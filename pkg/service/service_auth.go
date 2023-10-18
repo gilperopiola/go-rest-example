@@ -5,11 +5,9 @@ import (
 
 	"github.com/gilperopiola/go-rest-example/pkg/common"
 	customErrors "github.com/gilperopiola/go-rest-example/pkg/common/errors"
-	"github.com/gilperopiola/go-rest-example/pkg/common/models"
 	"github.com/gilperopiola/go-rest-example/pkg/common/requests"
 	"github.com/gilperopiola/go-rest-example/pkg/common/responses"
-	"github.com/gilperopiola/go-rest-example/pkg/repository"
-	"github.com/gilperopiola/go-rest-example/pkg/service/handlers"
+	"github.com/gilperopiola/go-rest-example/pkg/repository/options"
 )
 
 //-----------------------
@@ -17,7 +15,7 @@ import (
 //-----------------------
 
 func (s *Service) Signup(signupRequest requests.SignupRequest) (responses.SignupResponse, error) {
-	user := handlers.New(signupRequest.ToUserModel(), models.UserPost{})
+	user := signupRequest.ToUserModel()
 
 	if user.Exists(s.Repository) {
 		return responses.SignupResponse{}, common.Wrap(fmt.Errorf("Signup: user.Exists"), customErrors.ErrUsernameOrEmailAlreadyInUse)
@@ -37,9 +35,9 @@ func (s *Service) Signup(signupRequest requests.SignupRequest) (responses.Signup
 //---------------------
 
 func (s *Service) Login(loginRequest requests.LoginRequest) (responses.LoginResponse, error) {
-	user := handlers.New(loginRequest.ToUserModel(), models.UserPost{})
+	user := loginRequest.ToUserModel()
 
-	if err := user.Get(s.Repository, repository.WithoutDeleted); err != nil {
+	if err := user.Get(s.Repository, options.WithoutDeleted); err != nil {
 		return responses.LoginResponse{}, common.Wrap(fmt.Errorf("Login: user.Get"), err)
 	}
 

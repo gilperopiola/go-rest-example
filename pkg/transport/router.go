@@ -32,9 +32,9 @@ func (router *Router) Setup(transport TransportLayer, cfg config.GeneralConfig, 
 	router.Use(middleware.NewLoggerToContextMiddleware(logger)) // Logger to context
 
 	// Set endpoints
-	router.SetPublicEndpoints(transport)
-	router.SetUserEndpoints(transport, auth)
-	router.SetAdminEndpoints(transport, auth)
+	router.setPublicEndpoints(transport)
+	router.setUserEndpoints(transport, auth)
+	router.setAdminEndpoints(transport, auth)
 }
 
 func (router *Router) prepare(isProd bool) {

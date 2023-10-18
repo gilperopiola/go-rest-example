@@ -63,8 +63,8 @@ func MakeLoginRequest(c GinI) (request LoginRequest, err error) {
 
 func (r *SignupRequest) ToUserModel() models.User {
 	return models.User{
-		Email:    r.Email,
 		Username: r.Username,
+		Email:    r.Email,
 		Password: r.Password,
 		Deleted:  false,
 		Details: models.UserDetail{

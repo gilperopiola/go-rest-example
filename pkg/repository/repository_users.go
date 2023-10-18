@@ -6,6 +6,7 @@ import (
 	"github.com/gilperopiola/go-rest-example/pkg/common"
 	customErrors "github.com/gilperopiola/go-rest-example/pkg/common/errors"
 	"github.com/gilperopiola/go-rest-example/pkg/common/models"
+	"github.com/gilperopiola/go-rest-example/pkg/repository/options"
 
 	"github.com/jinzhu/gorm"
 )
@@ -19,7 +20,7 @@ func (r *Repository) CreateUser(user models.User) (models.User, error) {
 }
 
 // GetUser retrieves a user, if it exists
-func (r *Repository) GetUser(user models.User, opts ...QueryOption) (models.User, error) {
+func (r *Repository) GetUser(user models.User, opts ...options.QueryOption) (models.User, error) {
 	query := "(id = ? OR username = ? OR email = ?)"
 	for _, opt := range opts {
 		opt(&query)
@@ -69,7 +70,7 @@ func (r *Repository) DeleteUser(id int) (models.User, error) {
 }
 
 // UserExists checks if a user with username or email exists
-func (r *Repository) UserExists(username, email string, opts ...QueryOption) bool {
+func (r *Repository) UserExists(username, email string, opts ...options.QueryOption) bool {
 	query := "(username = ? OR email = ?)"
 	for _, opt := range opts {
 		opt(&query)
