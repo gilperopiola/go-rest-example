@@ -16,8 +16,8 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-func newTestService(mockRepository *mocks.RepositoryMock) *Service {
-	return NewService(mockRepository, &auth.Auth{}, &config.Config{})
+func newTestService(mockRepository *mocks.RepositoryMock) *service {
+	return New(mockRepository, &auth.Auth{}, &config.Config{})
 }
 
 const (

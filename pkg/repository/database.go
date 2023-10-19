@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/gilperopiola/go-rest-example/pkg/common/config"
-	"github.com/gilperopiola/go-rest-example/pkg/common/logger"
+	"github.com/gilperopiola/go-rest-example/pkg/common/middleware"
 	"github.com/gilperopiola/go-rest-example/pkg/common/models"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -16,7 +16,7 @@ type Database struct {
 	DB *gorm.DB
 }
 
-func NewDatabase(config config.DatabaseConfig, logger logger.LoggerI) Database {
+func NewDatabase(config config.Database, logger middleware.LoggerI) Database {
 	var database Database
 	database.Setup(config, logger)
 	return database
@@ -27,7 +27,7 @@ const (
 	retryDelay = 5 // In seconds
 )
 
-func (database *Database) Setup(config config.DatabaseConfig, logger logger.LoggerI) {
+func (database *Database) Setup(config config.Database, logger middleware.LoggerI) {
 
 	// Create connection. It's deferred closed in main.go.
 	// Retry connection if it fails due to Docker's orchestration.

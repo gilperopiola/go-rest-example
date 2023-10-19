@@ -7,7 +7,7 @@ import (
 )
 
 // CreateUserPost inserts a new post on the database. Title is required, body is optional
-func (r *Repository) CreateUserPost(post models.UserPost) (models.UserPost, error) {
+func (r *repository) CreateUserPost(post models.UserPost) (models.UserPost, error) {
 	if err := r.Database.DB.Create(&post).Error; err != nil {
 		return models.UserPost{}, common.Wrap(err, customErrors.ErrCreatingUserPost)
 	}

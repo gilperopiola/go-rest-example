@@ -8,9 +8,9 @@ import (
 func (config *Config) validate() {
 	var (
 		necessaryVars = map[string]string{
-			prefix + "PORT":            config.general.Port,
-			prefix + "DATABASE_TYPE":   config.database.Type,
-			prefix + "DATABASE_SCHEMA": config.database.Schema,
+			prefix + "PORT":            config.General.Port,
+			prefix + "DATABASE_TYPE":   config.Database.Type,
+			prefix + "DATABASE_SCHEMA": config.Database.Schema,
 		}
 		missingVars = []string{}
 	)

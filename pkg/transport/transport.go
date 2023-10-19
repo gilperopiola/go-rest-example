@@ -11,11 +11,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type Transport struct {
-	Service      service.ServiceLayer
-	ErrorsMapper errorsMapperI
-}
-
 type TransportLayer interface {
 
 	// - Auth
@@ -32,7 +27,12 @@ type TransportLayer interface {
 	CreateUserPost(c *gin.Context)
 }
 
-func NewTransport(service service.ServiceLayer, errorsMapper errorsMapperI) Transport {
+type Transport struct {
+	Service      service.ServiceLayer
+	ErrorsMapper errorsMapperI
+}
+
+func New(service service.ServiceLayer, errorsMapper errorsMapperI) Transport {
 	return Transport{
 		Service:      service,
 		ErrorsMapper: errorsMapper,

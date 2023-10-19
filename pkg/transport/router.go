@@ -3,7 +3,6 @@ package transport
 import (
 	"github.com/gilperopiola/go-rest-example/pkg/auth"
 	"github.com/gilperopiola/go-rest-example/pkg/common/config"
-	"github.com/gilperopiola/go-rest-example/pkg/common/logger"
 	"github.com/gilperopiola/go-rest-example/pkg/common/middleware"
 
 	"github.com/gin-gonic/gin"
@@ -13,13 +12,13 @@ type Router struct {
 	*gin.Engine
 }
 
-func NewRouter(transport TransportLayer, cfg config.GeneralConfig, auth auth.AuthI, logger logger.LoggerI, monitoring gin.HandlerFunc) Router {
+func NewRouter(t TransportLayer, cfg config.General, auth auth.AuthI, logger middleware.LoggerI, monitoring gin.HandlerFunc) Router {
 	var router Router
-	router.Setup(transport, cfg, auth, logger, monitoring)
+	router.Setup(t, cfg, auth, logger, monitoring)
 	return router
 }
 
-func (router *Router) Setup(transport TransportLayer, cfg config.GeneralConfig, auth auth.AuthI, logger logger.LoggerI, monitoring gin.HandlerFunc) {
+func (router *Router) Setup(t TransportLayer, cfg config.General, auth auth.AuthI, logger middleware.LoggerI, monitoring gin.HandlerFunc) {
 
 	// Create router. Set debug/release mode
 	router.prepare(!cfg.Debug)
@@ -32,9 +31,9 @@ func (router *Router) Setup(transport TransportLayer, cfg config.GeneralConfig, 
 	router.Use(middleware.NewLoggerToContextMiddleware(logger)) // Logger to context
 
 	// Set endpoints
-	router.setPublicEndpoints(transport)
-	router.setUserEndpoints(transport, auth)
-	router.setAdminEndpoints(transport, auth)
+	router.setPublicEndpoints(t)
+	router.setUserEndpoints(t, auth)
+	router.setAdminEndpoints(t, auth)
 }
 
 func (router *Router) prepare(isProd bool) {

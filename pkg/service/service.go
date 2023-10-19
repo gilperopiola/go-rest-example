@@ -8,12 +8,6 @@ import (
 	"github.com/gilperopiola/go-rest-example/pkg/repository"
 )
 
-type Service struct {
-	Config     *config.Config
-	Auth       auth.AuthI
-	Repository repository.RepositoryLayer
-}
-
 type ServiceLayer interface {
 	Signup(signupRequest requests.SignupRequest) (responses.SignupResponse, error)
 	Login(loginRequest requests.LoginRequest) (responses.LoginResponse, error)
@@ -26,8 +20,14 @@ type ServiceLayer interface {
 	CreateUserPost(createUserPostRequest requests.CreateUserPostRequest) (responses.CreateUserPostResponse, error)
 }
 
-func NewService(repository repository.RepositoryLayer, auth auth.AuthI, config *config.Config) *Service {
-	return &Service{
+type service struct {
+	Config     *config.Config
+	Auth       auth.AuthI
+	Repository repository.RepositoryLayer
+}
+
+func New(repository repository.RepositoryLayer, auth auth.AuthI, config *config.Config) *service {
+	return &service{
 		Repository: repository,
 		Auth:       auth,
 		Config:     config,

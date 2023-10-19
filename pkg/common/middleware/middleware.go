@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/gilperopiola/go-rest-example/pkg/common/config"
-	"github.com/gilperopiola/go-rest-example/pkg/common/logger"
+	"github.com/sirupsen/logrus"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/timeout"
@@ -14,7 +14,21 @@ import (
 	"github.com/newrelic/go-agent/v3/newrelic"
 )
 
-func NewMonitoringMiddleware(config config.MonitoringConfig) gin.HandlerFunc {
+type LoggerI interface {
+	Info(args ...interface{})
+	Warn(args ...interface{})
+	Error(args ...interface{})
+	Fatalf(format string, args ...interface{})
+}
+
+func NewLogger() LoggerI {
+	logger := logrus.New()
+	logger.SetFormatter(&logrus.JSONFormatter{})
+	logger.SetLevel(logrus.InfoLevel)
+	return logger
+}
+
+func NewMonitoringMiddleware(config config.Monitoring) gin.HandlerFunc {
 	// If monitoring is not enabled, return empty middleware
 	if !config.Enabled {
 		return gin.HandlerFunc(func(c *gin.Context) {})
@@ -49,7 +63,7 @@ func NewTimeoutMiddleware(timeoutSeconds int) gin.HandlerFunc {
 	)
 }
 
-func NewLoggerToContextMiddleware(logger logger.LoggerI) gin.HandlerFunc {
+func NewLoggerToContextMiddleware(logger LoggerI) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Set("logger", logger)
 		c.Next()

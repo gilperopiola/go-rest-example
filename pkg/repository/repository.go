@@ -5,9 +5,8 @@ import (
 	"github.com/gilperopiola/go-rest-example/pkg/repository/options"
 )
 
-type Repository struct {
-	Database Database
-}
+// Compile time check to ensure repository implements the RepositoryLayer interface
+var _ RepositoryLayer = (*repository)(nil)
 
 type RepositoryLayer interface {
 	CreateUser(user models.User) (models.User, error)
@@ -19,6 +18,10 @@ type RepositoryLayer interface {
 	CreateUserPost(post models.UserPost) (models.UserPost, error)
 }
 
-func NewRepository(database Database) *Repository {
-	return &Repository{Database: database}
+type repository struct {
+	Database Database
+}
+
+func New(database Database) *repository {
+	return &repository{Database: database}
 }

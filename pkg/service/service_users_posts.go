@@ -12,7 +12,7 @@ import (
 //        USER POSTS
 //------------------------------
 
-func (s *Service) CreateUserPost(createUserPostRequest requests.CreateUserPostRequest) (responses.CreateUserPostResponse, error) {
+func (s *service) CreateUserPost(createUserPostRequest requests.CreateUserPostRequest) (responses.CreateUserPostResponse, error) {
 	userPost := createUserPostRequest.ToUserPostModel()
 
 	if err := userPost.Create(s.Repository); err != nil {

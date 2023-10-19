@@ -14,14 +14,14 @@ import (
 //       SIGNUP
 //-----------------------
 
-func (s *Service) Signup(signupRequest requests.SignupRequest) (responses.SignupResponse, error) {
+func (s *service) Signup(signupRequest requests.SignupRequest) (responses.SignupResponse, error) {
 	user := signupRequest.ToUserModel()
 
 	if user.Exists(s.Repository) {
 		return responses.SignupResponse{}, common.Wrap(fmt.Errorf("Signup: user.Exists"), customErrors.ErrUsernameOrEmailAlreadyInUse)
 	}
 
-	user.HashPassword(s.Config.JWT().HashSalt)
+	user.HashPassword(s.Config.JWT.HashSalt)
 
 	if err := user.Create(s.Repository); err != nil {
 		return responses.SignupResponse{}, common.Wrap(fmt.Errorf("Signup: user.Create"), err)
@@ -34,14 +34,14 @@ func (s *Service) Signup(signupRequest requests.SignupRequest) (responses.Signup
 //       LOGIN
 //---------------------
 
-func (s *Service) Login(loginRequest requests.LoginRequest) (responses.LoginResponse, error) {
+func (s *service) Login(loginRequest requests.LoginRequest) (responses.LoginResponse, error) {
 	user := loginRequest.ToUserModel()
 
 	if err := user.Get(s.Repository, options.WithoutDeleted); err != nil {
 		return responses.LoginResponse{}, common.Wrap(fmt.Errorf("Login: user.Get"), err)
 	}
 
-	if !user.PasswordMatches(loginRequest.Password, s.Config.JWT().HashSalt) {
+	if !user.PasswordMatches(loginRequest.Password, s.Config.JWT.HashSalt) {
 		return responses.LoginResponse{}, common.Wrap(fmt.Errorf("Login: !user.PasswordMatches"), customErrors.ErrWrongPassword)
 	}
 

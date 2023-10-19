@@ -39,11 +39,12 @@ func TestUsersCRUDIntegrationTest(t *testing.T) {
 	}
 
 	// Prepare
-	config := config.NewTestConfig()
-	database := repository.NewDatabase(config.Database(), nopLogger{})
-	repository := repository.NewRepository(database)
-	service := service.NewService(repository, nopAuth{}, config)
-	endpoints := transport.NewTransport(service, transport.NewErrorsMapper(nopLogger{}))
+	config := config.NewConfig()
+	config.Database.Purge = true
+	database := repository.NewDatabase(config.Database, nopLogger{})
+	repository := repository.New(database)
+	service := service.New(repository, nopAuth{}, config)
+	endpoints := transport.New(service, transport.NewErrorsMapper(nopLogger{}))
 
 	// Happy run :)
 	testSignup(t, endpoints)

@@ -15,14 +15,14 @@ import (
 //-------------------------
 
 // CreateUser is an admins only endpoint
-func (s *Service) CreateUser(createUserRequest requests.CreateUserRequest) (responses.CreateUserResponse, error) {
+func (s *service) CreateUser(createUserRequest requests.CreateUserRequest) (responses.CreateUserResponse, error) {
 	user := createUserRequest.ToUserModel()
 
 	if user.Exists(s.Repository) {
 		return responses.CreateUserResponse{}, common.Wrap(fmt.Errorf("CreateUser: user.Exists"), customErrors.ErrUsernameOrEmailAlreadyInUse)
 	}
 
-	user.HashPassword(s.Config.JWT().HashSalt)
+	user.HashPassword(s.Config.JWT.HashSalt)
 
 	if err := user.Create(s.Repository); err != nil {
 		return responses.CreateUserResponse{}, common.Wrap(fmt.Errorf("CreateUser: user.Create"), err)
@@ -35,7 +35,7 @@ func (s *Service) CreateUser(createUserRequest requests.CreateUserRequest) (resp
 //       GET USER
 //-----------------------
 
-func (s *Service) GetUser(getUserRequest requests.GetUserRequest) (responses.GetUserResponse, error) {
+func (s *service) GetUser(getUserRequest requests.GetUserRequest) (responses.GetUserResponse, error) {
 	user := getUserRequest.ToUserModel()
 
 	if err := user.Get(s.Repository, options.WithoutDeleted); err != nil {
@@ -49,7 +49,7 @@ func (s *Service) GetUser(getUserRequest requests.GetUserRequest) (responses.Get
 //       UPDATE USER
 //--------------------------
 
-func (s *Service) UpdateUser(updateUserRequest requests.UpdateUserRequest) (responses.UpdateUserResponse, error) {
+func (s *service) UpdateUser(updateUserRequest requests.UpdateUserRequest) (responses.UpdateUserResponse, error) {
 	user := updateUserRequest.ToUserModel()
 
 	if user.Exists(s.Repository) {
@@ -74,7 +74,7 @@ func (s *Service) UpdateUser(updateUserRequest requests.UpdateUserRequest) (resp
 //       DELETE USER
 //--------------------------
 
-func (s *Service) DeleteUser(deleteUserRequest requests.DeleteUserRequest) (responses.DeleteUserResponse, error) {
+func (s *service) DeleteUser(deleteUserRequest requests.DeleteUserRequest) (responses.DeleteUserResponse, error) {
 	user := deleteUserRequest.ToUserModel()
 
 	// This returns an error if the user is already deleted

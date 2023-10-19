@@ -5,7 +5,6 @@ import (
 
 	"github.com/gilperopiola/go-rest-example/pkg/auth"
 	"github.com/gilperopiola/go-rest-example/pkg/common/config"
-	"github.com/gilperopiola/go-rest-example/pkg/common/logger"
 	"github.com/gilperopiola/go-rest-example/pkg/common/middleware"
 	"github.com/gilperopiola/go-rest-example/pkg/repository"
 	"github.com/gilperopiola/go-rest-example/pkg/service"
@@ -28,7 +27,7 @@ import (
 func main() {
 
 	// It all starts here
-	log.Println("Server started")
+	log.Println("Server starting ;)")
 
 	// Setup dependencies
 	var (
@@ -36,35 +35,35 @@ func main() {
 		config = config.NewConfig()
 
 		// Initialize logger
-		logger = logger.NewLogger()
+		logger = middleware.NewLogger()
 
 		// Initialize monitoring as middleware (New Relic)
-		monitoringMiddleware = middleware.NewMonitoringMiddleware(config.Monitoring())
+		monitoringMiddleware = middleware.NewMonitoringMiddleware(config.Monitoring)
 
 		// Initialize authentication module
-		auth = auth.NewAuth(config.JWT().Secret, config.JWT().SessionDurationDays)
+		auth = auth.NewAuth(config.JWT.Secret, config.JWT.SessionDurationDays)
 
 		// Establish database connection
-		database = repository.NewDatabase(config.Database(), logger)
+		database = repository.NewDatabase(config.Database, logger)
 
 		// Initialize repository layer with the database connection
-		repository = repository.NewRepository(database)
+		repository = repository.New(database)
 
 		// Setup the main service layer with dependencies
-		service = service.NewService(repository, auth, config)
+		service = service.New(repository, auth, config)
 
 		// Setup endpoints & transport layer with dependencies
-		endpoints = transport.NewTransport(service, transport.NewErrorsMapper(logger))
+		endpoints = transport.New(service, transport.NewErrorsMapper(logger))
 
 		// Initialize the router with the endpoints
-		router = transport.NewRouter(endpoints, config.General(), auth, logger, monitoringMiddleware)
+		router = transport.NewRouter(endpoints, config.General, auth, logger, monitoringMiddleware)
 	)
 
 	// Defer closing open connections
 	defer database.Close()
 
 	// Start server
-	port := config.General().Port
+	port := config.General.Port
 	log.Println("Running server on port " + port)
 
 	err := router.Run(":" + port)

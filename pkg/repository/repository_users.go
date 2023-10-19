@@ -12,7 +12,7 @@ import (
 )
 
 // CreateUser inserts a user. Table structure can be found on the models package
-func (r *Repository) CreateUser(user models.User) (models.User, error) {
+func (r *repository) CreateUser(user models.User) (models.User, error) {
 	if err := r.Database.DB.Create(&user).Error; err != nil {
 		return models.User{}, common.Wrap(err, customErrors.ErrCreatingUser)
 	}
@@ -20,7 +20,7 @@ func (r *Repository) CreateUser(user models.User) (models.User, error) {
 }
 
 // GetUser retrieves a user, if it exists
-func (r *Repository) GetUser(user models.User, opts ...options.QueryOption) (models.User, error) {
+func (r *repository) GetUser(user models.User, opts ...options.QueryOption) (models.User, error) {
 	query := "(id = ? OR username = ? OR email = ?)"
 	for _, opt := range opts {
 		opt(&query)
@@ -38,7 +38,7 @@ func (r *Repository) GetUser(user models.User, opts ...options.QueryOption) (mod
 }
 
 // UpdateUser updates the fields that are not empty on the model
-func (r *Repository) UpdateUser(user models.User) (models.User, error) {
+func (r *repository) UpdateUser(user models.User) (models.User, error) {
 	if err := r.Database.DB.Model(&user).Update(&user).Error; err != nil {
 		return models.User{}, common.Wrap(err, customErrors.ErrUpdatingUser)
 	}
@@ -46,7 +46,7 @@ func (r *Repository) UpdateUser(user models.User) (models.User, error) {
 }
 
 // DeleteUser soft-deletes a user. if it is already deleted it throws an error
-func (r *Repository) DeleteUser(id int) (models.User, error) {
+func (r *repository) DeleteUser(id int) (models.User, error) {
 
 	// First, retrieve the user
 	user := models.User{ID: id}
@@ -70,7 +70,7 @@ func (r *Repository) DeleteUser(id int) (models.User, error) {
 }
 
 // UserExists checks if a user with username or email exists
-func (r *Repository) UserExists(username, email string, opts ...options.QueryOption) bool {
+func (r *repository) UserExists(username, email string, opts ...options.QueryOption) bool {
 	query := "(username = ? OR email = ?)"
 	for _, opt := range opts {
 		opt(&query)
