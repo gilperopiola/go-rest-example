@@ -22,13 +22,29 @@ func NewDatabase(config config.DatabaseConfig, logger logger.LoggerI) Database {
 	return database
 }
 
+const (
+	maxRetries = 5
+	retryDelay = 5 // In seconds
+)
+
 func (database *Database) Setup(config config.DatabaseConfig, logger logger.LoggerI) {
 
-	// Create connection. It's deferred closed in main.go
+	// Create connection. It's deferred closed in main.go.
+	// Retry connection if it fails due to Docker's orchestration.
 	var err error
-	if database.DB, err = gorm.Open(config.Type, config.GetConnectionString()); err != nil {
-		logger.Fatalf("error connecting to database: %v", err)
-		os.Exit(1)
+	retries := 0
+	for retries < maxRetries {
+		if database.DB, err = gorm.Open(config.Type, config.GetConnectionString()); err != nil {
+			retries++
+			if retries == maxRetries {
+				logger.Fatalf("error connecting to database after %d retries: %v", maxRetries, err)
+				os.Exit(1)
+			}
+			logger.Warn("error connecting to database, retrying... ")
+			time.Sleep(retryDelay * time.Second)
+			continue
+		}
+		break
 	}
 
 	// Set connection pool limits

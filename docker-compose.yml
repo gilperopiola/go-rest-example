@@ -1,0 +1,29 @@
+version: '3'
+
+services:
+
+  go-rest-example-db:
+    image: mariadb:latest
+    environment:
+      - MARIADB_DATABASE=go-rest-example-db
+      - MARIADB_ROOT_PASSWORD=password ########### IN PRODUCTION, CHANGE THIS TO A .env FILE
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+  go-rest-example:
+    build: .
+    ports:
+      - "8040:8040"
+    depends_on:
+      - go-rest-example-db
+    environment:
+      # These are defined in config.go
+      - GO_REST_EXAMPLE_DATABASE_HOSTNAME=go-rest-example-db
+      - GO_REST_EXAMPLE_DATABASE_USERNAME=root
+      - GO_REST_EXAMPLE_DATABASE_PASSWORD=password
+      - GO_REST_EXAMPLE_DATABASE_SCHEMA=go-rest-example-db
+
+volumes:
+  db_data:

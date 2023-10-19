@@ -3,8 +3,10 @@ package tests
 import (
 	"bytes"
 	"encoding/json"
+	"flag"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/gilperopiola/go-rest-example/pkg/auth"
@@ -19,23 +21,22 @@ import (
 )
 
 /*
-	IMPORTANT: To run this you should enable the database destruction on the env vars or default config
-	IMPORTANT: To run this you should enable the database destruction on the env vars or default config
-	IMPORTANT: To run this you should enable the database destruction on the env vars or default config
-	IMPORTANT: To run this you should enable the database destruction on the env vars or default config
-	IMPORTANT: To run this you should enable the database destruction on the env vars or default config
-	IMPORTANT: To run this you should enable the database destruction on the env vars or default config
-	IMPORTANT: To run this you should enable the database destruction on the env vars or default config
-	IMPORTANT: To run this you should enable the database destruction on the env vars or default config
-	IMPORTANT: To run this you should enable the database destruction on the env vars or default config
-	IMPORTANT: To run this you should enable the database destruction on the env vars or default config
-	IMPORTANT: To run this you should enable the database destruction on the env vars or default config
-	IMPORTANT: To run this you should enable the database destruction on the env vars or default config
-	IMPORTANT: To run this you should enable the database destruction on the env vars or default config
-	IMPORTANT: To run this you should enable the database destruction on the env vars or default config
+	IMPORTANT: To run this you should enable the database destruction on the env vars or default config.
+	Also enable the integration flag on the test command.
 */
 
+var runIntegrationTest = flag.Bool("integration", false, "Set to true to run the integration test")
+
+func TestMain(m *testing.M) {
+	flag.Parse()
+	os.Exit(m.Run())
+}
+
 func TestUsersCRUDIntegrationTest(t *testing.T) {
+
+	if !*runIntegrationTest {
+		t.Skip("Skipping this test because the integration flag is not set.")
+	}
 
 	// Prepare
 	config := config.NewTestConfig()
