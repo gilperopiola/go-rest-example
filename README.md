@@ -1,138 +1,92 @@
 # Go REST Example
 
-**`Hey kiddo!`** Now that you're here, please take a few seconds to breathe. In & out. Slowly... Gently... Yeah, right there.
+**`Hey kiddo!`** Tired of those same old boilerplate repositories that claim they're basically perfect and simple and elegant and modular and many other lies? sheesh. 🤮 
 
-Try to be mindful of your body and your surroundings... Are you comfortable? Are you tense? **Untense those muscles!** 
-
-...And now that your auto-pilot mode is turned off, let's dive in! 🐙
-
----
-
-This project is a template ~ example ~ boilerplate of a `large-sized microservice` exposing an elegant and extensible `HTTP REST API`. If you're going for a simpler microservice you should check out [v1.2.0](https://github.com/gilperopiola/go-rest-example/releases/tag/v1.2.0), it's much simpler.
-
-Using **Gin**, it provides a **clean and layered architecture** complete with:
+Here you have **EASY TO FOLLOW CODE** without having to learn an entire framework. Is it perfect? Yes. Well no, but it's robust and solid enough for a large microservice[^1] without having much complexity, and without sacrificing much. `SOLID and Clean Architecture are there, Logging & Monitoring, Auth, Errors, Tests, Docker, User Management`.
 
 |User Management|Unit Tests|JWT Auth|
 |:-------------:|:-------------:|:-------------:|
-|**Mature Error Handling**|**Easy Config**|**Logrus Logging**|
-|**NewRelic Monitoring**|**MySQL Storage**|**Design Patterns**|
-|**Follows Best Practices**|**Inversion of Control**|**Dependency Injection**|
-|**Entities & DB Models**|**Dockerized**|**Modular Interfaces**|
-
-## Table of Contents
-
-- [Installation and Usage](#installation-and-usage)
-- [Project Architecture](#project-architecture)
-- [Request Flow Overview](#request-flow-overview)
-- [Contributing and License](#contributing-and-license)
+|**Gin Routing**|**Easy Config**|**Logrus Logging**|
+|**Auth**|**MySQL Storage**|**Design Patterns**|
+|**Best Practices**|**Great Error Handling**|**Dependency Injection**|
+|**NewRelic Monitoring**|**Dockerized**|**Modular Interfaces**|
+|**Inversion of Control**|**Integration Tests**|**Abstracted DB Models**|
 
 ## Installation and Usage
 
-You'll need to have **Go 1.x.x** installed, as well as a **MySQL Database** running.
+You'll need to have **Go 1.x.x** installed, as well as **Docker**, **Docker Compose** and a **MySQL Database** running. Good thing it's dockerized.[^3]
 
-1. Clone the repository:
+1. Clone, access folder, install deps:
    ```bash
    git clone https://github.com/gilperopiola/go-rest-example.git
-   ```
-
-2. Navigate to the project directory and install dependencies:
-   ```bash
    cd go-rest-example
    go mod download
    ```
 
-3. Set up your database _(you can use XAMPP)_ and your environment variables. **You should read the `config.go` file before going further**.
+2. Set up your environment variables. You should copy the **.env_example** file and name it **.env**, and then just make it yours.
 
-4. Run the project:
+3. Build & Run in Docker:
    ```bash
-   go run cmd/main.go
+   docker-compose build
+   docker-compose up
    ```
 
-This will start the server and you'll (hopefully 🛐) be able to hit the endpoints.
-
-**You can also use Docker :)**
+Fix any issue that might arise and `kiddo, you're GTG!`
 
 ## Project Architecture
 
-On `cmd/main.go` we have the app's entrypoint as well as the initialization of the dependencies.
+On `cmd/main.go` we have the app's entrypoint and the initialization of the dependencies.
 
-Then, it's basically divided into 3 layers: `Transport, Service and Repository`.
+Then it's divided into 3 layers: `Transport, Service and Repository`.
 
-`Transport` handles routing, validations, error management and logging.
+`Transport` handles routing, middleware & auth, request validations, error management and logging.
 
-`Service` handles the business logic, it receives the requests created by the previous layer, calls the next one, and returns the appropiate responses.
+`Service` handles the core business logic. It receives the requests created by the previous layer, calls the next layer, and then returns the appropiate responses.
 
-`Repository` handles connections with external dependencies, such as the database.
+`Repository` handles connections with external dependencies, such as the database. Talks in terms of Models.
 
-| Package | 👀 |
-|---------|-------------|
-| `auth` | Token creation and validation. |
-| `common` | Things used across the project. |
-| `common.config` | Configuration. |
-| `common.errors` | Our custom error type. |
-| `common.logger` | Our logger. |
-| `common.middleware` | Our middleware. |
-| `common.mocks` | Mocks for our dependencies. |
-| `common.models` | Database Models & Behaviours. |
-| `common.requests` | Our custom Requests & Behaviours. |
-| `common.responses` | Our custom Responses & Behaviours. |
-| `test` | Holds integration tests. |
+## Request Lifecycle
 
-## Request Flow Overview
+Let's assume this is the lifecycle of a DELETE User request.
 
-1. **Entrypoint & Token Validation**: 
+1. `**Entrypoint & Token Validation**`: 
+
+   First, router.go receives the HTTP request, matches it with the URL and validates the token using auth.
    
-   All requests start at `router.go`, where the URL is matched with a transport function. For private endpoints, the request is routed through `token_validation.go` for authentication. Each token contains a Role, some endpoints require a specific Role to work.
+2. `**Endpoint Call, Request Handling**`: 
 
-2. **Endpoint Call, Request Handling**: 
+   In `endpoints.go` and `handler.go` the corresponding function is called and the DeleteUserRequest is made and validated.
    
-   The corresponding function in `transport_endpoints.go` is invoked based on the matched URL. This function then calls `HandleRequest` from `transport.go`. This function orchestrates everything.
+3. `**Service Layer & Models**`: 
 
-3. **Request Typification & Validation**: 
-   
-   Inside `transport.go`, the appropriate function from `transport_requests.go` is called. This step involves typifying and validating the incoming request, returning it back to the previous file.
+   The call to `service_users.go` is made, and there the DeleteUserRequest is transformed to a UserModel
 
-4. **Service Layer Invocation**: 
+4. `**Repository Layer**`: 
    
-   Upon successful validation, `HandleRequest` invokes the corresponding method in `service.go`. The actual implementation of these methods resides in `service_xxx.go`, divided by domain.
+   The UserModel makes all operations it needs to make, and then calls .Delete on itself. The DeleteUser method on the Repository Layer is called.
 
-5. **Requests to Models to Handlers**: 
+5. `**Database**`: 
    
-   The service layer receives requests and transforms them into **models**. With a model, the handler is then created and the business functions can be called. These will interact with the last layer, the Repository.
+   The Repository marks the user as deleted on the database. A UserModel with the new state of the user is returned.
 
-6. **Repository Layer**: 
+6. `**Backtracking & Response Handling**`: 
    
-   Here, the matching `repository_xxx.go` file is invoked. This layer handles outside dependencies such as database operations. Then, the backtracking begins.
+   And then it's just going back the layers and returning the HTTP Response. If there's an error it goes through the `http_errors_mapper.go`.
 
-7. **Backtracking & Response Handling**: 
-   
-   The system then retraces its steps. If the repository layer returned a model, it's converted back to an entity in `service_xxx.go`. This file also handles any errors or continues execution if there are none.
-
-8. **Finalizing Response**: 
-   
-   The process returns to `HandleRequest` in `transport.go`, where the service's response is processed. If there's an error, it's mapped and logged using `errors_mapper.go`. The HTTP response is User Friendly, but the logs contain the whole stacktrace of the request.
-
-9. **Voilá**: 
-   
-   And voilá 🌞
+**HTTP Request -> Router -> Handler -> Request -> Service -> Model -> Repository -> Response -> HTTP Response**[^2]
 
 ## Contributing and License
 
-### Contributing
-
-We welcome contributions! If you find a bug or want to add a new feature, feel free to create an issue or submit a pull request.
-
-1. Fork the repository.
-2. Create a new branch for your changes.
-3. Make your changes and commit them.
-4. Push your changes to your fork.
-5. Submit a pull request.
-
-### License
-
-This project is licensed under the MIT License. See the `LICENSE` file for more details.
+I don't care. Do what you will. I think there's a `LICENSE` file tho.
 
 ---
 
 # Thanks for reading! 🐿️
 
+[^1]: If you are aiming for a small or medium microservice, you should check out this repo's [v1.2.0](https://github.com/gilperopiola/go-rest-example/releases/tag/v1.2.0).
+
+[^2]: or if you wanna go deep
+
+**`HTTP Request -> Router -> Middleware -> Handler -> Request -> Service -> Model -> Repository -> Model -> Service -> Response -> Handler -> HTTP Response`**.
+
+[^3]: If you don't want to use Docker, you can just run a MySQL database and point to it in `config.go`.
