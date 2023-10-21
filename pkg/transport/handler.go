@@ -6,6 +6,7 @@ import (
 	"github.com/gilperopiola/go-rest-example/pkg/common"
 	"github.com/gilperopiola/go-rest-example/pkg/common/requests"
 	"github.com/gilperopiola/go-rest-example/pkg/common/responses"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -47,6 +48,7 @@ type Request interface {
 		requests.GetUserRequest |
 		requests.UpdateUserRequest |
 		requests.DeleteUserRequest |
+		requests.SearchUsersRequest |
 		requests.CreateUserPostRequest
 }
 type Response interface {
@@ -56,5 +58,6 @@ type Response interface {
 		responses.GetUserResponse |
 		responses.UpdateUserResponse |
 		responses.DeleteUserResponse |
+		responses.SearchUsersResponse |
 		responses.CreateUserPostResponse
 }

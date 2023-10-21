@@ -16,6 +16,8 @@ import (
 //      USERS
 //-------------------
 
+type Users []User
+
 func (u User) ToResponseModel() responses.User {
 	return responses.User{
 		ID:        u.ID,
@@ -35,6 +37,14 @@ func (u UserDetail) ToResponseModel() responses.UserDetail {
 		FirstName: u.FirstName,
 		LastName:  u.LastName,
 	}
+}
+
+func (u Users) ToResponseModel() []responses.User {
+	var users []responses.User
+	for _, user := range u {
+		users = append(users, user.ToResponseModel())
+	}
+	return users
 }
 
 //-------------------

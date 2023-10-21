@@ -45,6 +45,7 @@ type RepositoryLayer interface {
 	UpdateUser(user User) (User, error)
 	GetUser(user User, opts ...options.QueryOption) (User, error)
 	DeleteUser(id int) (User, error)
+	SearchUsers(username string, page, perPage int, opts ...options.PreloadOption) (Users, error)
 	UserExists(username, email string, opts ...options.QueryOption) bool
 
 	CreateUserPost(post UserPost) (UserPost, error)

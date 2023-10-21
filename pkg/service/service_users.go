@@ -84,3 +84,27 @@ func (s *service) DeleteUser(deleteUserRequest requests.DeleteUserRequest) (resp
 
 	return responses.DeleteUserResponse{User: user.ToResponseModel()}, nil
 }
+
+//--------------------------
+//      SEARCH USERS
+//--------------------------
+
+func (s *service) SearchUsers(searchUsersRequest requests.SearchUsersRequest) (responses.SearchUsersResponse, error) {
+	var (
+		page    = searchUsersRequest.Page
+		perPage = searchUsersRequest.PerPage
+	)
+
+	user := searchUsersRequest.ToUserModel()
+
+	users, err := user.Search(s.Repository, page, perPage)
+	if err != nil {
+		return responses.SearchUsersResponse{}, common.Wrap(fmt.Errorf("SearchUsers: user.Search"), err)
+	}
+
+	return responses.SearchUsersResponse{
+		Users:   users.ToResponseModel(),
+		Page:    page,
+		PerPage: perPage,
+	}, nil
+}

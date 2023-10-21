@@ -60,6 +60,7 @@ func (router *Router) setAdminEndpoints(transport TransportLayer, authI auth.Aut
 	admin := router.Group("/admin", authI.ValidateToken(auth.AdminRole, false))
 	{
 		admin.POST("/user", transport.CreateUser)
+		admin.GET("/users", transport.SearchUsers)
 	}
 }
 
@@ -93,6 +94,10 @@ func (t Transport) UpdateUser(c *gin.Context) {
 
 func (t Transport) DeleteUser(c *gin.Context) {
 	HandleRequest(t, c, requests.MakeDeleteUserRequest, t.Service.DeleteUser)
+}
+
+func (t Transport) SearchUsers(c *gin.Context) {
+	HandleRequest(t, c, requests.MakeSearchUsersRequest, t.Service.SearchUsers)
 }
 
 //-------------------

@@ -14,6 +14,7 @@ type TransportLayer interface {
 	GetUser(c *gin.Context)
 	UpdateUser(c *gin.Context)
 	DeleteUser(c *gin.Context)
+	SearchUsers(c *gin.Context)
 
 	CreateUserPost(c *gin.Context)
 }

@@ -3,6 +3,7 @@ package requests
 import (
 	"fmt"
 	"regexp"
+	"strconv"
 	"time"
 
 	"github.com/gilperopiola/go-rest-example/pkg/common"
@@ -13,6 +14,8 @@ import (
 type GinI interface {
 	ShouldBindJSON(obj interface{}) error
 	GetInt(key string) int
+	Query(key string) (value string)
+	DefaultQuery(key string, defaultValue string) string
 }
 
 const (
@@ -57,6 +60,12 @@ type UpdateUserRequest struct {
 
 type DeleteUserRequest struct {
 	ID int `json:"id"`
+}
+
+type SearchUsersRequest struct {
+	Username string `json:"username"`
+	Page     int    `json:"page"`
+	PerPage  int    `json:"per_page"`
 }
 
 //-------------------------
@@ -124,6 +133,24 @@ func MakeDeleteUserRequest(c GinI) (request DeleteUserRequest, err error) {
 	return request, nil
 }
 
+func MakeSearchUsersRequest(c GinI) (request SearchUsersRequest, err error) {
+	request.Username = c.Query("username")
+	request.Page, err = strconv.Atoi(c.DefaultQuery("page", "0"))
+	if err != nil {
+		return SearchUsersRequest{}, common.Wrap(fmt.Errorf("makeSearchUsersRequest"), customErrors.ErrInvalidValue)
+	}
+	request.PerPage, err = strconv.Atoi(c.DefaultQuery("per_page", "10"))
+	if err != nil {
+		return SearchUsersRequest{}, common.Wrap(fmt.Errorf("makeSearchUsersRequest"), customErrors.ErrInvalidValue)
+	}
+
+	if err = request.Validate(); err != nil {
+		return SearchUsersRequest{}, common.Wrap(fmt.Errorf("makeSearchUsersRequest"), err)
+	}
+
+	return request, nil
+}
+
 //----------------------------
 //     REQUEST TO MODEL
 //----------------------------
@@ -175,6 +202,10 @@ func (r *DeleteUserRequest) ToUserModel() models.User {
 	return models.User{ID: r.ID}
 }
 
+func (r *SearchUsersRequest) ToUserModel() models.User {
+	return models.User{Username: r.Username}
+}
+
 //--------------------------
 //	 REQUEST VALIDATIONS
 //--------------------------
@@ -210,6 +241,14 @@ func (req UpdateUserRequest) Validate() error {
 
 func (req DeleteUserRequest) Validate() error {
 	if req.ID == 0 {
+		return customErrors.ErrAllFieldsRequired
+	}
+
+	return nil
+}
+
+func (req SearchUsersRequest) Validate() error {
+	if req.Page < 0 || req.PerPage <= 0 {
 		return customErrors.ErrAllFieldsRequired
 	}
 

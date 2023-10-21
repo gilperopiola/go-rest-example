@@ -78,6 +78,7 @@ var errorsMapToHTTPCode = map[error]int{
 	customErrors.ErrInvalidEmailFormat:    400,
 	customErrors.ErrInvalidUsernameLength: 400,
 	customErrors.ErrInvalidPasswordLength: 400,
+	customErrors.ErrInvalidValue:          400,
 
 	// 401 - Unauthorized
 	customErrors.ErrUnauthorized:  401,
@@ -95,6 +96,7 @@ var errorsMapToHTTPCode = map[error]int{
 	customErrors.ErrGettingUser:      500,
 	customErrors.ErrUpdatingUser:     500,
 	customErrors.ErrDeletingUser:     500,
+	customErrors.ErrSearchingUsers:   500,
 	customErrors.ErrUnknown:          500,
 	customErrors.ErrNilError:         500,
 	customErrors.ErrCreatingUserPost: 500,

@@ -30,12 +30,14 @@ var (
 	ErrBindingRequest      = New(fmt.Errorf("error binding request"))
 	ErrAllFieldsRequired   = New(fmt.Errorf("error, all fields required"))
 	ErrReadingValueFromCtx = New(fmt.Errorf("error reading value from context"))
+	ErrInvalidValue        = New(fmt.Errorf("error, invalid value"))
 
 	// - User errors
 	ErrCreatingUser                = New(fmt.Errorf("error creating user"))
 	ErrGettingUser                 = New(fmt.Errorf("error getting user"))
 	ErrUpdatingUser                = New(fmt.Errorf("error updating user"))
 	ErrDeletingUser                = New(fmt.Errorf("error deleting user"))
+	ErrSearchingUsers              = New(fmt.Errorf("error searching users"))
 	ErrUserNotFound                = New(fmt.Errorf("error, user not found"))
 	ErrUserAlreadyDeleted          = New(fmt.Errorf("error, user already deleted"))
 	ErrUsernameOrEmailAlreadyInUse = New(fmt.Errorf("error, username or email already in use"))

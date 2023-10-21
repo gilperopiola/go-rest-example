@@ -29,6 +29,12 @@ type DeleteUserResponse struct {
 	User User `json:"user"`
 }
 
+type SearchUsersResponse struct {
+	Users   []User `json:"users"`
+	Page    int    `json:"page"`
+	PerPage int    `json:"per_page"`
+}
+
 // - Posts
 
 type CreateUserPostResponse struct {

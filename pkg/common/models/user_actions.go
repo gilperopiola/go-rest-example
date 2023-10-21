@@ -72,6 +72,14 @@ func (u *User) Delete(r RepositoryLayer) error {
 	return nil
 }
 
+func (u *User) Search(r RepositoryLayer, page, perPage int) (Users, error) {
+	users, err := r.SearchUsers(u.Username, page, perPage, options.WithDetails)
+	if err != nil {
+		return []User{}, common.Wrap(fmt.Errorf("User.Search"), err)
+	}
+	return users, nil
+}
+
 func (u *User) Exists(r RepositoryLayer) bool {
 	return r.UserExists(u.Username, u.Email)
 }

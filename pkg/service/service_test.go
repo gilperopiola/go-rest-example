@@ -266,6 +266,44 @@ func TestDeleteUser(t *testing.T) {
 	}
 }
 
+func TestSearchUsers(t *testing.T) {
+
+	makeMockRepositoryWithSearchUsers := func(returnUsers models.Users, returnErr error) *mocks.RepositoryMock {
+		mockRepository := mocks.NewRepositoryMock()
+		mockRepository.On("SearchUsers", mock.Anything, mock.Anything, mock.Anything).Return(returnUsers, returnErr).Once()
+		return mockRepository
+	}
+
+	tests := []struct {
+		name           string
+		mockRepository *mocks.RepositoryMock
+		request        requests.SearchUsersRequest
+		want           responses.SearchUsersResponse
+		wantErr        error
+	}{
+		{
+			name:           "error_searching_users",
+			mockRepository: makeMockRepositoryWithSearchUsers(nil, customErrors.ErrSearchingUsers),
+			request:        requests.SearchUsersRequest{Page: 1, PerPage: 10},
+			wantErr:        customErrors.ErrSearchingUsers,
+		},
+		{
+			name:           "success",
+			mockRepository: makeMockRepositoryWithSearchUsers([]models.User{modelUser}, nil),
+			request:        requests.SearchUsersRequest{Page: 1, PerPage: 10},
+			want:           responses.SearchUsersResponse{Users: []responses.User{entityUser}, Page: 1, PerPage: 10},
+			wantErr:        nil,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			got, err := newTestService(tc.mockRepository).SearchUsers(tc.request)
+			assertTC(t, tc.want, tc.wantErr, got, err, tc.mockRepository)
+		})
+	}
+}
+
 func assertTC(t *testing.T, want interface{}, wantErr error, got interface{}, err error, mockRepository *mocks.RepositoryMock) {
 	assert.Equal(t, want, got)
 	assert.ErrorIs(t, err, wantErr)

@@ -13,8 +13,8 @@ var (
 	defaultDatabaseHostname = "127.0.0.1"
 	defaultDatabasePort     = "3306"
 	defaultDatabaseSchema   = "go-rest-example-db"
-	defaultDatabasePurge    = true
-	defaultDatabaseDebug    = false
+	defaultDatabasePurge    = false
+	defaultDatabaseDebug    = true
 	defaultDatabaseDestroy  = false
 
 	defaultJWTSecret              = "a0#3ndl2"

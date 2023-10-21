@@ -69,6 +69,20 @@ func (r *repository) DeleteUser(id int) (models.User, error) {
 	return user, nil
 }
 
+func (r *repository) SearchUsers(username string, page, perPage int, opts ...options.PreloadOption) (models.Users, error) {
+	var users models.Users
+
+	for _, opt := range opts {
+		r.Database.DB = opt(r.Database.DB)
+	}
+
+	username = "%" + username + "%"
+	if err := r.Database.DB.Where("username LIKE ?", username).Offset(page * perPage).Limit(perPage).Find(&users).Error; err != nil {
+		return models.Users{}, common.Wrap(err, customErrors.ErrSearchingUsers)
+	}
+	return users, nil
+}
+
 // UserExists checks if a user with username or email exists
 func (r *repository) UserExists(username, email string, opts ...options.QueryOption) bool {
 	query := "(username = ? OR email = ?)"

@@ -16,6 +16,7 @@ type ServiceLayer interface {
 	GetUser(getUserRequest requests.GetUserRequest) (responses.GetUserResponse, error)
 	UpdateUser(updateUserRequest requests.UpdateUserRequest) (responses.UpdateUserResponse, error)
 	DeleteUser(deleteUserRequest requests.DeleteUserRequest) (responses.DeleteUserResponse, error)
+	SearchUsers(searchUsersRequest requests.SearchUsersRequest) (responses.SearchUsersResponse, error)
 
 	CreateUserPost(createUserPostRequest requests.CreateUserPostRequest) (responses.CreateUserPostResponse, error)
 }
