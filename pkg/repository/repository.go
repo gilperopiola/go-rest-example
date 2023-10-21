@@ -20,9 +20,9 @@ type RepositoryLayer interface {
 }
 
 type repository struct {
-	Database Database
+	database database
 }
 
-func New(database Database) *repository {
-	return &repository{Database: database}
+func New(database database) *repository {
+	return &repository{database: database}
 }

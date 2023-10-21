@@ -6,6 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+var _ TransportLayer = (*transport)(nil)
+
 type TransportLayer interface {
 	Service() service.ServiceLayer
 	ErrorsMapper() errorsMapperI

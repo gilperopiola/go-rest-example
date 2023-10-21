@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"fmt"
 	"os"
 	"time"
 
@@ -12,12 +13,12 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-type Database struct {
-	DB *gorm.DB
+type database struct {
+	db *gorm.DB
 }
 
-func NewDatabase(config config.Database, logger middleware.LoggerI) Database {
-	var database Database
+func NewDatabase(config config.Database, logger middleware.LoggerI) database {
+	var database database
 	database.Setup(config, logger)
 	return database
 }
@@ -27,18 +28,34 @@ const (
 	retryDelay = 5 // In seconds
 )
 
-func (database *Database) Setup(config config.Database, logger middleware.LoggerI) {
+func (database *database) Setup(config config.Database, logger middleware.LoggerI) {
 
 	// Create connection. It's deferred closed in main.go.
 	// Retry connection if it fails due to Docker's orchestration.
+	if err := database.connectToDB(config, logger); err != nil {
+		logger.Fatalf("error connecting to database: %v", err)
+		os.Exit(1)
+	}
+
+	// Set connection pool limits
+	// Log queries if debug = true
+	// Destroy or clean tables
+	// AutoMigrate fields
+	database.configure(config)
+}
+
+func (database *database) Close() {
+	database.db.Close()
+}
+
+func (database *database) connectToDB(config config.Database, logger middleware.LoggerI) error {
 	var err error
 	retries := 0
 	for retries < maxRetries {
-		if database.DB, err = gorm.Open(config.Type, config.GetConnectionString()); err != nil {
+		if database.db, err = gorm.Open(config.Type, config.GetConnectionString()); err != nil {
 			retries++
 			if retries == maxRetries {
-				logger.Fatalf("error connecting to database after %d retries: %v", maxRetries, err)
-				os.Exit(1)
+				return fmt.Errorf("error connecting to database after %d retries: %v", maxRetries, err)
 			}
 			logger.Warn("error connecting to database, retrying... ")
 			time.Sleep(retryDelay * time.Second)
@@ -46,34 +63,34 @@ func (database *Database) Setup(config config.Database, logger middleware.Logger
 		}
 		break
 	}
+	return nil
+}
+
+func (database *database) configure(config config.Database) {
 
 	// Set connection pool limits
-	database.DB.DB().SetMaxIdleConns(10)
-	database.DB.DB().SetMaxOpenConns(100)
-	database.DB.DB().SetConnMaxLifetime(time.Hour)
+	database.db.DB().SetMaxIdleConns(10)
+	database.db.DB().SetMaxOpenConns(100)
+	database.db.DB().SetConnMaxLifetime(time.Hour)
 
-	// Log queries
+	// Log queries if debug = true
 	if config.Debug {
-		database.DB.LogMode(true)
+		database.db.LogMode(true)
 	}
 
 	// Destroy or clean tables
 	if config.Destroy {
-		database.DB.DropTable(&models.User{})
-		database.DB.DropTable(&models.UserDetail{})
-		database.DB.DropTable(&models.UserPost{})
+		database.db.DropTable(&models.User{})
+		database.db.DropTable(&models.UserDetail{})
+		database.db.DropTable(&models.UserPost{})
 	} else if config.Purge {
-		database.DB.Delete(models.User{})
-		database.DB.Delete(models.UserDetail{})
-		database.DB.Delete(models.UserPost{})
+		database.db.Delete(models.User{})
+		database.db.Delete(models.UserDetail{})
+		database.db.Delete(models.UserPost{})
 	}
 
-	// Run migrations
-	database.DB.AutoMigrate(&models.User{})
-	database.DB.AutoMigrate(&models.UserDetail{})
-	database.DB.AutoMigrate(&models.UserPost{})
-}
-
-func (database *Database) Close() {
-	database.DB.Close()
+	// AutoMigrate fields
+	database.db.AutoMigrate(&models.User{})
+	database.db.AutoMigrate(&models.UserDetail{})
+	database.db.AutoMigrate(&models.UserPost{})
 }

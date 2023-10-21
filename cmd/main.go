@@ -23,6 +23,8 @@ import (
 // - reset password
 // - roles to DB
 // - List users ep
+// - api versioning
+// - prometheus
 
 func main() {
 
@@ -34,8 +36,9 @@ func main() {
 		// Load configuration settings
 		config = config.NewConfig()
 
-		// Initialize logger
-		logger = middleware.NewLogger()
+		// Initialize logger & logger middleware
+		logger           = middleware.NewLogger()
+		loggerMiddleware = middleware.NewLoggerToContextMiddleware(logger)
 
 		// Initialize monitoring as middleware (New Relic)
 		monitoringMiddleware = middleware.NewMonitoringMiddleware(config.Monitoring)
@@ -56,7 +59,7 @@ func main() {
 		endpoints = transport.New(service, transport.NewErrorsMapper(logger))
 
 		// Initialize the router with the endpoints
-		router = transport.NewRouter(endpoints, config.General, auth, logger, monitoringMiddleware)
+		router = transport.NewRouter(endpoints, config.General, auth, loggerMiddleware, monitoringMiddleware)
 	)
 
 	// Defer closing open connections

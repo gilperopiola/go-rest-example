@@ -13,7 +13,7 @@ import (
 
 // CreateUser inserts a user. Table structure can be found on the models package
 func (r *repository) CreateUser(user models.User) (models.User, error) {
-	if err := r.Database.DB.Create(&user).Error; err != nil {
+	if err := r.database.db.Create(&user).Error; err != nil {
 		return models.User{}, common.Wrap(err, customErrors.ErrCreatingUser)
 	}
 	return user, nil
@@ -26,7 +26,7 @@ func (r *repository) GetUser(user models.User, opts ...options.QueryOption) (mod
 		opt(&query)
 	}
 
-	err := r.Database.DB.Preload("Details").Preload("Posts").Where(query, user.ID, user.Username, user.Email).First(&user).Error
+	err := r.database.db.Preload("Details").Preload("Posts").Where(query, user.ID, user.Username, user.Email).First(&user).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return models.User{}, common.Wrap(err, customErrors.ErrUserNotFound)
@@ -39,7 +39,7 @@ func (r *repository) GetUser(user models.User, opts ...options.QueryOption) (mod
 
 // UpdateUser updates the fields that are not empty on the model
 func (r *repository) UpdateUser(user models.User) (models.User, error) {
-	if err := r.Database.DB.Model(&user).Update(&user).Error; err != nil {
+	if err := r.database.db.Model(&user).Update(&user).Error; err != nil {
 		return models.User{}, common.Wrap(err, customErrors.ErrUpdatingUser)
 	}
 	return user, nil
@@ -73,11 +73,11 @@ func (r *repository) SearchUsers(username string, page, perPage int, opts ...opt
 	var users models.Users
 
 	for _, opt := range opts {
-		r.Database.DB = opt(r.Database.DB)
+		r.database.db = opt(r.database.db)
 	}
 
 	username = "%" + username + "%"
-	if err := r.Database.DB.Where("username LIKE ?", username).Offset(page * perPage).Limit(perPage).Find(&users).Error; err != nil {
+	if err := r.database.db.Where("username LIKE ?", username).Offset(page * perPage).Limit(perPage).Find(&users).Error; err != nil {
 		return models.Users{}, common.Wrap(err, customErrors.ErrSearchingUsers)
 	}
 	return users, nil
@@ -91,6 +91,6 @@ func (r *repository) UserExists(username, email string, opts ...options.QueryOpt
 	}
 
 	var count int64
-	r.Database.DB.Model(&models.User{}).Where(query, username, email).Count(&count)
+	r.database.db.Model(&models.User{}).Where(query, username, email).Count(&count)
 	return count > 0
 }

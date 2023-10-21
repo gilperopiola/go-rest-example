@@ -8,27 +8,28 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type Router struct {
+type router struct {
 	*gin.Engine
 }
 
-func NewRouter(t TransportLayer, cfg config.General, auth auth.AuthI, logger middleware.LoggerI, monitoring gin.HandlerFunc) Router {
-	var router Router
-	router.Setup(t, cfg, auth, logger, monitoring)
+func NewRouter(t TransportLayer, cfg config.General, auth auth.AuthI, middlewares ...gin.HandlerFunc) router {
+	var router router
+	router.Setup(t, cfg, auth, middlewares...)
 	return router
 }
 
-func (router *Router) Setup(t TransportLayer, cfg config.General, auth auth.AuthI, logger middleware.LoggerI, monitoring gin.HandlerFunc) {
+func (router *router) Setup(t TransportLayer, cfg config.General, auth auth.AuthI, middlewares ...gin.HandlerFunc) {
 
 	// Create router. Set debug/release mode
 	router.prepare(!cfg.Debug)
 
 	// Add middleware
-	router.Use(monitoring)                                      // Monitoring
-	router.Use(gin.Recovery())                                  // Panic recovery
-	router.Use(middleware.NewTimeoutMiddleware(cfg.Timeout))    // Timeout
-	router.Use(middleware.NewCORSConfigMiddleware())            // CORS
-	router.Use(middleware.NewLoggerToContextMiddleware(logger)) // Logger to context
+	router.Use(gin.Recovery())                               // Panic recovery
+	router.Use(middleware.NewTimeoutMiddleware(cfg.Timeout)) // Timeout
+	router.Use(middleware.NewCORSConfigMiddleware())         // CORS
+	for _, m := range middlewares {
+		router.Use(m) // Monitoring & Adding Logger to Ctx
+	}
 
 	// Set endpoints
 	router.setPublicEndpoints(t)
@@ -36,7 +37,7 @@ func (router *Router) Setup(t TransportLayer, cfg config.General, auth auth.Auth
 	router.setAdminEndpoints(t, auth)
 }
 
-func (router *Router) prepare(isProd bool) {
+func (router *router) prepare(isProd bool) {
 	if isProd {
 		gin.SetMode(gin.ReleaseMode)
 	}

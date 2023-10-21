@@ -15,7 +15,7 @@ import (
 func (s *service) CreateUserPost(createUserPostRequest requests.CreateUserPostRequest) (responses.CreateUserPostResponse, error) {
 	userPost := createUserPostRequest.ToUserPostModel()
 
-	if err := userPost.Create(s.Repository); err != nil {
+	if err := userPost.Create(s.repository); err != nil {
 		return responses.CreateUserPostResponse{}, common.Wrap(fmt.Errorf("CreateUserPost: user.CreatePost"), err)
 	}
 

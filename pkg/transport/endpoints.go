@@ -32,7 +32,7 @@ import (
 //      ROUTES / ENDPOINTS
 //-----------------------------
 
-func (router *Router) setPublicEndpoints(transport TransportLayer) {
+func (router *router) setPublicEndpoints(transport TransportLayer) {
 	public := router.Group("/")
 	{
 		public.GET("/health", healthCheck)
@@ -42,7 +42,7 @@ func (router *Router) setPublicEndpoints(transport TransportLayer) {
 	}
 }
 
-func (router *Router) setUserEndpoints(transport TransportLayer, authI auth.AuthI) {
+func (router *router) setUserEndpoints(transport TransportLayer, authI auth.AuthI) {
 	users := router.Group("/users", authI.ValidateToken(auth.AnyRole, true))
 	{
 		users.GET("/:user_id", transport.GetUser)
@@ -56,7 +56,7 @@ func (router *Router) setUserEndpoints(transport TransportLayer, authI auth.Auth
 	}
 }
 
-func (router *Router) setAdminEndpoints(transport TransportLayer, authI auth.AuthI) {
+func (router *router) setAdminEndpoints(transport TransportLayer, authI auth.AuthI) {
 	admin := router.Group("/admin", authI.ValidateToken(auth.AdminRole, false))
 	{
 		admin.POST("/user", transport.CreateUser)
