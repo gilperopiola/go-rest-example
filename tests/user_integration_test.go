@@ -60,58 +60,58 @@ func TestUsersCRUDIntegrationTest(t *testing.T) {
 	testLogin(t, endpoints, "admin")
 }
 
-func testSignup(t *testing.T, endpoints transport.Transport) {
+func testSignup(t *testing.T, endpoints transport.TransportLayer) {
 	c := makeTestContextWithHTTPRequest(map[string]string{
 		"username":        "test",
 		"email":           "test@email.com",
 		"password":        "password",
 		"repeat_password": "password",
 	})
-	transport.HandleRequest(endpoints, c, requests.MakeSignupRequest, endpoints.Service.Signup)
+	transport.HandleRequest(endpoints, c, requests.MakeSignupRequest, endpoints.Service().Signup)
 	assert.Equal(t, http.StatusOK, c.Writer.Status())
 }
 
-func testLogin(t *testing.T, endpoints transport.Transport, username string) {
+func testLogin(t *testing.T, endpoints transport.TransportLayer, username string) {
 	c := makeTestContextWithHTTPRequest(map[string]string{
 		"username_or_email": username,
 		"password":          "password",
 	})
-	transport.HandleRequest(endpoints, c, requests.MakeLoginRequest, endpoints.Service.Login)
+	transport.HandleRequest(endpoints, c, requests.MakeLoginRequest, endpoints.Service().Login)
 	assert.Equal(t, http.StatusOK, c.Writer.Status())
 }
 
-func testCreateUser(t *testing.T, endpoints transport.Transport) {
+func testCreateUser(t *testing.T, endpoints transport.TransportLayer) {
 	c := makeTestContextWithHTTPRequest(map[string]any{
 		"email":    "admin@email.com",
 		"username": "admin",
 		"password": "password",
 		"is_admin": true,
 	})
-	transport.HandleRequest(endpoints, c, requests.MakeCreateUserRequest, endpoints.Service.CreateUser)
+	transport.HandleRequest(endpoints, c, requests.MakeCreateUserRequest, endpoints.Service().CreateUser)
 	assert.Equal(t, http.StatusOK, c.Writer.Status())
 }
 
-func testGetUser(t *testing.T, endpoints transport.Transport, status int) {
+func testGetUser(t *testing.T, endpoints transport.TransportLayer, status int) {
 	c := makeTestContextWithHTTPRequest(map[string]string{})
 	addValueAndParamToContext(c, "ID", 1, "user_id", "1")
-	transport.HandleRequest(endpoints, c, requests.MakeGetUserRequest, endpoints.Service.GetUser)
+	transport.HandleRequest(endpoints, c, requests.MakeGetUserRequest, endpoints.Service().GetUser)
 	assert.Equal(t, status, c.Writer.Status())
 }
 
-func testUpdateUser(t *testing.T, endpoints transport.Transport) {
+func testUpdateUser(t *testing.T, endpoints transport.TransportLayer) {
 	c := makeTestContextWithHTTPRequest(map[string]string{
 		"username": "test2",
 		"email":    "test2@email.com",
 	})
 	addValueAndParamToContext(c, "ID", 1, "user_id", "1")
-	transport.HandleRequest(endpoints, c, requests.MakeUpdateUserRequest, endpoints.Service.UpdateUser)
+	transport.HandleRequest(endpoints, c, requests.MakeUpdateUserRequest, endpoints.Service().UpdateUser)
 	assert.Equal(t, http.StatusOK, c.Writer.Status())
 }
 
-func testDeleteUser(t *testing.T, endpoints transport.Transport) {
+func testDeleteUser(t *testing.T, endpoints transport.TransportLayer) {
 	c := makeTestContextWithHTTPRequest(map[string]string{})
 	addValueAndParamToContext(c, "ID", 1, "user_id", "1")
-	transport.HandleRequest(endpoints, c, requests.MakeDeleteUserRequest, endpoints.Service.DeleteUser)
+	transport.HandleRequest(endpoints, c, requests.MakeDeleteUserRequest, endpoints.Service().DeleteUser)
 	assert.Equal(t, http.StatusOK, c.Writer.Status())
 }
 

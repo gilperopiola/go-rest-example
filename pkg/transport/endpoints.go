@@ -68,44 +68,44 @@ func (router *Router) setAdminEndpoints(transport TransportLayer, authI auth.Aut
 //       AUTH
 //-------------------
 
-func (t Transport) Signup(c *gin.Context) {
-	HandleRequest(t, c, requests.MakeSignupRequest, t.Service.Signup)
+func (t transport) Signup(c *gin.Context) {
+	HandleRequest(t, c, requests.MakeSignupRequest, t.Service().Signup)
 }
 
-func (t Transport) Login(c *gin.Context) {
-	HandleRequest(t, c, requests.MakeLoginRequest, t.Service.Login)
+func (t transport) Login(c *gin.Context) {
+	HandleRequest(t, c, requests.MakeLoginRequest, t.Service().Login)
 }
 
 //-------------------
 //      USERS
 //-------------------
 
-func (t Transport) CreateUser(c *gin.Context) {
-	HandleRequest(t, c, requests.MakeCreateUserRequest, t.Service.CreateUser)
+func (t transport) CreateUser(c *gin.Context) {
+	HandleRequest(t, c, requests.MakeCreateUserRequest, t.Service().CreateUser)
 }
 
-func (t Transport) GetUser(c *gin.Context) {
-	HandleRequest(t, c, requests.MakeGetUserRequest, t.Service.GetUser)
+func (t transport) GetUser(c *gin.Context) {
+	HandleRequest(t, c, requests.MakeGetUserRequest, t.Service().GetUser)
 }
 
-func (t Transport) UpdateUser(c *gin.Context) {
-	HandleRequest(t, c, requests.MakeUpdateUserRequest, t.Service.UpdateUser)
+func (t transport) UpdateUser(c *gin.Context) {
+	HandleRequest(t, c, requests.MakeUpdateUserRequest, t.Service().UpdateUser)
 }
 
-func (t Transport) DeleteUser(c *gin.Context) {
-	HandleRequest(t, c, requests.MakeDeleteUserRequest, t.Service.DeleteUser)
+func (t transport) DeleteUser(c *gin.Context) {
+	HandleRequest(t, c, requests.MakeDeleteUserRequest, t.Service().DeleteUser)
 }
 
-func (t Transport) SearchUsers(c *gin.Context) {
-	HandleRequest(t, c, requests.MakeSearchUsersRequest, t.Service.SearchUsers)
+func (t transport) SearchUsers(c *gin.Context) {
+	HandleRequest(t, c, requests.MakeSearchUsersRequest, t.Service().SearchUsers)
 }
 
 //-------------------
 //      POSTS
 //-------------------
 
-func (t Transport) CreateUserPost(c *gin.Context) {
-	HandleRequest(t, c, requests.MakeCreateUserPostRequest, t.Service.CreateUserPost)
+func (t transport) CreateUserPost(c *gin.Context) {
+	HandleRequest(t, c, requests.MakeCreateUserPostRequest, t.Service().CreateUserPost)
 }
 
 //-------------------

@@ -7,6 +7,9 @@ import (
 )
 
 type TransportLayer interface {
+	Service() service.ServiceLayer
+	ErrorsMapper() errorsMapperI
+
 	Signup(c *gin.Context)
 	Login(c *gin.Context)
 
@@ -19,14 +22,22 @@ type TransportLayer interface {
 	CreateUserPost(c *gin.Context)
 }
 
-type Transport struct {
-	Service      service.ServiceLayer
-	ErrorsMapper errorsMapperI
+type transport struct {
+	service      service.ServiceLayer
+	errorsMapper errorsMapperI
 }
 
-func New(service service.ServiceLayer, errorsMapper errorsMapperI) Transport {
-	return Transport{
-		Service:      service,
-		ErrorsMapper: errorsMapper,
+func New(service service.ServiceLayer, errorsMapper errorsMapperI) transport {
+	return transport{
+		service:      service,
+		errorsMapper: errorsMapper,
 	}
+}
+
+func (t transport) Service() service.ServiceLayer {
+	return t.service
+}
+
+func (t transport) ErrorsMapper() errorsMapperI {
+	return t.errorsMapper
 }
