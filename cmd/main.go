@@ -34,7 +34,7 @@ func main() {
 	// Setup dependencies
 	var (
 		// Load configuration settings
-		config = config.New()
+		config = config.New(".env")
 
 		// Initialize logger & logger middleware
 		logger           = middleware.NewLogger()

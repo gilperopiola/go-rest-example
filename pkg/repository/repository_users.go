@@ -21,12 +21,17 @@ func (r *repository) CreateUser(user models.User) (models.User, error) {
 
 // GetUser retrieves a user, if it exists
 func (r *repository) GetUser(user models.User, opts ...options.QueryOption) (models.User, error) {
+
+	// get by id, username or email
 	query := "(id = ? OR username = ? OR email = ?)"
+
+	// only non deleted users
 	for _, opt := range opts {
 		opt(&query)
 	}
 
-	err := r.database.db.Preload("Details").Preload("Posts").Where(query, user.ID, user.Username, user.Email).First(&user).Error
+	// preload user details and posts
+	err := r.database.db.Preload("Details").Preload("Posts").Where(query, user.ID, user.Username, user.Email).Find(&user).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return models.User{}, common.Wrap(err, customErrors.ErrUserNotFound)
@@ -48,19 +53,19 @@ func (r *repository) UpdateUser(user models.User) (models.User, error) {
 // DeleteUser soft-deletes a user. if it is already deleted it throws an error
 func (r *repository) DeleteUser(id int) (models.User, error) {
 
-	// First, retrieve the user
+	// first, retrieve the user
 	user := models.User{ID: id}
 	var err error
 	if user, err = r.GetUser(user); err != nil {
 		return models.User{}, common.Wrap(err, customErrors.ErrGettingUser)
 	}
 
-	// If it's already deleted, return an error
+	// if it's already deleted, return an error
 	if user.Deleted {
 		return models.User{}, customErrors.ErrUserAlreadyDeleted
 	}
 
-	// Then, mark the user as deleted and save it
+	// then, mark the user as deleted and save it
 	user.Deleted = true
 	if _, err := r.UpdateUser(user); err != nil {
 		return models.User{}, common.Wrap(err, customErrors.ErrUpdatingUser)
@@ -72,14 +77,21 @@ func (r *repository) DeleteUser(id int) (models.User, error) {
 func (r *repository) SearchUsers(username string, page, perPage int, opts ...options.PreloadOption) (models.Users, error) {
 	var users models.Users
 
+	// preload user details and posts
 	for _, opt := range opts {
 		r.database.db = opt(r.database.db)
 	}
 
-	username = "%" + username + "%"
-	if err := r.database.db.Where("username LIKE ?", username).Offset(page * perPage).Limit(perPage).Find(&users).Error; err != nil {
+	// if username is provided, apply the filter
+	if username != "" {
+		searchPattern := "%" + username + "%"
+		r.database.db = r.database.db.Where("username LIKE ?", searchPattern)
+	}
+
+	if err := r.database.db.Offset(page * perPage).Limit(perPage).Find(&users).Error; err != nil {
 		return models.Users{}, common.Wrap(err, customErrors.ErrSearchingUsers)
 	}
+
 	return users, nil
 }
 

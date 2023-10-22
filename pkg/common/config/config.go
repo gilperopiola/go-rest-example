@@ -14,16 +14,16 @@ type Config struct {
 	Monitoring Monitoring
 }
 
-func New() *Config {
+func New(envFilename string) *Config {
 	config := Config{}
-	config.setup()
+	config.setup(envFilename)
 	return &config
 }
 
-func (config *Config) setup() {
+func (config *Config) setup(envFilename string) {
 
 	// Load .env file
-	err := godotenv.Load(".env")
+	err := godotenv.Load(envFilename)
 	if err != nil {
 		log.Fatalf("error loading .env file: %v", err)
 	}

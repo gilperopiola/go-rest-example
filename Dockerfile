@@ -14,8 +14,10 @@ RUN go mod download
 # Copy the entire project directory to the container's workspace
 COPY . .
 
-# Run unit tests
-#RUN go test ./...
+# Run unit tests. IDK why this logic works, but it works
+RUN if [ "$fast" = "true" ]; then \
+    go test ./...; \
+fi
 
 # Build the Go app from the /cmd directory
 RUN go build -o go-rest-example ./cmd/
