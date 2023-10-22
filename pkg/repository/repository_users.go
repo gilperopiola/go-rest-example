@@ -14,7 +14,7 @@ import (
 // CreateUser inserts a user. Table structure can be found on the models package
 func (r *repository) CreateUser(user models.User) (models.User, error) {
 	if err := r.database.db.Create(&user).Error; err != nil {
-		return models.User{}, common.Wrap(err, customErrors.ErrCreatingUser)
+		return models.User{}, common.Wrap(err.Error(), customErrors.ErrCreatingUser)
 	}
 	return user, nil
 }
@@ -31,12 +31,12 @@ func (r *repository) GetUser(user models.User, opts ...options.QueryOption) (mod
 	}
 
 	// preload user details and posts
-	err := r.database.db.Preload("Details").Preload("Posts").Where(query, user.ID, user.Username, user.Email).Find(&user).Error
+	err := r.database.db.Preload("Details").Preload("Posts").Where(query, user.ID, user.Username, user.Email).First(&user).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return models.User{}, common.Wrap(err, customErrors.ErrUserNotFound)
+			return models.User{}, common.Wrap(err.Error(), customErrors.ErrUserNotFound)
 		}
-		return models.User{}, common.Wrap(err, customErrors.ErrUnknown)
+		return models.User{}, common.Wrap(err.Error(), customErrors.ErrUnknown)
 	}
 
 	return user, nil
@@ -45,7 +45,7 @@ func (r *repository) GetUser(user models.User, opts ...options.QueryOption) (mod
 // UpdateUser updates the fields that are not empty on the model
 func (r *repository) UpdateUser(user models.User) (models.User, error) {
 	if err := r.database.db.Model(&user).Update(&user).Error; err != nil {
-		return models.User{}, common.Wrap(err, customErrors.ErrUpdatingUser)
+		return models.User{}, common.Wrap(err.Error(), customErrors.ErrUpdatingUser)
 	}
 	return user, nil
 }
@@ -57,7 +57,7 @@ func (r *repository) DeleteUser(id int) (models.User, error) {
 	user := models.User{ID: id}
 	var err error
 	if user, err = r.GetUser(user); err != nil {
-		return models.User{}, common.Wrap(err, customErrors.ErrGettingUser)
+		return models.User{}, common.Wrap(err.Error(), customErrors.ErrGettingUser)
 	}
 
 	// if it's already deleted, return an error
@@ -68,7 +68,7 @@ func (r *repository) DeleteUser(id int) (models.User, error) {
 	// then, mark the user as deleted and save it
 	user.Deleted = true
 	if _, err := r.UpdateUser(user); err != nil {
-		return models.User{}, common.Wrap(err, customErrors.ErrUpdatingUser)
+		return models.User{}, common.Wrap(err.Error(), customErrors.ErrUpdatingUser)
 	}
 
 	return user, nil
@@ -89,7 +89,7 @@ func (r *repository) SearchUsers(username string, page, perPage int, opts ...opt
 	}
 
 	if err := r.database.db.Offset(page * perPage).Limit(perPage).Find(&users).Error; err != nil {
-		return models.Users{}, common.Wrap(err, customErrors.ErrSearchingUsers)
+		return models.Users{}, common.Wrap(err.Error(), customErrors.ErrSearchingUsers)
 	}
 
 	return users, nil

@@ -1,8 +1,6 @@
 package service
 
 import (
-	"fmt"
-
 	"github.com/gilperopiola/go-rest-example/pkg/common"
 	"github.com/gilperopiola/go-rest-example/pkg/common/requests"
 	"github.com/gilperopiola/go-rest-example/pkg/common/responses"
@@ -16,7 +14,7 @@ func (s *service) CreateUserPost(createUserPostRequest requests.CreateUserPostRe
 	userPost := createUserPostRequest.ToUserPostModel()
 
 	if err := userPost.Create(s.repository); err != nil {
-		return responses.CreateUserPostResponse{}, common.Wrap(fmt.Errorf("CreateUserPost: user.CreatePost"), err)
+		return responses.CreateUserPostResponse{}, common.Wrap("CreateUserPost: user.CreatePost", err)
 	}
 
 	return responses.CreateUserPostResponse{UserPost: userPost.ToResponseModel()}, nil

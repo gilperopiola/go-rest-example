@@ -18,13 +18,17 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-/*
-	IMPORTANT: To run this you should enable the database destruction on the env vars.
-*/
+//-------------------------
+// IMPORTANT: To run this you should enable the database destruction on the env vars.
+//-------------------------
 
 func TestUsersCRUDIntegrationTest(t *testing.T) {
 
-	// Prepare
+	if testing.Short() {
+		t.Skip("skipping integration test")
+	}
+
+	// prepare
 	config := config.New("../.env")
 	config.Database.Purge = true
 	database := repository.NewDatabase(config.Database, nopLogger{})
@@ -32,7 +36,7 @@ func TestUsersCRUDIntegrationTest(t *testing.T) {
 	service := service.New(repository, nopAuth{}, config)
 	endpoints := transport.New(service, transport.NewErrorsMapper(nopLogger{}))
 
-	// Happy run :)
+	// happy run :)
 	testSignup(t, endpoints)
 	testLogin(t, endpoints, "test")
 	testGetUser(t, endpoints, http.StatusOK)
@@ -41,7 +45,7 @@ func TestUsersCRUDIntegrationTest(t *testing.T) {
 	testDeleteUser(t, endpoints)
 	testGetUser(t, endpoints, http.StatusNotFound)
 
-	// Admin run :o
+	// admin run :o
 	testCreateUser(t, endpoints)
 	testLogin(t, endpoints, "admin")
 }
@@ -101,7 +105,9 @@ func testDeleteUser(t *testing.T, endpoints transport.TransportLayer) {
 	assert.Equal(t, http.StatusOK, c.Writer.Status())
 }
 
-/* Helpers */
+//--------------------
+//      HELPERS
+//--------------------
 
 func makeTestHTTPRequest(body []byte) *http.Request {
 	req, _ := http.NewRequest("", "", bytes.NewBuffer(body))
@@ -127,7 +133,9 @@ func addValueAndParamToContext(context *gin.Context, ctxKey string, ctxValue any
 	context.Params = append(context.Params, gin.Param{Key: paramKey, Value: paramValue})
 }
 
-/* Nops */
+//--------------------
+//       NOPS
+//--------------------
 
 type nopLogger struct{}
 

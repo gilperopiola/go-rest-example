@@ -7,4 +7,6 @@ run:
 run-local:
 	go run cmd/main.go
 
-.PHONY: run run-local
+test:
+	go test ./... -short
+

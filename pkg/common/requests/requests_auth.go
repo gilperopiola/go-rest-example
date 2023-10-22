@@ -1,7 +1,6 @@
 package requests
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/gilperopiola/go-rest-example/pkg/common"
@@ -35,11 +34,11 @@ type LoginRequest struct {
 
 func MakeSignupRequest(c GinI) (request SignupRequest, err error) {
 	if err = c.ShouldBindJSON(&request); err != nil {
-		return SignupRequest{}, common.Wrap(fmt.Errorf("makeSignupRequest"), customErrors.ErrBindingRequest)
+		return SignupRequest{}, common.Wrap("makeSignupRequest", customErrors.ErrBindingRequest)
 	}
 
 	if err = request.Validate(); err != nil {
-		return SignupRequest{}, common.Wrap(fmt.Errorf("makeSignupRequest"), err)
+		return SignupRequest{}, common.Wrap("makeSignupRequest", err)
 	}
 
 	return request, nil
@@ -47,11 +46,11 @@ func MakeSignupRequest(c GinI) (request SignupRequest, err error) {
 
 func MakeLoginRequest(c GinI) (request LoginRequest, err error) {
 	if err = c.ShouldBindJSON(&request); err != nil {
-		return LoginRequest{}, common.Wrap(fmt.Errorf("makeLoginRequest"), customErrors.ErrBindingRequest)
+		return LoginRequest{}, common.Wrap("makeLoginRequest", customErrors.ErrBindingRequest)
 	}
 
 	if err = request.Validate(); err != nil {
-		return LoginRequest{}, common.Wrap(fmt.Errorf("makeLoginRequest"), err)
+		return LoginRequest{}, common.Wrap("makeLoginRequest", err)
 	}
 
 	return request, nil

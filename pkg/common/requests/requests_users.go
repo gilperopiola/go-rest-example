@@ -1,7 +1,6 @@
 package requests
 
 import (
-	"fmt"
 	"regexp"
 	"strconv"
 	"time"
@@ -74,11 +73,11 @@ type SearchUsersRequest struct {
 
 func MakeCreateUserRequest(c GinI) (request CreateUserRequest, err error) {
 	if err = c.ShouldBindJSON(&request); err != nil {
-		return CreateUserRequest{}, common.Wrap(fmt.Errorf("makeCreateUserRequest"), customErrors.ErrBindingRequest)
+		return CreateUserRequest{}, common.Wrap("makeCreateUserRequest", customErrors.ErrBindingRequest)
 	}
 
 	if err = request.Validate(); err != nil {
-		return CreateUserRequest{}, common.Wrap(fmt.Errorf("makeCreateUserRequest"), err)
+		return CreateUserRequest{}, common.Wrap("makeCreateUserRequest", err)
 	}
 
 	return request, nil
@@ -87,13 +86,13 @@ func MakeCreateUserRequest(c GinI) (request CreateUserRequest, err error) {
 func MakeGetUserRequest(c GinI) (request GetUserRequest, err error) {
 	userToGetID, err := getIntFromContext(c, "ID")
 	if err != nil {
-		return GetUserRequest{}, common.Wrap(fmt.Errorf("makeGetUserRequest"), err)
+		return GetUserRequest{}, common.Wrap("makeGetUserRequest", err)
 	}
 
 	request.ID = userToGetID
 
 	if err = request.Validate(); err != nil {
-		return GetUserRequest{}, common.Wrap(fmt.Errorf("makeGetUserRequest"), err)
+		return GetUserRequest{}, common.Wrap("makeGetUserRequest", err)
 	}
 
 	return request, nil
@@ -101,18 +100,18 @@ func MakeGetUserRequest(c GinI) (request GetUserRequest, err error) {
 
 func MakeUpdateUserRequest(c GinI) (request UpdateUserRequest, err error) {
 	if err = c.ShouldBindJSON(&request); err != nil {
-		return UpdateUserRequest{}, common.Wrap(fmt.Errorf("makeUpdateUserRequest"), customErrors.ErrBindingRequest)
+		return UpdateUserRequest{}, common.Wrap("makeUpdateUserRequest", customErrors.ErrBindingRequest)
 	}
 
 	userToUpdateID, err := getIntFromContext(c, "ID")
 	if err != nil {
-		return UpdateUserRequest{}, common.Wrap(fmt.Errorf("makeUpdateUserRequest"), err)
+		return UpdateUserRequest{}, common.Wrap("makeUpdateUserRequest", err)
 	}
 
 	request.ID = userToUpdateID
 
 	if err = request.Validate(); err != nil {
-		return UpdateUserRequest{}, common.Wrap(fmt.Errorf("makeUpdateUserRequest"), err)
+		return UpdateUserRequest{}, common.Wrap("makeUpdateUserRequest", err)
 	}
 
 	return request, nil
@@ -121,13 +120,13 @@ func MakeUpdateUserRequest(c GinI) (request UpdateUserRequest, err error) {
 func MakeDeleteUserRequest(c GinI) (request DeleteUserRequest, err error) {
 	userToDeleteID, err := getIntFromContext(c, "ID")
 	if err != nil {
-		return DeleteUserRequest{}, common.Wrap(fmt.Errorf("makeDeleteUserRequest"), err)
+		return DeleteUserRequest{}, common.Wrap("makeDeleteUserRequest", err)
 	}
 
 	request.ID = userToDeleteID
 
 	if err = request.Validate(); err != nil {
-		return DeleteUserRequest{}, common.Wrap(fmt.Errorf("makeDeleteUserRequest"), err)
+		return DeleteUserRequest{}, common.Wrap("makeDeleteUserRequest", err)
 	}
 
 	return request, nil
@@ -137,15 +136,15 @@ func MakeSearchUsersRequest(c GinI) (request SearchUsersRequest, err error) {
 	request.Username = c.Query("username")
 	request.Page, err = strconv.Atoi(c.DefaultQuery("page", "0"))
 	if err != nil {
-		return SearchUsersRequest{}, common.Wrap(fmt.Errorf("makeSearchUsersRequest"), customErrors.ErrInvalidValue)
+		return SearchUsersRequest{}, common.Wrap("makeSearchUsersRequest", customErrors.ErrInvalidValue)
 	}
 	request.PerPage, err = strconv.Atoi(c.DefaultQuery("per_page", "10"))
 	if err != nil {
-		return SearchUsersRequest{}, common.Wrap(fmt.Errorf("makeSearchUsersRequest"), customErrors.ErrInvalidValue)
+		return SearchUsersRequest{}, common.Wrap("makeSearchUsersRequest", customErrors.ErrInvalidValue)
 	}
 
 	if err = request.Validate(); err != nil {
-		return SearchUsersRequest{}, common.Wrap(fmt.Errorf("makeSearchUsersRequest"), err)
+		return SearchUsersRequest{}, common.Wrap("makeSearchUsersRequest", err)
 	}
 
 	return request, nil

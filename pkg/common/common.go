@@ -12,8 +12,8 @@ type HTTPResponse struct {
 	Error   string      `json:"error"`
 }
 
-func Wrap(err1, err2 error) error {
-	return fmt.Errorf("%s: %w", err1.Error(), err2)
+func Wrap(trace string, err error) error {
+	return fmt.Errorf("%s: %w", trace, err)
 }
 
 func Hash(data string, salt string) string {

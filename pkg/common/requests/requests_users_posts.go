@@ -1,8 +1,6 @@
 package requests
 
 import (
-	"fmt"
-
 	"github.com/gilperopiola/go-rest-example/pkg/common"
 	customErrors "github.com/gilperopiola/go-rest-example/pkg/common/errors"
 	"github.com/gilperopiola/go-rest-example/pkg/common/models"
@@ -24,18 +22,18 @@ type CreateUserPostRequest struct {
 
 func MakeCreateUserPostRequest(c GinI) (request CreateUserPostRequest, err error) {
 	if err = c.ShouldBindJSON(&request); err != nil {
-		return CreateUserPostRequest{}, common.Wrap(fmt.Errorf("makeCreateUserPostRequest"), customErrors.ErrBindingRequest)
+		return CreateUserPostRequest{}, common.Wrap("makeCreateUserPostRequest", customErrors.ErrBindingRequest)
 	}
 
 	postOwnerID, err := getIntFromContext(c, "ID")
 	if err != nil {
-		return CreateUserPostRequest{}, common.Wrap(fmt.Errorf("makeCreateUserPostRequest"), err)
+		return CreateUserPostRequest{}, common.Wrap("makeCreateUserPostRequest", err)
 	}
 
 	request.UserID = postOwnerID
 
 	if err = request.Validate(); err != nil {
-		return CreateUserPostRequest{}, common.Wrap(fmt.Errorf("makeCreateUserPostRequest"), err)
+		return CreateUserPostRequest{}, common.Wrap("makeCreateUserPostRequest", err)
 	}
 
 	return request, nil

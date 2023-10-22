@@ -1,8 +1,6 @@
 package service
 
 import (
-	"fmt"
-
 	"github.com/gilperopiola/go-rest-example/pkg/common"
 	customErrors "github.com/gilperopiola/go-rest-example/pkg/common/errors"
 	"github.com/gilperopiola/go-rest-example/pkg/common/requests"
@@ -18,13 +16,13 @@ func (s *service) Signup(signupRequest requests.SignupRequest) (responses.Signup
 	user := signupRequest.ToUserModel()
 
 	if user.Exists(s.repository) {
-		return responses.SignupResponse{}, common.Wrap(fmt.Errorf("Signup: user.Exists"), customErrors.ErrUsernameOrEmailAlreadyInUse)
+		return responses.SignupResponse{}, common.Wrap("Signup: user.Exists", customErrors.ErrUsernameOrEmailAlreadyInUse)
 	}
 
 	user.HashPassword(s.config.JWT.HashSalt)
 
 	if err := user.Create(s.repository); err != nil {
-		return responses.SignupResponse{}, common.Wrap(fmt.Errorf("Signup: user.Create"), err)
+		return responses.SignupResponse{}, common.Wrap("Signup: user.Create", err)
 	}
 
 	return responses.SignupResponse{User: user.ToResponseModel()}, nil
@@ -38,16 +36,16 @@ func (s *service) Login(loginRequest requests.LoginRequest) (responses.LoginResp
 	user := loginRequest.ToUserModel()
 
 	if err := user.Get(s.repository, options.WithoutDeleted); err != nil {
-		return responses.LoginResponse{}, common.Wrap(fmt.Errorf("Login: user.Get"), err)
+		return responses.LoginResponse{}, common.Wrap("Login: user.Get", err)
 	}
 
 	if !user.PasswordMatches(loginRequest.Password, s.config.JWT.HashSalt) {
-		return responses.LoginResponse{}, common.Wrap(fmt.Errorf("Login: !user.PasswordMatches"), customErrors.ErrWrongPassword)
+		return responses.LoginResponse{}, common.Wrap("Login: !user.PasswordMatches", customErrors.ErrWrongPassword)
 	}
 
 	tokenString, err := user.GenerateTokenString(s.auth)
 	if err != nil {
-		return responses.LoginResponse{}, common.Wrap(fmt.Errorf("Login: user.GenerateTokenString"), customErrors.ErrUnauthorized)
+		return responses.LoginResponse{}, common.Wrap("Login: user.GenerateTokenString", customErrors.ErrUnauthorized)
 	}
 
 	return responses.LoginResponse{Token: tokenString}, nil

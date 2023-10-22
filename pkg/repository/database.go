@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"database/sql"
 	"fmt"
 	"os"
 	"time"
@@ -14,12 +15,30 @@ import (
 )
 
 type database struct {
-	db *gorm.DB
+	db DB
+}
+
+// Gorm is quite difficult to mock, not completed
+type DB interface {
+	Create(value interface{}) *gorm.DB
+	Preload(column string, conditions ...interface{}) *gorm.DB
+	Where(query interface{}, args ...interface{}) *gorm.DB
+	Find(out interface{}, where ...interface{}) *gorm.DB
+	Model(value interface{}) *gorm.DB
+	Update(attrs ...interface{}) *gorm.DB
+	Delete(value interface{}, where ...interface{}) *gorm.DB
+	Offset(offset interface{}) *gorm.DB
+	Limit(limit interface{}) *gorm.DB
+	Close() error
+	LogMode(enable bool) *gorm.DB
+	DB() *sql.DB
+	AutoMigrate(values ...interface{}) *gorm.DB
+	DropTable(values ...interface{}) *gorm.DB
 }
 
 func NewDatabase(config config.Database, logger middleware.LoggerI) database {
 	var database database
-	database.Setup(config, logger)
+	database.setup(config, logger)
 	return database
 }
 
@@ -28,7 +47,7 @@ const (
 	retryDelay = 5 // In seconds
 )
 
-func (database *database) Setup(config config.Database, logger middleware.LoggerI) {
+func (database *database) setup(config config.Database, logger middleware.LoggerI) {
 
 	// Create connection. It's deferred closed in main.go.
 	// Retry connection if it fails due to Docker's orchestration.
@@ -51,6 +70,8 @@ func (database *database) Close() {
 func (database *database) connectToDB(config config.Database, logger middleware.LoggerI) error {
 	var err error
 	retries := 0
+
+	// Retry connection if it fails due to Docker's orchestration
 	for retries < maxRetries {
 		if database.db, err = gorm.Open(config.Type, config.GetConnectionString()); err != nil {
 			retries++

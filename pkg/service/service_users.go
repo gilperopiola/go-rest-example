@@ -1,8 +1,6 @@
 package service
 
 import (
-	"fmt"
-
 	"github.com/gilperopiola/go-rest-example/pkg/common"
 	customErrors "github.com/gilperopiola/go-rest-example/pkg/common/errors"
 	"github.com/gilperopiola/go-rest-example/pkg/common/requests"
@@ -19,13 +17,13 @@ func (s *service) CreateUser(createUserRequest requests.CreateUserRequest) (resp
 	user := createUserRequest.ToUserModel()
 
 	if user.Exists(s.repository) {
-		return responses.CreateUserResponse{}, common.Wrap(fmt.Errorf("CreateUser: user.Exists"), customErrors.ErrUsernameOrEmailAlreadyInUse)
+		return responses.CreateUserResponse{}, common.Wrap("CreateUser: user.Exists", customErrors.ErrUsernameOrEmailAlreadyInUse)
 	}
 
 	user.HashPassword(s.config.JWT.HashSalt)
 
 	if err := user.Create(s.repository); err != nil {
-		return responses.CreateUserResponse{}, common.Wrap(fmt.Errorf("CreateUser: user.Create"), err)
+		return responses.CreateUserResponse{}, common.Wrap("CreateUser: user.Create", err)
 	}
 
 	return responses.CreateUserResponse{User: user.ToResponseModel()}, nil
@@ -39,7 +37,7 @@ func (s *service) GetUser(getUserRequest requests.GetUserRequest) (responses.Get
 	user := getUserRequest.ToUserModel()
 
 	if err := user.Get(s.repository, options.WithoutDeleted); err != nil {
-		return responses.GetUserResponse{}, common.Wrap(fmt.Errorf("GetUser: user.Get"), err)
+		return responses.GetUserResponse{}, common.Wrap("GetUser: user.Get", err)
 	}
 
 	return responses.GetUserResponse{User: user.ToResponseModel()}, nil
@@ -53,18 +51,18 @@ func (s *service) UpdateUser(updateUserRequest requests.UpdateUserRequest) (resp
 	user := updateUserRequest.ToUserModel()
 
 	if user.Exists(s.repository) {
-		return responses.UpdateUserResponse{}, common.Wrap(fmt.Errorf("UpdateUser: user.Exists"), customErrors.ErrUsernameOrEmailAlreadyInUse)
+		return responses.UpdateUserResponse{}, common.Wrap("UpdateUser: user.Exists", customErrors.ErrUsernameOrEmailAlreadyInUse)
 	}
 
 	if err := user.Get(s.repository, options.WithoutDeleted); err != nil {
-		return responses.UpdateUserResponse{}, common.Wrap(fmt.Errorf("UpdateUser: user.Get"), err)
+		return responses.UpdateUserResponse{}, common.Wrap("UpdateUser: user.Get", err)
 	}
 
 	user.OverwriteFields(updateUserRequest.Username, updateUserRequest.Email, "")
 	user.OverwriteDetails(updateUserRequest.FirstName, updateUserRequest.LastName)
 
 	if err := user.Update(s.repository); err != nil {
-		return responses.UpdateUserResponse{}, common.Wrap(fmt.Errorf("UpdateUser: user.Update"), err)
+		return responses.UpdateUserResponse{}, common.Wrap("UpdateUser: user.Update", err)
 	}
 
 	return responses.UpdateUserResponse{User: user.ToResponseModel()}, nil
@@ -79,7 +77,7 @@ func (s *service) DeleteUser(deleteUserRequest requests.DeleteUserRequest) (resp
 
 	// This returns an error if the user is already deleted
 	if err := user.Delete(s.repository); err != nil {
-		return responses.DeleteUserResponse{}, common.Wrap(fmt.Errorf("DeleteUser: user.Delete"), err)
+		return responses.DeleteUserResponse{}, common.Wrap("DeleteUser: user.Delete", err)
 	}
 
 	return responses.DeleteUserResponse{User: user.ToResponseModel()}, nil
@@ -99,7 +97,7 @@ func (s *service) SearchUsers(searchUsersRequest requests.SearchUsersRequest) (r
 
 	users, err := user.Search(s.repository, page, perPage)
 	if err != nil {
-		return responses.SearchUsersResponse{}, common.Wrap(fmt.Errorf("SearchUsers: user.Search"), err)
+		return responses.SearchUsersResponse{}, common.Wrap("SearchUsers: user.Search", err)
 	}
 
 	return responses.SearchUsersResponse{

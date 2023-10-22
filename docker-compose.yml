@@ -17,14 +17,6 @@ services:
       - "8040:8040"
     depends_on:
       - go-rest-example-db
-    environment:
-      # These are defined in config.go
-      - GO_REST_EXAMPLE_DATABASE_HOSTNAME=go-rest-example-db
-      - GO_REST_EXAMPLE_DATABASE_USERNAME=root
-      - GO_REST_EXAMPLE_DATABASE_PASSWORD=password
-      - GO_REST_EXAMPLE_DATABASE_SCHEMA=go-rest-example-db
-    env_file:
-      - .env
     working_dir: /app
 
 volumes:

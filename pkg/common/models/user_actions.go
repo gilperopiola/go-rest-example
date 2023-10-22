@@ -1,8 +1,6 @@
 package models
 
 import (
-	"fmt"
-
 	"github.com/gilperopiola/go-rest-example/pkg/auth"
 	"github.com/gilperopiola/go-rest-example/pkg/common"
 	"github.com/gilperopiola/go-rest-example/pkg/repository/options"
@@ -39,7 +37,7 @@ func (u *User) GenerateTokenString(a auth.AuthI) (string, error) {
 func (u *User) Create(r RepositoryLayer) error {
 	user, err := r.CreateUser(*u)
 	if err != nil {
-		return common.Wrap(fmt.Errorf("User.Create"), err)
+		return common.Wrap("User.Create", err)
 	}
 	*u = user
 	return nil
@@ -48,7 +46,7 @@ func (u *User) Create(r RepositoryLayer) error {
 func (u *User) Get(r RepositoryLayer, opts ...options.QueryOption) error {
 	user, err := r.GetUser(*u, opts...)
 	if err != nil {
-		return common.Wrap(fmt.Errorf("User.Get"), err)
+		return common.Wrap("User.Get", err)
 	}
 	*u = user
 	return nil
@@ -57,7 +55,7 @@ func (u *User) Get(r RepositoryLayer, opts ...options.QueryOption) error {
 func (u *User) Update(r RepositoryLayer) error {
 	user, err := r.UpdateUser(*u)
 	if err != nil {
-		return common.Wrap(fmt.Errorf("User.Update"), err)
+		return common.Wrap("User.Update", err)
 	}
 	*u = user
 	return nil
@@ -66,7 +64,7 @@ func (u *User) Update(r RepositoryLayer) error {
 func (u *User) Delete(r RepositoryLayer) error {
 	user, err := r.DeleteUser(u.ID)
 	if err != nil {
-		return common.Wrap(fmt.Errorf("User.Delete"), err)
+		return common.Wrap("User.Delete", err)
 	}
 	*u = user
 	return nil
@@ -75,7 +73,7 @@ func (u *User) Delete(r RepositoryLayer) error {
 func (u *User) Search(r RepositoryLayer, page, perPage int) (Users, error) {
 	users, err := r.SearchUsers(u.Username, page, perPage, options.WithDetails)
 	if err != nil {
-		return []User{}, common.Wrap(fmt.Errorf("User.Search"), err)
+		return []User{}, common.Wrap("User.Search", err)
 	}
 	return users, nil
 }
