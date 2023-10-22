@@ -4,13 +4,12 @@ import (
 	"time"
 
 	"github.com/gilperopiola/go-rest-example/pkg/common"
-	customErrors "github.com/gilperopiola/go-rest-example/pkg/common/errors"
 	"github.com/gilperopiola/go-rest-example/pkg/common/models"
 )
 
-//-----------------------
-//    REQUEST STRUCTS
-//-----------------------
+//---------------------------
+//    AUTH REQUEST STRUCTS
+//---------------------------
 
 type SignupRequest struct {
 	Username       string `json:"username"`
@@ -28,13 +27,13 @@ type LoginRequest struct {
 	Password        string `json:"password"`
 }
 
-//-------------------------
-//     REQUEST MAKERS
-//-------------------------
+//----------------------------
+//     AUTH REQUEST MAKERS
+//----------------------------
 
 func MakeSignupRequest(c GinI) (request SignupRequest, err error) {
 	if err = c.ShouldBindJSON(&request); err != nil {
-		return SignupRequest{}, common.Wrap("makeSignupRequest", customErrors.ErrBindingRequest)
+		return SignupRequest{}, common.Wrap("makeSignupRequest", common.ErrBindingRequest)
 	}
 
 	if err = request.Validate(); err != nil {
@@ -46,7 +45,7 @@ func MakeSignupRequest(c GinI) (request SignupRequest, err error) {
 
 func MakeLoginRequest(c GinI) (request LoginRequest, err error) {
 	if err = c.ShouldBindJSON(&request); err != nil {
-		return LoginRequest{}, common.Wrap("makeLoginRequest", customErrors.ErrBindingRequest)
+		return LoginRequest{}, common.Wrap("makeLoginRequest", common.ErrBindingRequest)
 	}
 
 	if err = request.Validate(); err != nil {
@@ -56,9 +55,9 @@ func MakeLoginRequest(c GinI) (request LoginRequest, err error) {
 	return request, nil
 }
 
-//----------------------------
-//     REQUEST TO MODEL
-//----------------------------
+//-------------------------------
+//     REQUEST TO USER MODEL
+//-------------------------------
 
 func (r *SignupRequest) ToUserModel() models.User {
 	return models.User{
@@ -100,7 +99,7 @@ func (req SignupRequest) Validate() error {
 	}
 
 	if req.Password != req.RepeatPassword {
-		return customErrors.ErrPasswordsDontMatch
+		return common.ErrPasswordsDontMatch
 	}
 
 	return nil
@@ -108,7 +107,7 @@ func (req SignupRequest) Validate() error {
 
 func (req LoginRequest) Validate() error {
 	if req.UsernameOrEmail == "" || req.Password == "" {
-		return customErrors.ErrAllFieldsRequired
+		return common.ErrAllFieldsRequired
 	}
 
 	return nil

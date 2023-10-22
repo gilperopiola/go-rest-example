@@ -2,7 +2,6 @@ package service
 
 import (
 	"github.com/gilperopiola/go-rest-example/pkg/common"
-	customErrors "github.com/gilperopiola/go-rest-example/pkg/common/errors"
 	"github.com/gilperopiola/go-rest-example/pkg/common/requests"
 	"github.com/gilperopiola/go-rest-example/pkg/common/responses"
 	"github.com/gilperopiola/go-rest-example/pkg/repository/options"
@@ -17,7 +16,7 @@ func (s *service) CreateUser(createUserRequest requests.CreateUserRequest) (resp
 	user := createUserRequest.ToUserModel()
 
 	if user.Exists(s.repository) {
-		return responses.CreateUserResponse{}, common.Wrap("CreateUser: user.Exists", customErrors.ErrUsernameOrEmailAlreadyInUse)
+		return responses.CreateUserResponse{}, common.Wrap("CreateUser: user.Exists", common.ErrUsernameOrEmailAlreadyInUse)
 	}
 
 	user.HashPassword(s.config.JWT.HashSalt)
@@ -51,7 +50,7 @@ func (s *service) UpdateUser(updateUserRequest requests.UpdateUserRequest) (resp
 	user := updateUserRequest.ToUserModel()
 
 	if user.Exists(s.repository) {
-		return responses.UpdateUserResponse{}, common.Wrap("UpdateUser: user.Exists", customErrors.ErrUsernameOrEmailAlreadyInUse)
+		return responses.UpdateUserResponse{}, common.Wrap("UpdateUser: user.Exists", common.ErrUsernameOrEmailAlreadyInUse)
 	}
 
 	if err := user.Get(s.repository, options.WithoutDeleted); err != nil {

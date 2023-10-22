@@ -1,8 +1,8 @@
 package models
 
 import (
-	"github.com/gilperopiola/go-rest-example/pkg/auth"
 	"github.com/gilperopiola/go-rest-example/pkg/common"
+	"github.com/gilperopiola/go-rest-example/pkg/common/auth"
 	"github.com/gilperopiola/go-rest-example/pkg/repository/options"
 )
 
@@ -30,9 +30,9 @@ func (u *User) GenerateTokenString(a auth.AuthI) (string, error) {
 	return a.GenerateToken(u.ToAuthEntity(), u.GetAuthRole())
 }
 
-//-------------------
-//     DATABASE
-//-------------------
+//----------------
+//     USERS
+//----------------
 
 func (u *User) Create(r RepositoryLayer) error {
 	user, err := r.CreateUser(*u)
@@ -82,10 +82,6 @@ func (u *User) Exists(r RepositoryLayer) bool {
 	return r.UserExists(u.Username, u.Email)
 }
 
-//-------------------
-//       MISC
-//-------------------
-
 func (u *User) HashPassword(salt string) {
 	u.Password = common.Hash(u.Password, salt)
 }
@@ -113,4 +109,17 @@ func (u *User) OverwriteDetails(firstName, lastName *string) {
 	if lastName != nil {
 		u.Details.LastName = *lastName
 	}
+}
+
+//-----------------------
+//       USER POSTS
+//-----------------------
+
+func (up *UserPost) Create(r RepositoryLayer) error {
+	userPost, err := r.CreateUserPost(*up)
+	if err != nil {
+		return common.Wrap("UserPost.CreateUserPost", err)
+	}
+	*up = userPost
+	return nil
 }

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	customErrors "github.com/gilperopiola/go-rest-example/pkg/common/errors"
+	"github.com/gilperopiola/go-rest-example/pkg/common"
 	"github.com/gilperopiola/go-rest-example/pkg/common/mocks"
 	"github.com/gilperopiola/go-rest-example/pkg/common/models"
 
@@ -19,7 +19,7 @@ var (
 
 func TestCreateUser(t *testing.T) {
 	makeDBMockWithCreate := func(errToReturn error) *mocks.DBMock {
-		mockDB := mocks.NewDBMock(t)
+		mockDB := &mocks.DBMock{}
 		mockDB.On("Create", mock.Anything).Return(&gorm.DB{Error: errToReturn}).Once()
 		return mockDB
 	}
@@ -32,7 +32,7 @@ func TestCreateUser(t *testing.T) {
 		{
 			name:    "error_creating_user",
 			dbMock:  makeDBMockWithCreate(errGeneric),
-			wantErr: customErrors.ErrCreatingUser,
+			wantErr: common.ErrCreatingUser,
 		},
 		{
 			name:   "success",

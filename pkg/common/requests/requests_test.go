@@ -7,8 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	customErrors "github.com/gilperopiola/go-rest-example/pkg/common/errors"
-
+	"github.com/gilperopiola/go-rest-example/pkg/common"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
@@ -54,13 +53,13 @@ func TestMakeSignupRequest(t *testing.T) {
 			name:    "error_binding_request",
 			body:    SignupBody{Email: 5},
 			want:    SignupRequest{},
-			wantErr: customErrors.ErrBindingRequest,
+			wantErr: common.ErrBindingRequest,
 		},
 		{
 			name:    "error_validating_request",
 			body:    SignupBody{Email: "invalid"},
 			want:    SignupRequest{},
-			wantErr: customErrors.ErrAllFieldsRequired,
+			wantErr: common.ErrAllFieldsRequired,
 		},
 		{
 			name:    "success",
@@ -112,13 +111,13 @@ func TestMakeLoginRequest(t *testing.T) {
 			name:    "error_binding_request",
 			body:    LoginBody{UsernameOrEmail: 5},
 			want:    LoginRequest{},
-			wantErr: customErrors.ErrBindingRequest,
+			wantErr: common.ErrBindingRequest,
 		},
 		{
 			name:    "error_validating_request",
 			body:    LoginBody{UsernameOrEmail: "invalid"},
 			want:    LoginRequest{},
-			wantErr: customErrors.ErrAllFieldsRequired,
+			wantErr: common.ErrAllFieldsRequired,
 		},
 		{
 			name:    "success",
@@ -157,7 +156,7 @@ func TestMakeGetUserRequest(t *testing.T) {
 			ctxUserID: 0,
 			urlUserID: "0",
 			want:      GetUserRequest{},
-			wantErr:   customErrors.ErrReadingValueFromCtx,
+			wantErr:   common.ErrReadingValueFromCtx,
 		},
 		{
 			name:      "success",
@@ -209,7 +208,7 @@ func TestMakeUpdateUserRequest(t *testing.T) {
 			urlUserID: "1",
 			body:      UpdateUserBody{Username: 5},
 			want:      UpdateUserRequest{},
-			wantErr:   customErrors.ErrBindingRequest,
+			wantErr:   common.ErrBindingRequest,
 		},
 		{
 			name:      "error_validating_request",
@@ -217,7 +216,7 @@ func TestMakeUpdateUserRequest(t *testing.T) {
 			urlUserID: "2",
 			body:      UpdateUserBody{Username: VALID_USERNAME, Email: "invalid"},
 			want:      UpdateUserRequest{},
-			wantErr:   customErrors.ErrInvalidEmailFormat,
+			wantErr:   common.ErrInvalidEmailFormat,
 		},
 		{
 			name:      "success",

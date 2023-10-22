@@ -2,7 +2,6 @@ package service
 
 import (
 	"github.com/gilperopiola/go-rest-example/pkg/common"
-	customErrors "github.com/gilperopiola/go-rest-example/pkg/common/errors"
 	"github.com/gilperopiola/go-rest-example/pkg/common/requests"
 	"github.com/gilperopiola/go-rest-example/pkg/common/responses"
 	"github.com/gilperopiola/go-rest-example/pkg/repository/options"
@@ -16,7 +15,7 @@ func (s *service) Signup(signupRequest requests.SignupRequest) (responses.Signup
 	user := signupRequest.ToUserModel()
 
 	if user.Exists(s.repository) {
-		return responses.SignupResponse{}, common.Wrap("Signup: user.Exists", customErrors.ErrUsernameOrEmailAlreadyInUse)
+		return responses.SignupResponse{}, common.Wrap("Signup: user.Exists", common.ErrUsernameOrEmailAlreadyInUse)
 	}
 
 	user.HashPassword(s.config.JWT.HashSalt)
@@ -40,12 +39,12 @@ func (s *service) Login(loginRequest requests.LoginRequest) (responses.LoginResp
 	}
 
 	if !user.PasswordMatches(loginRequest.Password, s.config.JWT.HashSalt) {
-		return responses.LoginResponse{}, common.Wrap("Login: !user.PasswordMatches", customErrors.ErrWrongPassword)
+		return responses.LoginResponse{}, common.Wrap("Login: !user.PasswordMatches", common.ErrWrongPassword)
 	}
 
 	tokenString, err := user.GenerateTokenString(s.auth)
 	if err != nil {
-		return responses.LoginResponse{}, common.Wrap("Login: user.GenerateTokenString", customErrors.ErrUnauthorized)
+		return responses.LoginResponse{}, common.Wrap("Login: user.GenerateTokenString", common.ErrUnauthorized)
 	}
 
 	return responses.LoginResponse{Token: tokenString}, nil

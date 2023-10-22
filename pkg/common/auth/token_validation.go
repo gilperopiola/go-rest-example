@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/gilperopiola/go-rest-example/pkg/common"
-	customErrors "github.com/gilperopiola/go-rest-example/pkg/common/errors"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
@@ -78,7 +77,7 @@ func (auth *Auth) decodeTokenString(tokenString string) (*jwt.Token, error) {
 
 	// Check length
 	if len(tokenString) < 40 {
-		return &jwt.Token{}, customErrors.ErrUnauthorized
+		return &jwt.Token{}, common.ErrUnauthorized
 	}
 
 	// Make key function

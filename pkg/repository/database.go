@@ -47,6 +47,10 @@ const (
 	retryDelay = 5 // In seconds
 )
 
+func (database *database) DB() DB {
+	return database.db
+}
+
 func (database *database) setup(config config.Database, logger middleware.LoggerI) {
 
 	// Create connection. It's deferred closed in main.go.
@@ -111,7 +115,5 @@ func (database *database) configure(config config.Database) {
 	}
 
 	// AutoMigrate fields
-	database.db.AutoMigrate(&models.User{})
-	database.db.AutoMigrate(&models.UserDetail{})
-	database.db.AutoMigrate(&models.UserPost{})
+	database.db.AutoMigrate(models.AllModels...)
 }

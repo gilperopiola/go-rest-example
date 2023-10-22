@@ -4,13 +4,11 @@ import (
 	"github.com/gilperopiola/go-rest-example/pkg/common/responses"
 )
 
-/**********************
-
+/*---------------------------------------------------------------------------
 // When the Service layer calls the Repository layer, the output is a Model.
 // Here we transform those Models into Response Models, returned on our Custom Responses
 // to the Transport layer.
-
-***********************/
+------------------------*/
 
 //-------------------
 //      USERS
@@ -51,18 +49,18 @@ func (u Users) ToResponseModel() []responses.User {
 //      POSTS
 //-------------------
 
-func (p UserPost) ToResponseModel() responses.UserPost {
-	return responses.UserPost{
-		ID:    p.ID,
-		Title: p.Title,
-		Body:  p.Body,
-	}
-}
-
 func (p UserPosts) ToResponseModel() []responses.UserPost {
 	var posts []responses.UserPost
 	for _, post := range p {
 		posts = append(posts, post.ToResponseModel())
 	}
 	return posts
+}
+
+func (p UserPost) ToResponseModel() responses.UserPost {
+	return responses.UserPost{
+		ID:    p.ID,
+		Title: p.Title,
+		Body:  p.Body,
+	}
 }

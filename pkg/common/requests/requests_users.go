@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/gilperopiola/go-rest-example/pkg/common"
-	customErrors "github.com/gilperopiola/go-rest-example/pkg/common/errors"
 	"github.com/gilperopiola/go-rest-example/pkg/common/models"
 )
 
@@ -28,9 +27,9 @@ var (
 	validEmailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`)
 )
 
-//-----------------------
-//    REQUEST STRUCTS
-//-----------------------
+//---------------------------
+//    USER REQUEST STRUCTS
+//---------------------------
 
 type CreateUserRequest struct {
 	Username string `json:"username"`
@@ -67,13 +66,19 @@ type SearchUsersRequest struct {
 	PerPage  int    `json:"per_page"`
 }
 
-//-------------------------
-//     REQUEST MAKERS
-//-------------------------
+type CreateUserPostRequest struct {
+	UserID int    `json:"user_id"`
+	Title  string `json:"title"`
+	Body   string `json:"body"`
+}
+
+//---------------------------
+//    USER REQUEST MAKERS
+//---------------------------
 
 func MakeCreateUserRequest(c GinI) (request CreateUserRequest, err error) {
 	if err = c.ShouldBindJSON(&request); err != nil {
-		return CreateUserRequest{}, common.Wrap("makeCreateUserRequest", customErrors.ErrBindingRequest)
+		return CreateUserRequest{}, common.Wrap("makeCreateUserRequest", common.ErrBindingRequest)
 	}
 
 	if err = request.Validate(); err != nil {
@@ -100,7 +105,7 @@ func MakeGetUserRequest(c GinI) (request GetUserRequest, err error) {
 
 func MakeUpdateUserRequest(c GinI) (request UpdateUserRequest, err error) {
 	if err = c.ShouldBindJSON(&request); err != nil {
-		return UpdateUserRequest{}, common.Wrap("makeUpdateUserRequest", customErrors.ErrBindingRequest)
+		return UpdateUserRequest{}, common.Wrap("makeUpdateUserRequest", common.ErrBindingRequest)
 	}
 
 	userToUpdateID, err := getIntFromContext(c, "ID")
@@ -136,11 +141,11 @@ func MakeSearchUsersRequest(c GinI) (request SearchUsersRequest, err error) {
 	request.Username = c.Query("username")
 	request.Page, err = strconv.Atoi(c.DefaultQuery("page", "0"))
 	if err != nil {
-		return SearchUsersRequest{}, common.Wrap("makeSearchUsersRequest", customErrors.ErrInvalidValue)
+		return SearchUsersRequest{}, common.Wrap("makeSearchUsersRequest", common.ErrInvalidValue)
 	}
 	request.PerPage, err = strconv.Atoi(c.DefaultQuery("per_page", "10"))
 	if err != nil {
-		return SearchUsersRequest{}, common.Wrap("makeSearchUsersRequest", customErrors.ErrInvalidValue)
+		return SearchUsersRequest{}, common.Wrap("makeSearchUsersRequest", common.ErrInvalidValue)
 	}
 
 	if err = request.Validate(); err != nil {
@@ -150,9 +155,28 @@ func MakeSearchUsersRequest(c GinI) (request SearchUsersRequest, err error) {
 	return request, nil
 }
 
-//----------------------------
-//     REQUEST TO MODEL
-//----------------------------
+func MakeCreateUserPostRequest(c GinI) (request CreateUserPostRequest, err error) {
+	if err = c.ShouldBindJSON(&request); err != nil {
+		return CreateUserPostRequest{}, common.Wrap("makeCreateUserPostRequest", common.ErrBindingRequest)
+	}
+
+	postOwnerID, err := getIntFromContext(c, "ID")
+	if err != nil {
+		return CreateUserPostRequest{}, common.Wrap("makeCreateUserPostRequest", err)
+	}
+
+	request.UserID = postOwnerID
+
+	if err = request.Validate(); err != nil {
+		return CreateUserPostRequest{}, common.Wrap("makeCreateUserPostRequest", err)
+	}
+
+	return request, nil
+}
+
+//-------------------------------
+//     REQUEST TO USER MODEL
+//-------------------------------
 
 func (r *CreateUserRequest) ToUserModel() models.User {
 	return models.User{
@@ -205,6 +229,14 @@ func (r *SearchUsersRequest) ToUserModel() models.User {
 	return models.User{Username: r.Username}
 }
 
+func (r *CreateUserPostRequest) ToUserPostModel() models.UserPost {
+	return models.UserPost{
+		UserID: r.UserID,
+		Title:  r.Title,
+		Body:   r.Body,
+	}
+}
+
 //--------------------------
 //	 REQUEST VALIDATIONS
 //--------------------------
@@ -215,23 +247,23 @@ func (req CreateUserRequest) Validate() error {
 
 func (req GetUserRequest) Validate() error {
 	if req.ID == 0 {
-		return customErrors.ErrAllFieldsRequired
+		return common.ErrAllFieldsRequired
 	}
 	return nil
 }
 
 func (req UpdateUserRequest) Validate() error {
 	if req.ID == 0 || (req.Email == "" && req.Username == "") {
-		return customErrors.ErrAllFieldsRequired
+		return common.ErrAllFieldsRequired
 	}
 
 	if req.Email != "" && !validEmailRegex.MatchString(req.Email) {
-		return customErrors.ErrInvalidEmailFormat
+		return common.ErrInvalidEmailFormat
 	}
 
 	if req.Username != "" {
 		if len(req.Username) < usernameMinLength || len(req.Username) > usernameMaxLength {
-			return customErrors.ErrInvalidUsernameLength
+			return common.ErrInvalidUsernameLength
 		}
 	}
 
@@ -240,7 +272,7 @@ func (req UpdateUserRequest) Validate() error {
 
 func (req DeleteUserRequest) Validate() error {
 	if req.ID == 0 {
-		return customErrors.ErrAllFieldsRequired
+		return common.ErrAllFieldsRequired
 	}
 
 	return nil
@@ -248,9 +280,16 @@ func (req DeleteUserRequest) Validate() error {
 
 func (req SearchUsersRequest) Validate() error {
 	if req.Page < 0 || req.PerPage <= 0 {
-		return customErrors.ErrAllFieldsRequired
+		return common.ErrAllFieldsRequired
 	}
 
+	return nil
+}
+
+func (req CreateUserPostRequest) Validate() error {
+	if req.UserID == 0 || req.Title == "" {
+		return common.ErrAllFieldsRequired
+	}
 	return nil
 }
 
@@ -261,26 +300,26 @@ func (req SearchUsersRequest) Validate() error {
 func getIntFromContext(c GinI, key string) (int, error) {
 	value := c.GetInt(key)
 	if value == 0 {
-		return 0, customErrors.ErrReadingValueFromCtx
+		return 0, common.ErrReadingValueFromCtx
 	}
 	return value, nil
 }
 
 func validateUsernameEmailAndPassword(username, email, password string) error {
 	if email == "" || username == "" || password == "" {
-		return customErrors.ErrAllFieldsRequired
+		return common.ErrAllFieldsRequired
 	}
 
 	if !validEmailRegex.MatchString(email) {
-		return customErrors.ErrInvalidEmailFormat
+		return common.ErrInvalidEmailFormat
 	}
 
 	if len(username) < usernameMinLength || len(username) > usernameMaxLength {
-		return customErrors.ErrInvalidUsernameLength
+		return common.ErrInvalidUsernameLength
 	}
 
 	if len(password) < passwordMinLength || len(password) > passwordMaxLength {
-		return customErrors.ErrInvalidPasswordLength
+		return common.ErrInvalidPasswordLength
 	}
 
 	return nil

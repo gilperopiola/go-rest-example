@@ -4,7 +4,6 @@ import (
 	"errors"
 
 	"github.com/gilperopiola/go-rest-example/pkg/common"
-	customErrors "github.com/gilperopiola/go-rest-example/pkg/common/errors"
 	"github.com/gilperopiola/go-rest-example/pkg/common/models"
 	"github.com/gilperopiola/go-rest-example/pkg/repository/options"
 
@@ -14,7 +13,7 @@ import (
 // CreateUser inserts a user. Table structure can be found on the models package
 func (r *repository) CreateUser(user models.User) (models.User, error) {
 	if err := r.database.db.Create(&user).Error; err != nil {
-		return models.User{}, common.Wrap(err.Error(), customErrors.ErrCreatingUser)
+		return models.User{}, common.Wrap(err.Error(), common.ErrCreatingUser)
 	}
 	return user, nil
 }
@@ -34,9 +33,9 @@ func (r *repository) GetUser(user models.User, opts ...options.QueryOption) (mod
 	err := r.database.db.Preload("Details").Preload("Posts").Where(query, user.ID, user.Username, user.Email).First(&user).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return models.User{}, common.Wrap(err.Error(), customErrors.ErrUserNotFound)
+			return models.User{}, common.Wrap(err.Error(), common.ErrUserNotFound)
 		}
-		return models.User{}, common.Wrap(err.Error(), customErrors.ErrUnknown)
+		return models.User{}, common.Wrap(err.Error(), common.ErrUnknown)
 	}
 
 	return user, nil
@@ -45,7 +44,7 @@ func (r *repository) GetUser(user models.User, opts ...options.QueryOption) (mod
 // UpdateUser updates the fields that are not empty on the model
 func (r *repository) UpdateUser(user models.User) (models.User, error) {
 	if err := r.database.db.Model(&user).Update(&user).Error; err != nil {
-		return models.User{}, common.Wrap(err.Error(), customErrors.ErrUpdatingUser)
+		return models.User{}, common.Wrap(err.Error(), common.ErrUpdatingUser)
 	}
 	return user, nil
 }
@@ -57,18 +56,18 @@ func (r *repository) DeleteUser(id int) (models.User, error) {
 	user := models.User{ID: id}
 	var err error
 	if user, err = r.GetUser(user); err != nil {
-		return models.User{}, common.Wrap(err.Error(), customErrors.ErrGettingUser)
+		return models.User{}, common.Wrap(err.Error(), common.ErrGettingUser)
 	}
 
 	// if it's already deleted, return an error
 	if user.Deleted {
-		return models.User{}, customErrors.ErrUserAlreadyDeleted
+		return models.User{}, common.ErrUserAlreadyDeleted
 	}
 
 	// then, mark the user as deleted and save it
 	user.Deleted = true
 	if _, err := r.UpdateUser(user); err != nil {
-		return models.User{}, common.Wrap(err.Error(), customErrors.ErrUpdatingUser)
+		return models.User{}, common.Wrap(err.Error(), common.ErrUpdatingUser)
 	}
 
 	return user, nil
@@ -89,7 +88,7 @@ func (r *repository) SearchUsers(username string, page, perPage int, opts ...opt
 	}
 
 	if err := r.database.db.Offset(page * perPage).Limit(perPage).Find(&users).Error; err != nil {
-		return models.Users{}, common.Wrap(err.Error(), customErrors.ErrSearchingUsers)
+		return models.Users{}, common.Wrap(err.Error(), common.ErrSearchingUsers)
 	}
 
 	return users, nil

@@ -9,6 +9,12 @@ import (
 // Models are the representation of the database schema. They are used in the Service & Repository Layers.
 // If you add a new one, you should add it to the methods in pkg/repository/database.go
 
+var AllModels = []interface{}{
+	&User{},
+	&UserDetail{},
+	&UserPost{},
+}
+
 type User struct {
 	ID        int    `gorm:"primaryKey"`
 	Username  string `gorm:"unique;not null"`

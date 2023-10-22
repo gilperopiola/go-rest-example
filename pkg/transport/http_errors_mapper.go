@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/gilperopiola/go-rest-example/pkg/common"
-	customErrors "github.com/gilperopiola/go-rest-example/pkg/common/errors"
 	"github.com/gilperopiola/go-rest-example/pkg/common/middleware"
 )
 
@@ -31,7 +30,7 @@ func (e errorsMapper) Map(err error) (statusCode int, response common.HTTPRespon
 
 	// If we're here we shouldn't have a nil error
 	if err == nil {
-		err = customErrors.ErrNilError
+		err = common.ErrNilError
 	}
 
 	// We get the HTTP code depending on the error, defaulting to 500
@@ -72,34 +71,34 @@ func getStatusCodeFromError(err error) int {
 
 var errorsMapToHTTPCode = map[error]int{
 	// 400 - Bad Request
-	customErrors.ErrBindingRequest:        400,
-	customErrors.ErrAllFieldsRequired:     400,
-	customErrors.ErrPasswordsDontMatch:    400,
-	customErrors.ErrInvalidEmailFormat:    400,
-	customErrors.ErrInvalidUsernameLength: 400,
-	customErrors.ErrInvalidPasswordLength: 400,
-	customErrors.ErrInvalidValue:          400,
+	common.ErrBindingRequest:        400,
+	common.ErrAllFieldsRequired:     400,
+	common.ErrPasswordsDontMatch:    400,
+	common.ErrInvalidEmailFormat:    400,
+	common.ErrInvalidUsernameLength: 400,
+	common.ErrInvalidPasswordLength: 400,
+	common.ErrInvalidValue:          400,
 
 	// 401 - Unauthorized
-	customErrors.ErrUnauthorized:  401,
-	customErrors.ErrWrongPassword: 401,
+	common.ErrUnauthorized:  401,
+	common.ErrWrongPassword: 401,
 
 	// 404 - Not Found
-	customErrors.ErrUserNotFound:       404,
-	customErrors.ErrUserAlreadyDeleted: 404,
+	common.ErrUserNotFound:       404,
+	common.ErrUserAlreadyDeleted: 404,
 
 	// 409 - Conflict
-	customErrors.ErrUsernameOrEmailAlreadyInUse: 409,
+	common.ErrUsernameOrEmailAlreadyInUse: 409,
 
 	// 500 - Internal Server Error
-	customErrors.ErrCreatingUser:     500,
-	customErrors.ErrGettingUser:      500,
-	customErrors.ErrUpdatingUser:     500,
-	customErrors.ErrDeletingUser:     500,
-	customErrors.ErrSearchingUsers:   500,
-	customErrors.ErrUnknown:          500,
-	customErrors.ErrNilError:         500,
-	customErrors.ErrCreatingUserPost: 500,
+	common.ErrCreatingUser:     500,
+	common.ErrGettingUser:      500,
+	common.ErrUpdatingUser:     500,
+	common.ErrDeletingUser:     500,
+	common.ErrSearchingUsers:   500,
+	common.ErrUnknown:          500,
+	common.ErrNilError:         500,
+	common.ErrCreatingUserPost: 500,
 }
 
 func (e errorsMapper) logWarningOrError(err error, responseStatusCode int) {
