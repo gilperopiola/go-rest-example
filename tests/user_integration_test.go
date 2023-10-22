@@ -39,7 +39,7 @@ func TestUsersCRUDIntegrationTest(t *testing.T) {
 	}
 
 	// Prepare
-	config := config.NewConfig()
+	config := config.New()
 	config.Database.Purge = true
 	database := repository.NewDatabase(config.Database, nopLogger{})
 	repository := repository.New(database)

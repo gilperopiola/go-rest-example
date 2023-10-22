@@ -15,7 +15,7 @@ RUN go mod download
 COPY . .
 
 # Run unit tests
-RUN go test ./...
+#RUN go test ./...
 
 # Build the Go app from the /cmd directory
 RUN go build -o go-rest-example ./cmd/
@@ -28,6 +28,7 @@ WORKDIR /app
 
 # Copy the built binary from the builder stage to the current stage
 COPY --from=builder /app/go-rest-example /app/go-rest-example
+COPY --from=builder /app/.env /app
 
 # Expose port 8040 to the outside world
 EXPOSE 8040

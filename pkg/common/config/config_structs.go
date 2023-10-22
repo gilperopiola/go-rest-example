@@ -3,22 +3,22 @@ package config
 import "fmt"
 
 type General struct {
-	Debug   bool
-	Port    string
-	Timeout int
+	Debug   bool   `envconfig:"GO_REST_EXAMPLE_DEBUG"`
+	Port    string `envconfig:"GO_REST_EXAMPLE_PORT"`
+	Timeout int    `envconfig:"GO_REST_EXAMPLE_TIMEOUT_SECONDS"`
 }
 
 type Database struct {
-	Type     string
-	Username string
-	Password string
-	Hostname string
-	Port     string
-	Schema   string
+	Type     string `envconfig:"GO_REST_EXAMPLE_DATABASE_TYPE"`
+	Username string `envconfig:"GO_REST_EXAMPLE_DATABASE_USERNAME"`
+	Password string `envconfig:"GO_REST_EXAMPLE_DATABASE_PASSWORD"`
+	Hostname string `envconfig:"GO_REST_EXAMPLE_DATABASE_HOSTNAME"`
+	Port     string `envconfig:"GO_REST_EXAMPLE_DATABASE_PORT"`
+	Schema   string `envconfig:"GO_REST_EXAMPLE_DATABASE_SCHEMA"`
 
-	Purge   bool
-	Debug   bool
-	Destroy bool
+	Purge   bool `envconfig:"GO_REST_EXAMPLE_DATABASE_PURGE"`
+	Debug   bool `envconfig:"GO_REST_EXAMPLE_DATABASE_DEBUG"`
+	Destroy bool `envconfig:"GO_REST_EXAMPLE_DATABASE_DESTROY"`
 }
 
 func (config *Database) GetConnectionString() string {
@@ -37,13 +37,13 @@ func (config *Database) GetConnectionString() string {
 }
 
 type JWT struct {
-	Secret              string
-	SessionDurationDays int
-	HashSalt            string
+	Secret              string `envconfig:"GO_REST_EXAMPLE_JWT_SECRET"`
+	SessionDurationDays int    `envconfig:"GO_REST_EXAMPLE_JWT_SESSION_DURATION_DAYS"`
+	HashSalt            string `envconfig:"GO_REST_EXAMPLE_JWT_HASH_SALT"`
 }
 
 type Monitoring struct {
-	Enabled bool
-	AppName string
-	Secret  string
+	Enabled bool   `envconfig:"GO_REST_EXAMPLE_MONITORING_ENABLED"`
+	AppName string `envconfig:"GO_REST_EXAMPLE_MONITORING_APP_NAME"`
+	Secret  string `envconfig:"GO_REST_EXAMPLE_MONITORING_SECRET"`
 }

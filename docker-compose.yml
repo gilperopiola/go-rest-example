@@ -25,6 +25,8 @@ services:
       - GO_REST_EXAMPLE_DATABASE_SCHEMA=go-rest-example-db
     env_file:
       - .env
+    working_dir: /app
 
 volumes:
   db_data:
+

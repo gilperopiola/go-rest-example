@@ -9,6 +9,8 @@ require (
 	github.com/go-sql-driver/mysql v1.7.1
 	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/jinzhu/gorm v1.9.16
+	github.com/joho/godotenv v1.5.1
+	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/newrelic/go-agent/v3 v3.26.0
 	github.com/newrelic/go-agent/v3/integrations/nrgin v1.2.1
 	github.com/sirupsen/logrus v1.9.3
