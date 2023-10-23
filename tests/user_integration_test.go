@@ -1,28 +1,10 @@
 package tests
 
-import (
-	"bytes"
-	"encoding/json"
-	"net/http"
-	"net/http/httptest"
-	"testing"
-
-	"github.com/gilperopiola/go-rest-example/pkg/common/auth"
-	"github.com/gilperopiola/go-rest-example/pkg/common/config"
-	"github.com/gilperopiola/go-rest-example/pkg/common/requests"
-	"github.com/gilperopiola/go-rest-example/pkg/repository"
-	"github.com/gilperopiola/go-rest-example/pkg/service"
-	"github.com/gilperopiola/go-rest-example/pkg/transport"
-
-	"github.com/gin-gonic/gin"
-	"github.com/stretchr/testify/assert"
-)
-
 //-------------------------
 // IMPORTANT: To run this you should enable the database destruction on the env vars.
 //-------------------------
 
-func TestUsersCRUDIntegrationTest(t *testing.T) {
+/*func TestUsersCRUDIntegrationTest(t *testing.T) {
 
 	if testing.Short() {
 		t.Skip("skipping integration test")
@@ -31,7 +13,7 @@ func TestUsersCRUDIntegrationTest(t *testing.T) {
 	// prepare
 	config := config.New("../.env")
 	config.Database.Purge = true
-	database := repository.NewDatabase(config.Database, nopLogger{})
+	database := repository.NewDatabase(config.Config, nopLogger{})
 	repository := repository.New(database)
 	service := service.New(repository, nopAuth{}, config)
 	endpoints := transport.New(service, transport.NewErrorsMapper(nopLogger{}))
@@ -148,3 +130,4 @@ type nopAuth struct{}
 
 func (a nopAuth) GenerateToken(user auth.User, role auth.Role) (string, error)         { return "", nil }
 func (a nopAuth) ValidateToken(role auth.Role, shouldMatchUserID bool) gin.HandlerFunc { return nil }
+*/

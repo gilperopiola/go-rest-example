@@ -47,7 +47,7 @@ func main() {
 		auth = auth.NewAuth(config.JWT.Secret, config.JWT.SessionDurationDays)
 
 		// Establish database connection
-		database = repository.NewDatabase(config.Database, logger)
+		database = repository.NewDatabase(*config, logger)
 
 		// Initialize repository layer with the database connection
 		repository = repository.New(database)

@@ -19,6 +19,9 @@ type Database struct {
 	Purge   bool `envconfig:"GO_REST_EXAMPLE_DATABASE_PURGE"`
 	Debug   bool `envconfig:"GO_REST_EXAMPLE_DATABASE_DEBUG"`
 	Destroy bool `envconfig:"GO_REST_EXAMPLE_DATABASE_DESTROY"`
+
+	AdminInsert   bool   `envconfig:"GO_REST_EXAMPLE_DATABASE_ADMIN_INSERT"`
+	AdminPassword string `envconfig:"GO_REST_EXAMPLE_DATABASE_ADMIN_PASSWORD"`
 }
 
 func (config *Database) GetConnectionString() string {

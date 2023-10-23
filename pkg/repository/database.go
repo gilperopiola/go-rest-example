@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/gilperopiola/go-rest-example/pkg/common"
 	"github.com/gilperopiola/go-rest-example/pkg/common/config"
 	"github.com/gilperopiola/go-rest-example/pkg/common/middleware"
 	"github.com/gilperopiola/go-rest-example/pkg/common/models"
@@ -36,7 +37,7 @@ type DB interface {
 	DropTable(values ...interface{}) *gorm.DB
 }
 
-func NewDatabase(config config.Database, logger middleware.LoggerI) database {
+func NewDatabase(config config.Config, logger middleware.LoggerI) database {
 	var database database
 	database.setup(config, logger)
 	return database
@@ -51,7 +52,7 @@ func (database *database) DB() DB {
 	return database.db
 }
 
-func (database *database) setup(config config.Database, logger middleware.LoggerI) {
+func (database *database) setup(config config.Config, logger middleware.LoggerI) {
 
 	// Create connection. It's deferred closed in main.go.
 	// Retry connection if it fails due to Docker's orchestration.
@@ -71,13 +72,14 @@ func (database *database) Close() {
 	database.db.Close()
 }
 
-func (database *database) connectToDB(config config.Database, logger middleware.LoggerI) error {
+func (database *database) connectToDB(config config.Config, logger middleware.LoggerI) error {
 	var err error
 	retries := 0
+	dbConfig := config.Database
 
 	// Retry connection if it fails due to Docker's orchestration
 	for retries < maxRetries {
-		if database.db, err = gorm.Open(config.Type, config.GetConnectionString()); err != nil {
+		if database.db, err = gorm.Open(dbConfig.Type, dbConfig.GetConnectionString()); err != nil {
 			retries++
 			if retries == maxRetries {
 				return fmt.Errorf("error connecting to database after %d retries: %v", maxRetries, err)
@@ -91,7 +93,8 @@ func (database *database) connectToDB(config config.Database, logger middleware.
 	return nil
 }
 
-func (database *database) configure(config config.Database) {
+func (database *database) configure(config config.Config) {
+	dbConfig := config.Database
 
 	// Set connection pool limits
 	database.db.DB().SetMaxIdleConns(10)
@@ -99,16 +102,16 @@ func (database *database) configure(config config.Database) {
 	database.db.DB().SetConnMaxLifetime(time.Hour)
 
 	// Log queries if debug = true
-	if config.Debug {
+	if dbConfig.Debug {
 		database.db.LogMode(true)
 	}
 
 	// Destroy or clean tables
-	if config.Destroy {
+	if dbConfig.Destroy {
 		database.db.DropTable(&models.User{})
 		database.db.DropTable(&models.UserDetail{})
 		database.db.DropTable(&models.UserPost{})
-	} else if config.Purge {
+	} else if dbConfig.Purge {
 		database.db.Delete(models.User{})
 		database.db.Delete(models.UserDetail{})
 		database.db.Delete(models.UserPost{})
@@ -116,4 +119,15 @@ func (database *database) configure(config config.Database) {
 
 	// AutoMigrate fields
 	database.db.AutoMigrate(models.AllModels...)
+
+	// Insert admin user
+	if dbConfig.AdminInsert {
+		adminUserModel := models.User{
+			Username: "admin", Email: "ferra.main@gmail.com", IsAdmin: true,
+			Password: common.Hash(dbConfig.AdminPassword, config.JWT.HashSalt),
+		}
+		if err := database.DB().Create(&adminUserModel).Error; err != nil {
+			fmt.Printf(err.Error())
+		}
+	}
 }
