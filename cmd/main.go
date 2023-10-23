@@ -14,7 +14,6 @@ import (
 // TODO
 // - Redis
 // - More tests
-// - Add postman collection
 // - Add swagger docs
 // - pprof -> check goroutine leaks
 // - Add another model (user 1-n)
@@ -22,8 +21,6 @@ import (
 // - change password
 // - reset password
 // - roles to DB
-// - List users ep
-// - api versioning
 // - prometheus
 
 func main() {

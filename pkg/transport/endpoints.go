@@ -32,32 +32,41 @@ import (
 //      ROUTES / ENDPOINTS
 //-----------------------------
 
-func (router *router) setPublicEndpoints(transport TransportLayer) {
-	public := router.Group("/")
-	{
-		public.GET("/health", healthCheck)
+func (router *router) setEndpoints(transport TransportLayer, authI auth.AuthI) {
+	router.GET("/health", healthCheck)
 
-		public.POST("/signup", transport.Signup)
-		public.POST("/login", transport.Login)
+	v1 := router.Group("/v1")
+	{
+		router.setV1Endpoints(v1, transport, authI)
 	}
 }
 
-func (router *router) setUserEndpoints(transport TransportLayer, authI auth.AuthI) {
-	users := router.Group("/users", authI.ValidateToken(auth.AnyRole, true))
+func healthCheck(c *gin.Context) {
+	c.JSON(200, gin.H{"status": "API is up and running :)"})
+}
+
+func (router *router) setV1Endpoints(v1 *gin.RouterGroup, transport TransportLayer, authI auth.AuthI) {
+
+	// Auth
+	v1.POST("/signup", transport.Signup)
+	v1.POST("/login", transport.Login)
+
+	// Users
+	users := v1.Group("/users", authI.ValidateToken(auth.AnyRole, true))
 	{
 		users.GET("/:user_id", transport.GetUser)
 		users.PATCH("/:user_id", transport.UpdateUser)
 		users.DELETE("/:user_id", transport.DeleteUser)
+
+		// User posts
+		posts := users.Group("/:user_id/posts")
+		{
+			posts.POST("", transport.CreateUserPost)
+		}
 	}
 
-	posts := users.Group("/:user_id/posts")
-	{
-		posts.POST("", transport.CreateUserPost)
-	}
-}
-
-func (router *router) setAdminEndpoints(transport TransportLayer, authI auth.AuthI) {
-	admin := router.Group("/admin", authI.ValidateToken(auth.AdminRole, false))
+	// Admin endpoints
+	admin := v1.Group("/admin", authI.ValidateToken(auth.AdminRole, false))
 	{
 		admin.POST("/user", transport.CreateUser)
 		admin.GET("/users", transport.SearchUsers)
@@ -106,12 +115,4 @@ func (t transport) SearchUsers(c *gin.Context) {
 
 func (t transport) CreateUserPost(c *gin.Context) {
 	HandleRequest(t, c, requests.MakeCreateUserPostRequest, t.Service().CreateUserPost)
-}
-
-//-------------------
-//       MISC
-//-------------------
-
-func healthCheck(c *gin.Context) {
-	c.JSON(200, gin.H{"status": "API is up and running :)"})
 }

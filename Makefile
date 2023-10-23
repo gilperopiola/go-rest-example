@@ -8,5 +8,5 @@ run-local:
 	go run cmd/main.go
 
 test:
-	go test ./... -short
+	go test ./... -short -cover -race
 

@@ -32,9 +32,7 @@ func (router *router) Setup(t TransportLayer, cfg config.General, auth auth.Auth
 	}
 
 	// Set endpoints
-	router.setPublicEndpoints(t)
-	router.setUserEndpoints(t, auth)
-	router.setAdminEndpoints(t, auth)
+	router.setEndpoints(t, auth)
 }
 
 func (router *router) prepare(isProd bool) {
