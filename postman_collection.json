@@ -1,0 +1,2145 @@
+{
+	"info": {
+		"_postman_id": "d7bbd1d3-991a-4b47-8674-dfef1f0f05a1",
+		"name": "go-rest-example",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "5310198",
+		"_collection_link": "https://warped-escape-42133.postman.co/workspace/NotSpoton~8743d5aa-98de-435e-839b-e4188f191c81/collection/5310198-d7bbd1d3-991a-4b47-8674-dfef1f0f05a1?action=share&source=collection_link&creator=5310198"
+	},
+	"item": [
+		{
+			"name": "Test Run - Happy Path",
+			"item": [
+				{
+					"name": "TR - Signup Random User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Assert status",
+									"utils.assert_status(200);",
+									"",
+									"// Get JSON response",
+									"const jsonData = pm.response.json();",
+									"",
+									"// Check fields",
+									"pm.expect(jsonData.content.user.id).not.eq(undefined);",
+									"pm.expect(jsonData.content.user.username).not.eq(undefined);",
+									"pm.expect(jsonData.content.user.email).not.eq(undefined);",
+									"pm.expect(jsonData.content.user.details.first_name).eq(\"Franco\");",
+									"pm.expect(jsonData.content.user.details.last_name).eq(\"Ferraguti\");",
+									"",
+									"// Set ID as environment variable",
+									"postman.setEnvironmentVariable(\"id\", jsonData.content.user.id);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"let randomIdentifier = utils.generateRandomString(8)",
+									"",
+									"let email = \"user_\" + randomIdentifier + \"@gmail.com\"",
+									"let username = \"user_\" + randomIdentifier",
+									"let password = \"password\"",
+									"",
+									"postman.setEnvironmentVariable(\"email\", email);",
+									"postman.setEnvironmentVariable(\"username\", username);",
+									"postman.setEnvironmentVariable(\"password\", password);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"{{email}}\",\r\n    \"username\": \"{{username}}\",\r\n    \"password\": \"{{password}}\",\r\n    \"repeat_password\": \"{{password}}\",\r\n    \"first_name\": \"Franco\",\r\n    \"last_name\": \"Ferraguti\"\r\n}"
+						},
+						"url": {
+							"raw": "localhost:8040/signup",
+							"host": [
+								"localhost"
+							],
+							"port": "8040",
+							"path": [
+								"signup"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TR - Login User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Assert status",
+									"utils.assert_status(200);",
+									"",
+									"// Get JWT Token",
+									"const jsonData = pm.response.json();",
+									"postman.setEnvironmentVariable(\"jwt_token\", \"Bearer \" + jsonData.content.token);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username_or_email\": \"{{username}}\",\r\n    \"password\": \"{{password}}\"\r\n}"
+						},
+						"url": {
+							"raw": "localhost:8040/login",
+							"host": [
+								"localhost"
+							],
+							"port": "8040",
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TR - Get My User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Assert status",
+									"utils.assert_status(200);",
+									"",
+									"// Get JSON response",
+									"const jsonData = pm.response.json();",
+									"",
+									"// Check fields",
+									"pm.expect(jsonData.content.user.details.first_name).eq(\"Franco\");",
+									"pm.expect(jsonData.content.user.details.last_name).eq(\"Ferraguti\");",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "localhost:8040/users/{{id}}",
+							"host": [
+								"localhost"
+							],
+							"port": "8040",
+							"path": [
+								"users",
+								"{{id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TR - Update My User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Assert status",
+									"utils.assert_status(200);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"{{username}}_updated\",\r\n    \"first_name\": \"\"\r\n}"
+						},
+						"url": {
+							"raw": "localhost:8040/users/{{id}}",
+							"host": [
+								"localhost"
+							],
+							"port": "8040",
+							"path": [
+								"users",
+								"{{id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TR - Get Updated User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Assert status",
+									"utils.assert_status(200);",
+									"",
+									"// Get JSON response",
+									"const jsonData = pm.response.json();",
+									"",
+									"// Check fields",
+									"pm.expect(jsonData.content.user.details.first_name).eq(undefined);",
+									"pm.expect(jsonData.content.user.details.last_name).eq(\"Ferraguti\");",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "localhost:8040/users/{{id}}",
+							"host": [
+								"localhost"
+							],
+							"port": "8040",
+							"path": [
+								"users",
+								"{{id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TR - Create User Post",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Assert status",
+									"utils.assert_status(200);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\": \"title\",\r\n    \"body\": \"body\"\r\n}"
+						},
+						"url": {
+							"raw": "localhost:8040/users/{{id}}/posts",
+							"host": [
+								"localhost"
+							],
+							"port": "8040",
+							"path": [
+								"users",
+								"{{id}}",
+								"posts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TR - Delete My User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Assert status",
+									"utils.assert_status(200);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "localhost:8040/users/{{id}}",
+							"host": [
+								"localhost"
+							],
+							"port": "8040",
+							"path": [
+								"users",
+								"{{id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TR - Get Deleted User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Assert status",
+									"utils.assert_status(404);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "localhost:8040/users/{{id}}",
+							"host": [
+								"localhost"
+							],
+							"port": "8040",
+							"path": [
+								"users",
+								"{{id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"utils = {",
+							"    generateRandomString: function (length){",
+							"        const characters = 'abcdef';",
+							"        let result = '';",
+							"        for (let i = 0; i < length; i++) {",
+							"            result += characters.charAt(Math.floor(Math.random() * characters.length));",
+							"        }",
+							"        return result;",
+							"    }",
+							"}",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"utils = {",
+							"    assert_status: function (code){",
+							"        pm.test(\"Status code\", () => {",
+							"            pm.response.to.have.status(code);",
+							"        });",
+							"    }",
+							"}",
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Test Run - Signup Errors",
+			"item": [
+				{
+					"name": "TR - Signup Random User",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"let randomIdentifier = utils.generateRandomString(8)",
+									"",
+									"let email = \"user_\" + randomIdentifier + \"@gmail.com\"",
+									"let username = \"user_\" + randomIdentifier",
+									"let password = \"password\"",
+									"",
+									"postman.setEnvironmentVariable(\"email\", email);",
+									"postman.setEnvironmentVariable(\"username\", username);",
+									"postman.setEnvironmentVariable(\"password\", password);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Assert status",
+									"utils.assert_status(200);",
+									"",
+									"// Get User ID",
+									"const jsonData = pm.response.json();",
+									"postman.setEnvironmentVariable(\"id\", jsonData.content.user.id);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"{{email}}\",\r\n    \"username\": \"{{username}}\",\r\n    \"password\": \"{{password}}\",\r\n    \"repeat_password\": \"{{password}}\"\r\n}"
+						},
+						"url": {
+							"raw": "localhost:8040/signup",
+							"host": [
+								"localhost"
+							],
+							"port": "8040",
+							"path": [
+								"signup"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TR - Signup Error Existing Username",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Assert status",
+									"utils.assert_status(409);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"different_{{email}}\",\r\n    \"username\": \"{{username}}\",\r\n    \"password\": \"{{password}}\",\r\n    \"repeat_password\": \"{{password}}\"\r\n}"
+						},
+						"url": {
+							"raw": "localhost:8040/signup",
+							"host": [
+								"localhost"
+							],
+							"port": "8040",
+							"path": [
+								"signup"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TR - Signup Error Existing Email",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Assert status",
+									"utils.assert_status(409);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"{{email}}\",\r\n    \"username\": \"different_{{username}}\",\r\n    \"password\": \"{{password}}\",\r\n    \"repeat_password\": \"{{password}}\"\r\n}"
+						},
+						"url": {
+							"raw": "localhost:8040/signup",
+							"host": [
+								"localhost"
+							],
+							"port": "8040",
+							"path": [
+								"signup"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TR - Signup Error Empty Fields",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Assert status",
+									"utils.assert_status(400);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"\",\r\n    \"username\": \"\",\r\n    \"password\": \"\",\r\n    \"repeat_password\": \"\"\r\n}"
+						},
+						"url": {
+							"raw": "localhost:8040/signup",
+							"host": [
+								"localhost"
+							],
+							"port": "8040",
+							"path": [
+								"signup"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TR - Signup Error Missing Fields",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Assert status",
+									"utils.assert_status(400);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "localhost:8040/signup",
+							"host": [
+								"localhost"
+							],
+							"port": "8040",
+							"path": [
+								"signup"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"utils = {",
+							"    generateRandomString: function (length){",
+							"        const characters = 'abcdef';",
+							"        let result = '';",
+							"        for (let i = 0; i < length; i++) {",
+							"            result += characters.charAt(Math.floor(Math.random() * characters.length));",
+							"        }",
+							"        return result;",
+							"    }",
+							"}",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"utils = {",
+							"    assert_status: function (code){",
+							"        pm.test(\"Status code\", () => {",
+							"            pm.response.to.have.status(code);",
+							"        });",
+							"    }",
+							"}",
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Test Run - Login Errors",
+			"item": [
+				{
+					"name": "TR - Signup Random User",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"let randomIdentifier = utils.generateRandomString(8)",
+									"",
+									"let email = \"user_\" + randomIdentifier + \"@gmail.com\"",
+									"let username = \"user_\" + randomIdentifier",
+									"let password = \"password\"",
+									"",
+									"postman.setEnvironmentVariable(\"email\", email);",
+									"postman.setEnvironmentVariable(\"username\", username);",
+									"postman.setEnvironmentVariable(\"password\", password);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Assert status",
+									"utils.assert_status(200);",
+									"",
+									"// Get User ID",
+									"const jsonData = pm.response.json();",
+									"postman.setEnvironmentVariable(\"id\", jsonData.content.user.id);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"{{email}}\",\r\n    \"username\": \"{{username}}\",\r\n    \"password\": \"{{password}}\",\r\n    \"repeat_password\": \"{{password}}\"\r\n}"
+						},
+						"url": {
+							"raw": "localhost:8040/signup",
+							"host": [
+								"localhost"
+							],
+							"port": "8040",
+							"path": [
+								"signup"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TR - Login Wrong Username",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Assert status",
+									"utils.assert_status(404);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username_or_email\": \"invalid_{{username}}\",\r\n    \"password\": \"{{password}}\"\r\n}"
+						},
+						"url": {
+							"raw": "localhost:8040/login",
+							"host": [
+								"localhost"
+							],
+							"port": "8040",
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TR - Login Wrong Password",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Assert status",
+									"utils.assert_status(401);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username_or_email\": \"{{username}}\",\r\n    \"password\": \"invalid_{{password}}\"\r\n}"
+						},
+						"url": {
+							"raw": "localhost:8040/login",
+							"host": [
+								"localhost"
+							],
+							"port": "8040",
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TR - Login Empty Fields",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Assert status",
+									"utils.assert_status(400);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username_or_email\": \"\",\r\n    \"password\": \"\"\r\n}"
+						},
+						"url": {
+							"raw": "localhost:8040/login",
+							"host": [
+								"localhost"
+							],
+							"port": "8040",
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TR - Login Missing Fields",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Assert status",
+									"utils.assert_status(400);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "localhost:8040/login",
+							"host": [
+								"localhost"
+							],
+							"port": "8040",
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"utils = {",
+							"    generateRandomString: function (length){",
+							"        const characters = 'abcdef';",
+							"        let result = '';",
+							"        for (let i = 0; i < length; i++) {",
+							"            result += characters.charAt(Math.floor(Math.random() * characters.length));",
+							"        }",
+							"        return result;",
+							"    }",
+							"}",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"utils = {",
+							"    assert_status: function (code){",
+							"        pm.test(\"Status code\", () => {",
+							"            pm.response.to.have.status(code);",
+							"        });",
+							"    }",
+							"}",
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Test Run - Get User Errors",
+			"item": [
+				{
+					"name": "TR - Signup Random User",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"let randomIdentifier = utils.generateRandomString(8)",
+									"",
+									"let email = \"user_\" + randomIdentifier + \"@gmail.com\"",
+									"let username = \"user_\" + randomIdentifier",
+									"let password = \"password\"",
+									"",
+									"postman.setEnvironmentVariable(\"email\", email);",
+									"postman.setEnvironmentVariable(\"username\", username);",
+									"postman.setEnvironmentVariable(\"password\", password);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Assert status",
+									"utils.assert_status(200);",
+									"",
+									"// Get User ID",
+									"const jsonData = pm.response.json();",
+									"postman.setEnvironmentVariable(\"id\", jsonData.content.user.id);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"{{email}}\",\r\n    \"username\": \"{{username}}\",\r\n    \"password\": \"{{password}}\",\r\n    \"repeat_password\": \"{{password}}\"\r\n}"
+						},
+						"url": {
+							"raw": "localhost:8040/signup",
+							"host": [
+								"localhost"
+							],
+							"port": "8040",
+							"path": [
+								"signup"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TR - Login User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Assert status",
+									"utils.assert_status(200);",
+									"",
+									"// Get JWT Token",
+									"const jsonData = pm.response.json();",
+									"postman.setEnvironmentVariable(\"jwt_token\", \"Bearer \" + jsonData.content.token);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username_or_email\": \"{{username}}\",\r\n    \"password\": \"{{password}}\"\r\n}"
+						},
+						"url": {
+							"raw": "localhost:8040/login",
+							"host": [
+								"localhost"
+							],
+							"port": "8040",
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TR - Get Wrong User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Assert status",
+									"utils.assert_status(401);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "localhost:8040/users/9999999",
+							"host": [
+								"localhost"
+							],
+							"port": "8040",
+							"path": [
+								"users",
+								"9999999"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TR - Delete User (Aux)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Assert status",
+									"utils.assert_status(200);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "localhost:8040/users/{{id}}",
+							"host": [
+								"localhost"
+							],
+							"port": "8040",
+							"path": [
+								"users",
+								"{{id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TR - Get Deleted User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Assert status",
+									"utils.assert_status(404);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "localhost:8040/users/{{id}}",
+							"host": [
+								"localhost"
+							],
+							"port": "8040",
+							"path": [
+								"users",
+								"{{id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"utils = {",
+							"    generateRandomString: function (length){",
+							"        const characters = 'abcdef';",
+							"        let result = '';",
+							"        for (let i = 0; i < length; i++) {",
+							"            result += characters.charAt(Math.floor(Math.random() * characters.length));",
+							"        }",
+							"        return result;",
+							"    }",
+							"}",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"utils = {",
+							"    assert_status: function (code){",
+							"        pm.test(\"Status code\", () => {",
+							"            pm.response.to.have.status(code);",
+							"        });",
+							"    }",
+							"}",
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Test Run - Update User Errors",
+			"item": [
+				{
+					"name": "TR - Signup Fixed User",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"fixed@gmail.com\",\r\n    \"username\": \"fixed\",\r\n    \"password\": \"password\",\r\n    \"repeat_password\": \"password\"\r\n}"
+						},
+						"url": {
+							"raw": "localhost:8040/signup",
+							"host": [
+								"localhost"
+							],
+							"port": "8040",
+							"path": [
+								"signup"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TR - Signup Random User",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"let randomIdentifier = utils.generateRandomString(8)",
+									"",
+									"let email = \"user_\" + randomIdentifier + \"@gmail.com\"",
+									"let username = \"user_\" + randomIdentifier",
+									"let password = \"password\"",
+									"",
+									"postman.setEnvironmentVariable(\"email\", email);",
+									"postman.setEnvironmentVariable(\"username\", username);",
+									"postman.setEnvironmentVariable(\"password\", password);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Assert status",
+									"utils.assert_status(200);",
+									"",
+									"// Get User ID",
+									"const jsonData = pm.response.json();",
+									"postman.setEnvironmentVariable(\"id\", jsonData.content.user.id);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"{{email}}\",\r\n    \"username\": \"{{username}}\",\r\n    \"password\": \"{{password}}\",\r\n    \"repeat_password\": \"{{password}}\"\r\n}"
+						},
+						"url": {
+							"raw": "localhost:8040/signup",
+							"host": [
+								"localhost"
+							],
+							"port": "8040",
+							"path": [
+								"signup"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TR - Login User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Assert status",
+									"utils.assert_status(200);",
+									"",
+									"// Get JWT Token",
+									"const jsonData = pm.response.json();",
+									"postman.setEnvironmentVariable(\"jwt_token\", \"Bearer \" + jsonData.content.token);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username_or_email\": \"{{username}}\",\r\n    \"password\": \"{{password}}\"\r\n}"
+						},
+						"url": {
+							"raw": "localhost:8040/login",
+							"host": [
+								"localhost"
+							],
+							"port": "8040",
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TR - Update Wrong User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Assert status",
+									"utils.assert_status(401);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"{{username}}_updated\"\r\n}"
+						},
+						"url": {
+							"raw": "localhost:8040/users/9999999",
+							"host": [
+								"localhost"
+							],
+							"port": "8040",
+							"path": [
+								"users",
+								"9999999"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TR - Update Existing Username",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Assert status",
+									"utils.assert_status(409);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"fixed\"\r\n}"
+						},
+						"url": {
+							"raw": "localhost:8040/users/{{id}}",
+							"host": [
+								"localhost"
+							],
+							"port": "8040",
+							"path": [
+								"users",
+								"{{id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TR - Update Existing Email",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Assert status",
+									"utils.assert_status(409);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"fixed@gmail.com\"\r\n}"
+						},
+						"url": {
+							"raw": "localhost:8040/users/{{id}}",
+							"host": [
+								"localhost"
+							],
+							"port": "8040",
+							"path": [
+								"users",
+								"{{id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TR - Update Empty Fields",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Assert status",
+									"utils.assert_status(400);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"\",\r\n    \"email\": \"\"\r\n}"
+						},
+						"url": {
+							"raw": "localhost:8040/users/{{id}}",
+							"host": [
+								"localhost"
+							],
+							"port": "8040",
+							"path": [
+								"users",
+								"{{id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TR - Update Missing Fields",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Assert status",
+									"utils.assert_status(400);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "localhost:8040/users/{{id}}",
+							"host": [
+								"localhost"
+							],
+							"port": "8040",
+							"path": [
+								"users",
+								"{{id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"utils = {",
+							"    generateRandomString: function (length){",
+							"        const characters = 'abcdef';",
+							"        let result = '';",
+							"        for (let i = 0; i < length; i++) {",
+							"            result += characters.charAt(Math.floor(Math.random() * characters.length));",
+							"        }",
+							"        return result;",
+							"    }",
+							"}",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"utils = {",
+							"    assert_status: function (code){",
+							"        pm.test(\"Status code\", () => {",
+							"            pm.response.to.have.status(code);",
+							"        });",
+							"    }",
+							"}",
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Test Run - Delete User Errors",
+			"item": [
+				{
+					"name": "TR - Signup Random User",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"let randomIdentifier = utils.generateRandomString(8)",
+									"",
+									"let email = \"user_\" + randomIdentifier + \"@gmail.com\"",
+									"let username = \"user_\" + randomIdentifier",
+									"let password = \"password\"",
+									"",
+									"postman.setEnvironmentVariable(\"email\", email);",
+									"postman.setEnvironmentVariable(\"username\", username);",
+									"postman.setEnvironmentVariable(\"password\", password);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Assert status",
+									"utils.assert_status(200);",
+									"",
+									"// Get User ID",
+									"const jsonData = pm.response.json();",
+									"postman.setEnvironmentVariable(\"id\", jsonData.content.user.id);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"{{email}}\",\r\n    \"username\": \"{{username}}\",\r\n    \"password\": \"{{password}}\",\r\n    \"repeat_password\": \"{{password}}\"\r\n}"
+						},
+						"url": {
+							"raw": "localhost:8040/signup",
+							"host": [
+								"localhost"
+							],
+							"port": "8040",
+							"path": [
+								"signup"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TR - Login User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Assert status",
+									"utils.assert_status(200);",
+									"",
+									"// Get JWT Token",
+									"const jsonData = pm.response.json();",
+									"postman.setEnvironmentVariable(\"jwt_token\", \"Bearer \" + jsonData.content.token);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username_or_email\": \"{{username}}\",\r\n    \"password\": \"{{password}}\"\r\n}"
+						},
+						"url": {
+							"raw": "localhost:8040/login",
+							"host": [
+								"localhost"
+							],
+							"port": "8040",
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TR - Delete Wrong User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Assert status",
+									"utils.assert_status(401);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "localhost:8040/users/9999999",
+							"host": [
+								"localhost"
+							],
+							"port": "8040",
+							"path": [
+								"users",
+								"9999999"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TR - Delete My User (Aux)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Assert status",
+									"utils.assert_status(200);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "localhost:8040/users/{{id}}",
+							"host": [
+								"localhost"
+							],
+							"port": "8040",
+							"path": [
+								"users",
+								"{{id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "TR - Delete Deleted User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Assert status",
+									"utils.assert_status(404);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "localhost:8040/users/{{id}}",
+							"host": [
+								"localhost"
+							],
+							"port": "8040",
+							"path": [
+								"users",
+								"{{id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"utils = {",
+							"    generateRandomString: function (length){",
+							"        const characters = 'abcdef';",
+							"        let result = '';",
+							"        for (let i = 0; i < length; i++) {",
+							"            result += characters.charAt(Math.floor(Math.random() * characters.length));",
+							"        }",
+							"        return result;",
+							"    }",
+							"}",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"utils = {",
+							"    assert_status: function (code){",
+							"        pm.test(\"Status code\", () => {",
+							"            pm.response.to.have.status(code);",
+							"        });",
+							"    }",
+							"}",
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Test Run - Create User (Admin)",
+			"item": [
+				{
+					"name": "Admin - Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Assert status",
+									"utils.assert_status(200);",
+									"",
+									"// Get JWT Token",
+									"const jsonData = pm.response.json();",
+									"postman.setEnvironmentVariable(\"admin_jwt_token\", \"Bearer \" + jsonData.content.token);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username_or_email\": \"admin\",\r\n    \"password\": \"p4ssw0rd\"\r\n}"
+						},
+						"url": {
+							"raw": "localhost:8040/login",
+							"host": [
+								"localhost"
+							],
+							"port": "8040",
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Admin - Create User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"utils.assert_status(200);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"let randomIdentifier = utils.generateRandomString(8)",
+									"",
+									"let email = \"user_\" + randomIdentifier + \"@gmail.com\"",
+									"let username = \"user_\" + randomIdentifier",
+									"let password = \"password\"",
+									"",
+									"postman.setEnvironmentVariable(\"email\", email);",
+									"postman.setEnvironmentVariable(\"username\", username);",
+									"postman.setEnvironmentVariable(\"password\", password);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{admin_jwt_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"{{email}}\",\r\n    \"username\": \"{{username}}\",\r\n    \"password\": \"{{password}}\",\r\n    \"is_admin\": false\r\n}"
+						},
+						"url": {
+							"raw": "localhost:8040/admin/user",
+							"host": [
+								"localhost"
+							],
+							"port": "8040",
+							"path": [
+								"admin",
+								"user"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"utils = {",
+							"    generateRandomString: function (length){",
+							"        const characters = 'abcdef';",
+							"        let result = '';",
+							"        for (let i = 0; i < length; i++) {",
+							"            result += characters.charAt(Math.floor(Math.random() * characters.length));",
+							"        }",
+							"        return result;",
+							"    }",
+							"}",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"utils = {",
+							"    assert_status: function (code){",
+							"        pm.test(\"Status code\", () => {",
+							"            pm.response.to.have.status(code);",
+							"        });",
+							"    }",
+							"}"
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Test Run - Search Users (Admin)",
+			"item": [
+				{
+					"name": "Admin - Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Assert status",
+									"utils.assert_status(200);",
+									"",
+									"// Get JWT Token",
+									"const jsonData = pm.response.json();",
+									"postman.setEnvironmentVariable(\"admin_jwt_token\", \"Bearer \" + jsonData.content.token);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username_or_email\": \"admin\",\r\n    \"password\": \"p4ssw0rd\"\r\n}"
+						},
+						"url": {
+							"raw": "localhost:8040/login",
+							"host": [
+								"localhost"
+							],
+							"port": "8040",
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Admin - Search Users",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"utils.assert_status(200);",
+									"",
+									"const jsonData = pm.response.json();",
+									"pm.expect(jsonData.content.users.length).above(0);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{admin_jwt_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "localhost:8040/admin/users?page=0&per_page=10&username=",
+							"host": [
+								"localhost"
+							],
+							"port": "8040",
+							"path": [
+								"admin",
+								"users"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "per_page",
+									"value": "10"
+								},
+								{
+									"key": "username",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"utils = {",
+							"    generateRandomString: function (length){",
+							"        const characters = 'abcdef';",
+							"        let result = '';",
+							"        for (let i = 0; i < length; i++) {",
+							"            result += characters.charAt(Math.floor(Math.random() * characters.length));",
+							"        }",
+							"        return result;",
+							"    }",
+							"}",
+							"",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"utils = {",
+							"    assert_status: function (code){",
+							"        pm.test(\"Status code\", () => {",
+							"            pm.response.to.have.status(code);",
+							"        });",
+							"    }",
+							"}"
+						]
+					}
+				}
+			]
+		}
+	]
+}
