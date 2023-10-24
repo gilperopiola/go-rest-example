@@ -10,11 +10,10 @@ import (
 	"github.com/gilperopiola/go-rest-example/pkg/repository"
 	"github.com/gilperopiola/go-rest-example/pkg/service"
 	"github.com/gilperopiola/go-rest-example/pkg/transport"
-
-	_ "net/http/pprof"
 )
 
 // TODO
+// - NewRelic lo instancio por request
 // - Redis
 // - More tests
 // - Add swagger docs

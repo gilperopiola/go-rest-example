@@ -49,7 +49,6 @@ func NewPrometheusMiddleware(metrics *metrics.Metrics) gin.HandlerFunc {
 		status := fmt.Sprint(c.Writer.Status())
 
 		metrics.RequestsTotal.WithLabelValues(c.Request.Method, c.Request.URL.Path, status).Inc()
-		c.Next()
 	}
 }
 
