@@ -3,6 +3,9 @@ package transport
 import (
 	"github.com/gilperopiola/go-rest-example/pkg/common/auth"
 	"github.com/gilperopiola/go-rest-example/pkg/common/requests"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+
+	"net/http/pprof"
 
 	"github.com/gin-gonic/gin"
 )
@@ -34,10 +37,27 @@ import (
 
 func (router *router) setEndpoints(transport TransportLayer, authI auth.AuthI) {
 	router.GET("/health", healthCheck)
+	router.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
 	v1 := router.Group("/v1")
 	{
 		router.setV1Endpoints(v1, transport, authI)
+	}
+
+	pprofGroup := router.Group("/debug/pprof")
+	{
+		pprofGroup.GET("/", gin.WrapF(pprof.Index))
+		pprofGroup.GET("/cmdline", gin.WrapF(pprof.Cmdline))
+		pprofGroup.GET("/profile", gin.WrapF(pprof.Profile))
+		pprofGroup.POST("/symbol", gin.WrapF(pprof.Symbol))
+		pprofGroup.GET("/symbol", gin.WrapF(pprof.Symbol))
+		pprofGroup.GET("/trace", gin.WrapF(pprof.Trace))
+		pprofGroup.GET("/allocs", gin.WrapF(pprof.Handler("allocs").ServeHTTP))
+		pprofGroup.GET("/block", gin.WrapF(pprof.Handler("block").ServeHTTP))
+		pprofGroup.GET("/goroutine", gin.WrapF(pprof.Handler("goroutine").ServeHTTP))
+		pprofGroup.GET("/heap", gin.WrapF(pprof.Handler("heap").ServeHTTP))
+		pprofGroup.GET("/mutex", gin.WrapF(pprof.Handler("mutex").ServeHTTP))
+		pprofGroup.GET("/threadcreate", gin.WrapF(pprof.Handler("threadcreate").ServeHTTP))
 	}
 }
 

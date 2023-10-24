@@ -1,10 +1,12 @@
 package middleware
 
 import (
+	"fmt"
 	"log"
 	"time"
 
 	"github.com/gilperopiola/go-rest-example/pkg/common/config"
+	"github.com/gilperopiola/go-rest-example/pkg/common/metrics"
 	"github.com/sirupsen/logrus"
 
 	"github.com/gin-contrib/cors"
@@ -28,7 +30,31 @@ func NewLogger() LoggerI {
 	return logger
 }
 
+type Middlewares struct {
+	LoggerToCtx gin.HandlerFunc
+	Monitoring  gin.HandlerFunc
+	Prometheus  gin.HandlerFunc
+}
+
+func NewPrometheusMiddleware(metrics *metrics.Metrics) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Next()
+
+		// Don't log calls to /metrics
+		if c.Request.URL.Path == "/metrics" {
+			return
+		}
+
+		// HTTP Response Status
+		status := fmt.Sprint(c.Writer.Status())
+
+		metrics.RequestsTotal.WithLabelValues(c.Request.Method, c.Request.URL.Path, status).Inc()
+		c.Next()
+	}
+}
+
 func NewMonitoringMiddleware(config config.Monitoring) gin.HandlerFunc {
+
 	// If monitoring is not enabled, return empty middleware
 	if !config.Enabled {
 		return gin.HandlerFunc(func(c *gin.Context) {})

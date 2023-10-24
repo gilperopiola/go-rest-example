@@ -28,14 +28,8 @@ const (
 )
 
 var (
-	modelUser = models.User{
-		ID:    VALID_ID,
-		Email: VALID_EMAIL,
-	}
-	entityUser = responses.User{
-		ID:    VALID_ID,
-		Email: VALID_EMAIL,
-	}
+	modelUser  = models.User{ID: VALID_ID, Email: VALID_EMAIL}
+	entityUser = responses.User{ID: VALID_ID, Email: VALID_EMAIL}
 )
 
 func TestSignup(t *testing.T) {

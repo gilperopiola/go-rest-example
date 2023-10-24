@@ -12,24 +12,24 @@ type router struct {
 	*gin.Engine
 }
 
-func NewRouter(t TransportLayer, cfg config.General, auth auth.AuthI, middlewares ...gin.HandlerFunc) router {
+func NewRouter(t TransportLayer, cfg config.General, auth auth.AuthI, middlewares middleware.Middlewares) router {
 	var router router
-	router.Setup(t, cfg, auth, middlewares...)
+	router.Setup(t, cfg, auth, middlewares)
 	return router
 }
 
-func (router *router) Setup(t TransportLayer, cfg config.General, auth auth.AuthI, middlewares ...gin.HandlerFunc) {
+func (router *router) Setup(t TransportLayer, cfg config.General, auth auth.AuthI, middlewares middleware.Middlewares) {
 
 	// Create router. Set debug/release mode
 	router.prepare(!cfg.Debug)
 
 	// Add middleware
 	router.Use(gin.Recovery())                               // Panic recovery
+	router.Use(middlewares.Prometheus)                       // Prometheus
 	router.Use(middleware.NewTimeoutMiddleware(cfg.Timeout)) // Timeout
 	router.Use(middleware.NewCORSConfigMiddleware())         // CORS
-	for _, m := range middlewares {
-		router.Use(m) // Monitoring & Adding Logger to Ctx
-	}
+	router.Use(middlewares.LoggerToCtx)                      // Logger
+	router.Use(middlewares.Monitoring)                       // Monitoring
 
 	// Set endpoints
 	router.setEndpoints(t, auth)

@@ -5,10 +5,13 @@ import (
 
 	"github.com/gilperopiola/go-rest-example/pkg/common/auth"
 	"github.com/gilperopiola/go-rest-example/pkg/common/config"
+	"github.com/gilperopiola/go-rest-example/pkg/common/metrics"
 	"github.com/gilperopiola/go-rest-example/pkg/common/middleware"
 	"github.com/gilperopiola/go-rest-example/pkg/repository"
 	"github.com/gilperopiola/go-rest-example/pkg/service"
 	"github.com/gilperopiola/go-rest-example/pkg/transport"
+
+	_ "net/http/pprof"
 )
 
 // TODO
@@ -16,7 +19,6 @@ import (
 // - More tests
 // - Add swagger docs
 // - pprof -> check goroutine leaks
-// - Add another model (user 1-n)
 // - batch insert?
 // - change password
 // - reset password
@@ -33,12 +35,18 @@ func main() {
 		// Load configuration settings
 		config = config.New(".env")
 
-		// Initialize logger & logger middleware
-		logger           = middleware.NewLogger()
-		loggerMiddleware = middleware.NewLoggerToContextMiddleware(logger)
+		// Init Prometheus metrics
+		metrics = metrics.New()
 
-		// Initialize monitoring as middleware (New Relic)
-		monitoringMiddleware = middleware.NewMonitoringMiddleware(config.Monitoring)
+		// Initialize logger
+		logger = middleware.NewLogger()
+
+		// Initialize middlewares: logger, monitoring, prometheus
+		middlewares = middleware.Middlewares{
+			LoggerToCtx: middleware.NewLoggerToContextMiddleware(logger),
+			Monitoring:  middleware.NewMonitoringMiddleware(config.Monitoring),
+			Prometheus:  middleware.NewPrometheusMiddleware(metrics),
+		}
 
 		// Initialize authentication module
 		auth = auth.NewAuth(config.JWT.Secret, config.JWT.SessionDurationDays)
@@ -56,7 +64,7 @@ func main() {
 		endpoints = transport.New(service, transport.NewErrorsMapper(logger))
 
 		// Initialize the router with the endpoints
-		router = transport.NewRouter(endpoints, config.General, auth, loggerMiddleware, monitoringMiddleware)
+		router = transport.NewRouter(endpoints, config.General, auth, middlewares)
 	)
 
 	// Defer closing open connections

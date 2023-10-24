@@ -105,3 +105,17 @@ func (s *service) SearchUsers(searchUsersRequest requests.SearchUsersRequest) (r
 		PerPage: perPage,
 	}, nil
 }
+
+//------------------------------
+//      CREATE USER POST
+//------------------------------
+
+func (s *service) CreateUserPost(createUserPostRequest requests.CreateUserPostRequest) (responses.CreateUserPostResponse, error) {
+	userPost := createUserPostRequest.ToUserPostModel()
+
+	if err := userPost.Create(s.repository); err != nil {
+		return responses.CreateUserPostResponse{}, common.Wrap("CreateUserPost: user.CreatePost", err)
+	}
+
+	return responses.CreateUserPostResponse{UserPost: userPost.ToResponseModel()}, nil
+}
