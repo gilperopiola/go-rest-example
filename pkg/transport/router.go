@@ -24,12 +24,9 @@ func (router *router) Setup(t TransportLayer, cfg config.General, auth auth.Auth
 	router.prepare(!cfg.Debug)
 
 	// Add middleware
-	router.Use(gin.Recovery())                               // Panic recovery
-	router.Use(middlewares.Prometheus)                       // Prometheus
-	router.Use(middleware.NewTimeoutMiddleware(cfg.Timeout)) // Timeout
-	router.Use(middleware.NewCORSConfigMiddleware())         // CORS
-	router.Use(middlewares.LoggerToCtx)                      // Logger
-	router.Use(middlewares.Monitoring)                       // Monitoring
+	for _, middleware := range middlewares {
+		router.Use(middleware)
+	}
 
 	// Set endpoints
 	router.setEndpoints(t, auth)

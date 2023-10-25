@@ -5,11 +5,11 @@ import (
 
 	"github.com/gilperopiola/go-rest-example/pkg/common/auth"
 	"github.com/gilperopiola/go-rest-example/pkg/common/config"
-	"github.com/gilperopiola/go-rest-example/pkg/common/metrics"
 	"github.com/gilperopiola/go-rest-example/pkg/common/middleware"
 	"github.com/gilperopiola/go-rest-example/pkg/repository"
 	"github.com/gilperopiola/go-rest-example/pkg/service"
 	"github.com/gilperopiola/go-rest-example/pkg/transport"
+	"github.com/gin-gonic/gin"
 )
 
 // TODO
@@ -34,17 +34,23 @@ func main() {
 		// Load configuration settings
 		config = config.New(".env")
 
-		// Init Prometheus metrics
-		metrics = metrics.New()
-
 		// Initialize logger
 		logger = middleware.NewLogger()
 
-		// Initialize middlewares: logger, monitoring, prometheus
-		middlewares = middleware.Middlewares{
-			LoggerToCtx: middleware.NewLoggerToContextMiddleware(logger),
-			Monitoring:  middleware.NewMonitoringMiddleware(config.Monitoring),
-			Prometheus:  middleware.NewPrometheusMiddleware(metrics),
+		// We use prometheus to get metrics
+		prometheus = middleware.NewPrometheus(logger)
+
+		// We use New Relic to monitor the app
+		newRelic = middleware.NewMonitoringNewRelic(config.Monitoring)
+
+		// Initialize middlewares
+		middlewares = []gin.HandlerFunc{
+			gin.Recovery(),
+			middleware.NewCORSConfigMiddleware(),
+			middleware.NewLoggerToContextMiddleware(logger),
+			middleware.NewNewRelicMiddleware(newRelic),
+			middleware.NewPrometheusMiddleware(prometheus),
+			middleware.NewTimeoutMiddleware(config.General.Timeout),
 		}
 
 		// Initialize authentication module
@@ -56,10 +62,10 @@ func main() {
 		// Initialize repository layer with the database connection
 		repository = repository.New(database)
 
-		// Setup the main service layer with dependencies
+		// Setup the main service layer
 		service = service.New(repository, auth, config)
 
-		// Setup endpoints & transport layer with dependencies
+		// Setup endpoints & transport layer
 		endpoints = transport.New(service, transport.NewErrorsMapper(logger))
 
 		// Initialize the router with the endpoints

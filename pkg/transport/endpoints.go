@@ -5,8 +5,6 @@ import (
 	"github.com/gilperopiola/go-rest-example/pkg/common/requests"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
-	"net/http/pprof"
-
 	"github.com/gin-gonic/gin"
 )
 
@@ -44,6 +42,7 @@ func (router *router) setEndpoints(transport TransportLayer, authI auth.AuthI) {
 		router.setV1Endpoints(v1, transport, authI)
 	}
 
+	/* Profiling
 	pprofGroup := router.Group("/debug/pprof")
 	{
 		pprofGroup.GET("/", gin.WrapF(pprof.Index))
@@ -58,7 +57,7 @@ func (router *router) setEndpoints(transport TransportLayer, authI auth.AuthI) {
 		pprofGroup.GET("/heap", gin.WrapF(pprof.Handler("heap").ServeHTTP))
 		pprofGroup.GET("/mutex", gin.WrapF(pprof.Handler("mutex").ServeHTTP))
 		pprofGroup.GET("/threadcreate", gin.WrapF(pprof.Handler("threadcreate").ServeHTTP))
-	}
+	}*/
 }
 
 func healthCheck(c *gin.Context) {
