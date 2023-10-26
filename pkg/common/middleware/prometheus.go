@@ -20,7 +20,6 @@ func NewPrometheus(logger LoggerI) *Prometheus {
 	// Add standard metrics, replace URL keys
 	p := &Prometheus{
 		MetricsList: standardMetrics,
-		MetricsPath: "/metrics",
 		ReplaceURLKeys: func(c *gin.Context) string {
 			url := c.Request.URL.Path
 			for _, p := range c.Params {
@@ -40,19 +39,16 @@ func NewPrometheus(logger LoggerI) *Prometheus {
 	return p
 }
 
-type ReplaceURLKeysFn func(c *gin.Context) string
-
 // Prometheus contains the metrics gathered by the instance and its path
 type Prometheus struct {
+	MetricsList []*Metric
+
 	totalRequests    *prometheus.CounterVec
 	requestsDuration *prometheus.HistogramVec
 	requestsSize     prometheus.Summary
 	responsesSize    prometheus.Summary
 
-	MetricsList []*Metric
-	MetricsPath string
-
-	ReplaceURLKeys ReplaceURLKeysFn
+	ReplaceURLKeys func(c *gin.Context) string
 
 	logger LoggerI
 }
@@ -65,6 +61,37 @@ type Metric struct {
 	Description     string
 	Type            string
 	Args            []string
+}
+
+// HandlerFunc is the actual middleware, it's where the magic happens
+func (p *Prometheus) HandlerFunc() gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+		// Don't log the /metrics calls
+		if c.Request.URL.Path == "/metrics" {
+			c.Next()
+			return
+		}
+
+		// Start request
+		start := time.Now()
+		requestSize := getApproxRequestSize(c.Request)
+
+		c.Next()
+
+		// Get relevant info
+		method := c.Request.Method
+		status := strconv.Itoa(c.Writer.Status())
+		endpoint := p.ReplaceURLKeys(c)
+		elapsed := float64(time.Since(start)) / float64(time.Second)
+		responseSize := float64(c.Writer.Size())
+
+		// Increment & Observe metrics
+		p.totalRequests.WithLabelValues(status, endpoint, method).Inc()
+		p.requestsDuration.WithLabelValues(status, endpoint, method).Observe(elapsed)
+		p.requestsSize.Observe(float64(requestSize))
+		p.responsesSize.Observe(responseSize)
+	}
 }
 
 // Available metrics are:
@@ -107,37 +134,6 @@ var metricResponsesSize = &Metric{
 	Name:        "responses_size",
 	Description: "HTTP Responses sizes in bytes.",
 	Type:        "summary",
-}
-
-// HandlerFunc is the actual middleware, it's where the magic happens
-func (p *Prometheus) HandlerFunc() gin.HandlerFunc {
-	return func(c *gin.Context) {
-
-		// Don't log the /metrics calls
-		if c.Request.URL.Path == "/metrics" {
-			c.Next()
-			return
-		}
-
-		// Start request
-		start := time.Now()
-		requestSize := getApproxRequestSize(c.Request)
-
-		c.Next()
-
-		// Get relevant info
-		method := c.Request.Method
-		status := strconv.Itoa(c.Writer.Status())
-		endpoint := p.ReplaceURLKeys(c)
-		elapsed := float64(time.Since(start)) / float64(time.Second)
-		responseSize := float64(c.Writer.Size())
-
-		// Increment & Observe metrics
-		p.totalRequests.WithLabelValues(status, endpoint, method).Inc()
-		p.requestsDuration.WithLabelValues(status, endpoint, method).Observe(elapsed)
-		p.requestsSize.Observe(float64(requestSize))
-		p.responsesSize.Observe(responseSize)
-	}
 }
 
 // NewMetric associates prometheus.Collector based on Metric.Type

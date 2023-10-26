@@ -13,16 +13,16 @@ import (
 )
 
 // TODO
-// - NewRelic lo instancio por request
 // - Redis
 // - More tests
 // - Add swagger docs
-// - pprof -> check goroutine leaks
 // - batch insert?
 // - change password
 // - reset password
 // - roles to DB
-// - prometheus
+// - Fix Readme
+
+// Note: The HTTP Requests entrypoint is the Prometheus HandlerFunc
 
 func main() {
 
@@ -47,7 +47,6 @@ func main() {
 		middlewares = []gin.HandlerFunc{
 			gin.Recovery(),
 			middleware.NewCORSConfigMiddleware(),
-			middleware.NewLoggerToContextMiddleware(logger),
 			middleware.NewNewRelicMiddleware(newRelic),
 			middleware.NewPrometheusMiddleware(prometheus),
 			middleware.NewTimeoutMiddleware(config.General.Timeout),

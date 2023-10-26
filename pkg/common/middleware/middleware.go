@@ -19,13 +19,6 @@ func NewTimeoutMiddleware(timeoutSeconds int) gin.HandlerFunc {
 	)
 }
 
-func NewLoggerToContextMiddleware(logger LoggerI) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.Set("logger", logger)
-		c.Next()
-	}
-}
-
 func NewCORSConfigMiddleware() gin.HandlerFunc {
 	return cors.New(cors.Config{
 		AllowAllOrigins:  true,

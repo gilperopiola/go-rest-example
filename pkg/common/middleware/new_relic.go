@@ -4,8 +4,8 @@ import (
 	"log"
 
 	"github.com/gilperopiola/go-rest-example/pkg/common/config"
-	"github.com/gin-gonic/gin"
 
+	"github.com/gin-gonic/gin"
 	"github.com/newrelic/go-agent/v3/integrations/nrgin"
 	"github.com/newrelic/go-agent/v3/newrelic"
 )
