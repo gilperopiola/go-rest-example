@@ -17,8 +17,7 @@ import (
 //   - a function that calls the service with that request
 //
 // It returns a response with the result of the service call.
-func HandleRequest[req Request, resp Response](t TransportLayer, c *gin.Context,
-	makeRequest func(requests.GinI) (req, error), serviceCall func(req) (resp, error)) {
+func HandleRequest[req Request, resp Response](t TransportLayer, c *gin.Context, makeRequest func(requests.GinI) (req, error), serviceCall func(req) (resp, error)) {
 
 	// Make, validate and get request
 	request, err := makeRequest(c)

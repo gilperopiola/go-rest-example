@@ -12,16 +12,18 @@ type TransportLayer interface {
 	Service() service.ServiceLayer
 	ErrorsMapper() errorsMapperI
 
-	Signup(c *gin.Context)
-	Login(c *gin.Context)
+	healthCheck(c *gin.Context)
 
-	CreateUser(c *gin.Context)
-	GetUser(c *gin.Context)
-	UpdateUser(c *gin.Context)
-	DeleteUser(c *gin.Context)
-	SearchUsers(c *gin.Context)
+	signup(c *gin.Context)
+	login(c *gin.Context)
 
-	CreateUserPost(c *gin.Context)
+	createUser(c *gin.Context)
+	getUser(c *gin.Context)
+	updateUser(c *gin.Context)
+	deleteUser(c *gin.Context)
+	searchUsers(c *gin.Context)
+
+	createUserPost(c *gin.Context)
 }
 
 type transport struct {

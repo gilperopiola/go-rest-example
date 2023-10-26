@@ -3,9 +3,10 @@ package config
 import "fmt"
 
 type General struct {
-	Debug   bool   `envconfig:"GO_REST_EXAMPLE_DEBUG"`
-	Port    string `envconfig:"GO_REST_EXAMPLE_PORT"`
-	Timeout int    `envconfig:"GO_REST_EXAMPLE_TIMEOUT_SECONDS"`
+	Debug     bool   `envconfig:"GO_REST_EXAMPLE_DEBUG"`
+	Port      string `envconfig:"GO_REST_EXAMPLE_PORT"`
+	Profiling bool   `envconfig:"GO_REST_EXAMPLE_PROFILING"`
+	Timeout   int    `envconfig:"GO_REST_EXAMPLE_TIMEOUT_SECONDS"`
 }
 
 type Database struct {

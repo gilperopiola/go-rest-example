@@ -22,21 +22,11 @@ func New(envFilename string) *Config {
 	return &config
 }
 
-func isLastThreeCmd() bool {
-	dir, _ := os.Getwd()
-
-	// Extract the current directory name from the path
-	dirName := strings.Split(dir, string(os.PathSeparator))
-	currentDir := dirName[len(dirName)-1]
-
-	// Check if the last 3 letters are "cmd"
-	return strings.HasSuffix(currentDir, "cmd")
-}
-
 func (config *Config) setup(envFilename string) {
 
+	// We may be on the cmd folder or not. Hacky, I know.
 	envFilePath := ".env"
-	if isLastThreeCmd() {
+	if currentFolderIsCMD() {
 		envFilePath = "../.env"
 	}
 
@@ -51,4 +41,15 @@ func (config *Config) setup(envFilename string) {
 	if err != nil {
 		log.Fatalf("error parsing environment variables: %v", err)
 	}
+}
+
+func currentFolderIsCMD() bool {
+	dir, _ := os.Getwd()
+
+	// Extract the current directory name from the path
+	dirName := strings.Split(dir, string(os.PathSeparator))
+	currentDir := dirName[len(dirName)-1]
+
+	// Check if the last 3 letters are "cmd"
+	return strings.HasSuffix(currentDir, "cmd")
 }
