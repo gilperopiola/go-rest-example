@@ -77,100 +77,62 @@ type CreateUserPostRequest struct {
 //---------------------------
 
 func MakeCreateUserRequest(c GinI) (request CreateUserRequest, err error) {
-	if err = c.ShouldBindJSON(&request); err != nil {
-		return CreateUserRequest{}, common.Wrap("makeCreateUserRequest", common.ErrBindingRequest)
+	if err = request.Build(c); err != nil {
+		return CreateUserRequest{}, common.Wrap("makeCreateUserRequest", err)
 	}
-
 	if err = request.Validate(); err != nil {
 		return CreateUserRequest{}, common.Wrap("makeCreateUserRequest", err)
 	}
-
 	return request, nil
 }
 
 func MakeGetUserRequest(c GinI) (request GetUserRequest, err error) {
-	userToGetID, err := getIntFromContext(c, "ID")
-	if err != nil {
+	if err = request.Build(c); err != nil {
 		return GetUserRequest{}, common.Wrap("makeGetUserRequest", err)
 	}
-
-	request.ID = userToGetID
-
 	if err = request.Validate(); err != nil {
 		return GetUserRequest{}, common.Wrap("makeGetUserRequest", err)
 	}
-
 	return request, nil
 }
 
 func MakeUpdateUserRequest(c GinI) (request UpdateUserRequest, err error) {
-	if err = c.ShouldBindJSON(&request); err != nil {
-		return UpdateUserRequest{}, common.Wrap("makeUpdateUserRequest", common.ErrBindingRequest)
-	}
-
-	userToUpdateID, err := getIntFromContext(c, "ID")
-	if err != nil {
+	if err = request.Build(c); err != nil {
 		return UpdateUserRequest{}, common.Wrap("makeUpdateUserRequest", err)
 	}
-
-	request.ID = userToUpdateID
-
 	if err = request.Validate(); err != nil {
 		return UpdateUserRequest{}, common.Wrap("makeUpdateUserRequest", err)
 	}
-
 	return request, nil
 }
 
 func MakeDeleteUserRequest(c GinI) (request DeleteUserRequest, err error) {
-	userToDeleteID, err := getIntFromContext(c, "ID")
-	if err != nil {
+	if err = request.Build(c); err != nil {
 		return DeleteUserRequest{}, common.Wrap("makeDeleteUserRequest", err)
 	}
-
-	request.ID = userToDeleteID
-
 	if err = request.Validate(); err != nil {
 		return DeleteUserRequest{}, common.Wrap("makeDeleteUserRequest", err)
 	}
-
 	return request, nil
 }
 
 func MakeSearchUsersRequest(c GinI) (request SearchUsersRequest, err error) {
-	request.Username = c.Query("username")
-	request.Page, err = strconv.Atoi(c.DefaultQuery("page", "0"))
-	if err != nil {
-		return SearchUsersRequest{}, common.Wrap("makeSearchUsersRequest", common.ErrInvalidValue)
+	if err = request.Build(c); err != nil {
+		return SearchUsersRequest{}, common.Wrap("makeSearchUsersRequest", err)
 	}
-	request.PerPage, err = strconv.Atoi(c.DefaultQuery("per_page", "10"))
-	if err != nil {
-		return SearchUsersRequest{}, common.Wrap("makeSearchUsersRequest", common.ErrInvalidValue)
-	}
-
 	if err = request.Validate(); err != nil {
 		return SearchUsersRequest{}, common.Wrap("makeSearchUsersRequest", err)
 	}
-
 	return request, nil
 }
 
 func MakeCreateUserPostRequest(c GinI) (request CreateUserPostRequest, err error) {
-	if err = c.ShouldBindJSON(&request); err != nil {
-		return CreateUserPostRequest{}, common.Wrap("makeCreateUserPostRequest", common.ErrBindingRequest)
-	}
-
-	postOwnerID, err := getIntFromContext(c, "ID")
-	if err != nil {
+	if err = request.Build(c); err != nil {
 		return CreateUserPostRequest{}, common.Wrap("makeCreateUserPostRequest", err)
 	}
-
-	request.UserID = postOwnerID
-
 	if err = request.Validate(); err != nil {
 		return CreateUserPostRequest{}, common.Wrap("makeCreateUserPostRequest", err)
 	}
-
 	return request, nil
 }
 
@@ -235,6 +197,84 @@ func (r *CreateUserPostRequest) ToUserPostModel() models.UserPost {
 		Title:  r.Title,
 		Body:   r.Body,
 	}
+}
+
+//--------------------------
+//	  REQUEST BUILDERS
+//--------------------------
+
+func (req CreateUserRequest) Build(c GinI) error {
+	if err := c.ShouldBindJSON(&req); err != nil {
+		return common.ErrBindingRequest
+	}
+	return nil
+}
+
+func (req GetUserRequest) Build(c GinI) error {
+	userToGetID, err := getIntFromContext(c, "ID")
+	if err != nil {
+		return err
+	}
+
+	req.ID = userToGetID
+
+	return nil
+}
+
+func (req UpdateUserRequest) Build(c GinI) error {
+	if err := c.ShouldBindJSON(&req); err != nil {
+		return common.ErrBindingRequest
+	}
+
+	userToUpdateID, err := getIntFromContext(c, "ID")
+	if err != nil {
+		return err
+	}
+
+	req.ID = userToUpdateID
+	return nil
+}
+
+func (req DeleteUserRequest) Build(c GinI) error {
+	userToDeleteID, err := getIntFromContext(c, "ID")
+	if err != nil {
+		return err
+	}
+
+	req.ID = userToDeleteID
+	return nil
+}
+
+func (req SearchUsersRequest) Build(c GinI) error {
+	var err error
+
+	req.Username = c.Query("username")
+
+	req.Page, err = strconv.Atoi(c.DefaultQuery("page", "0"))
+	if err != nil {
+		return common.ErrInvalidValue
+	}
+
+	req.PerPage, err = strconv.Atoi(c.DefaultQuery("per_page", "10"))
+	if err != nil {
+		return common.ErrInvalidValue
+	}
+
+	return nil
+}
+
+func (req CreateUserPostRequest) Build(c GinI) error {
+	if err := c.ShouldBindJSON(&req); err != nil {
+		return common.ErrBindingRequest
+	}
+
+	postOwnerID, err := getIntFromContext(c, "ID")
+	if err != nil {
+		return err
+	}
+
+	req.UserID = postOwnerID
+	return nil
 }
 
 //--------------------------

@@ -17,19 +17,19 @@ import (
 //   - a function that calls the service with that request
 //
 // It returns a response with the result of the service call.
-func HandleRequest[req Request, resp Response](t TransportLayer, c *gin.Context, makeRequest func(requests.GinI) (req, error), serviceCall func(req) (resp, error)) {
+func HandleRequest[req Request, resp Response](c *gin.Context, makeRequest func(requests.GinI) (req, error), serviceCall func(req) (resp, error), e errorsMapperI) {
 
-	// Make, validate and get request
+	// Build, validate and get request
 	request, err := makeRequest(c)
 	if err != nil {
-		c.JSON(t.ErrorsMapper().Map(err))
+		c.JSON(e.Map(err))
 		return
 	}
 
 	// Call service with that request
 	response, err := serviceCall(request)
 	if err != nil {
-		c.JSON(t.ErrorsMapper().Map(err))
+		c.JSON(e.Map(err))
 		return
 	}
 
