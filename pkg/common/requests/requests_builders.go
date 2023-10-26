@@ -69,16 +69,20 @@ func (req *DeleteUserRequest) Build(c GinI) error {
 }
 
 func (req *SearchUsersRequest) Build(c GinI) error {
-	var err error
+	var (
+		err            = error(nil)
+		defaultPage    = "0"
+		defaultPerPage = "10"
+	)
 
 	req.Username = c.Query("username")
 
-	req.Page, err = strconv.Atoi(c.DefaultQuery("page", "0"))
+	req.Page, err = strconv.Atoi(c.DefaultQuery("page", defaultPage))
 	if err != nil {
 		return common.ErrInvalidValue
 	}
 
-	req.PerPage, err = strconv.Atoi(c.DefaultQuery("per_page", "10"))
+	req.PerPage, err = strconv.Atoi(c.DefaultQuery("per_page", defaultPerPage))
 	if err != nil {
 		return common.ErrInvalidValue
 	}

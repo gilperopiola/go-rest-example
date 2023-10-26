@@ -57,6 +57,7 @@ func (s *service) UpdateUser(updateUserRequest requests.UpdateUserRequest) (resp
 		return responses.UpdateUserResponse{}, common.Wrap("UpdateUser: user.Get", err)
 	}
 
+	// Overwrite fields that aren't empty
 	user.OverwriteFields(updateUserRequest.Username, updateUserRequest.Email, "")
 	user.OverwriteDetails(updateUserRequest.FirstName, updateUserRequest.LastName)
 
@@ -86,13 +87,13 @@ func (s *service) DeleteUser(deleteUserRequest requests.DeleteUserRequest) (resp
 //      SEARCH USERS
 //--------------------------
 
+// SearchUsers is an admins only endpoint
 func (s *service) SearchUsers(searchUsersRequest requests.SearchUsersRequest) (responses.SearchUsersResponse, error) {
 	var (
+		user    = searchUsersRequest.ToUserModel()
 		page    = searchUsersRequest.Page
 		perPage = searchUsersRequest.PerPage
 	)
-
-	user := searchUsersRequest.ToUserModel()
 
 	users, err := user.Search(s.repository, page, perPage)
 	if err != nil {
