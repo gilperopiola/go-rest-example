@@ -11,8 +11,8 @@ import (
 //       SIGNUP
 //-----------------------
 
-func (s *service) Signup(signupRequest requests.SignupRequest) (responses.SignupResponse, error) {
-	user := signupRequest.ToUserModel()
+func (s *service) Signup(request requests.SignupRequest) (responses.SignupResponse, error) {
+	user := request.ToUserModel()
 
 	if user.Exists(s.repository) {
 		return responses.SignupResponse{}, common.Wrap("Signup: user.Exists", common.ErrUsernameOrEmailAlreadyInUse)
@@ -31,14 +31,14 @@ func (s *service) Signup(signupRequest requests.SignupRequest) (responses.Signup
 //       LOGIN
 //---------------------
 
-func (s *service) Login(loginRequest requests.LoginRequest) (responses.LoginResponse, error) {
-	user := loginRequest.ToUserModel()
+func (s *service) Login(request requests.LoginRequest) (responses.LoginResponse, error) {
+	user := request.ToUserModel()
 
 	if err := user.Get(s.repository, options.WithoutDeleted); err != nil {
 		return responses.LoginResponse{}, common.Wrap("Login: user.Get", err)
 	}
 
-	if !user.PasswordMatches(loginRequest.Password, s.config.JWT.HashSalt) {
+	if !user.PasswordMatches(request.Password, s.config.JWT.HashSalt) {
 		return responses.LoginResponse{}, common.Wrap("Login: !user.PasswordMatches", common.ErrWrongPassword)
 	}
 

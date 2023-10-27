@@ -53,11 +53,3 @@ func (t transport) changePassword(c *gin.Context) {
 func (t transport) createUserPost(c *gin.Context) {
 	HandleRequest(c, requests.MakeCreateUserPostRequest, t.Service().CreateUserPost, t.ErrorsMapper())
 }
-
-//-------------------
-//      MISC
-//-------------------
-
-func (t transport) healthCheck(c *gin.Context) {
-	c.JSON(200, gin.H{"status": "API is up and running :)"})
-}

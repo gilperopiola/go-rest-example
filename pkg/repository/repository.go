@@ -19,10 +19,10 @@ type RepositoryLayer interface {
 	CreateUserPost(post models.UserPost) (models.UserPost, error)
 }
 
-type repository struct {
-	database database
-}
-
 func New(database database) *repository {
 	return &repository{database: database}
+}
+
+type repository struct {
+	database database
 }

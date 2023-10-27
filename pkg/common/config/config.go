@@ -16,13 +16,13 @@ type Config struct {
 	Monitoring Monitoring
 }
 
-func New(envFilename string) *Config {
+func New() *Config {
 	config := Config{}
-	config.setup(envFilename)
+	config.setup()
 	return &config
 }
 
-func (config *Config) setup(envFilename string) {
+func (config *Config) setup() {
 
 	// We may be on the cmd folder or not. Hacky, I know.
 	envFilePath := ".env"

@@ -12,8 +12,8 @@ import (
 //-------------------------
 
 // CreateUser is an admins only endpoint
-func (s *service) CreateUser(createUserRequest requests.CreateUserRequest) (responses.CreateUserResponse, error) {
-	user := createUserRequest.ToUserModel()
+func (s *service) CreateUser(request requests.CreateUserRequest) (responses.CreateUserResponse, error) {
+	user := request.ToUserModel()
 
 	if user.Exists(s.repository) {
 		return responses.CreateUserResponse{}, common.Wrap("CreateUser: user.Exists", common.ErrUsernameOrEmailAlreadyInUse)
@@ -32,8 +32,8 @@ func (s *service) CreateUser(createUserRequest requests.CreateUserRequest) (resp
 //       GET USER
 //-----------------------
 
-func (s *service) GetUser(getUserRequest requests.GetUserRequest) (responses.GetUserResponse, error) {
-	user := getUserRequest.ToUserModel()
+func (s *service) GetUser(request requests.GetUserRequest) (responses.GetUserResponse, error) {
+	user := request.ToUserModel()
 
 	if err := user.Get(s.repository, options.WithoutDeleted); err != nil {
 		return responses.GetUserResponse{}, common.Wrap("GetUser: user.Get", err)
@@ -46,8 +46,8 @@ func (s *service) GetUser(getUserRequest requests.GetUserRequest) (responses.Get
 //       UPDATE USER
 //--------------------------
 
-func (s *service) UpdateUser(updateUserRequest requests.UpdateUserRequest) (responses.UpdateUserResponse, error) {
-	user := updateUserRequest.ToUserModel()
+func (s *service) UpdateUser(request requests.UpdateUserRequest) (responses.UpdateUserResponse, error) {
+	user := request.ToUserModel()
 
 	if user.Exists(s.repository) {
 		return responses.UpdateUserResponse{}, common.Wrap("UpdateUser: user.Exists", common.ErrUsernameOrEmailAlreadyInUse)
@@ -58,8 +58,8 @@ func (s *service) UpdateUser(updateUserRequest requests.UpdateUserRequest) (resp
 	}
 
 	// Overwrite fields that aren't empty
-	user.OverwriteFields(updateUserRequest.Username, updateUserRequest.Email, "")
-	user.OverwriteDetails(updateUserRequest.FirstName, updateUserRequest.LastName)
+	user.OverwriteFields(request.Username, request.Email, "")
+	user.OverwriteDetails(request.FirstName, request.LastName)
 
 	if err := user.Update(s.repository); err != nil {
 		return responses.UpdateUserResponse{}, common.Wrap("UpdateUser: user.Update", err)
@@ -72,8 +72,8 @@ func (s *service) UpdateUser(updateUserRequest requests.UpdateUserRequest) (resp
 //       DELETE USER
 //--------------------------
 
-func (s *service) DeleteUser(deleteUserRequest requests.DeleteUserRequest) (responses.DeleteUserResponse, error) {
-	user := deleteUserRequest.ToUserModel()
+func (s *service) DeleteUser(request requests.DeleteUserRequest) (responses.DeleteUserResponse, error) {
+	user := request.ToUserModel()
 
 	// This returns an error if the user is already deleted
 	if err := user.Delete(s.repository); err != nil {
@@ -88,11 +88,11 @@ func (s *service) DeleteUser(deleteUserRequest requests.DeleteUserRequest) (resp
 //--------------------------
 
 // SearchUsers is an admins only endpoint
-func (s *service) SearchUsers(searchUsersRequest requests.SearchUsersRequest) (responses.SearchUsersResponse, error) {
+func (s *service) SearchUsers(request requests.SearchUsersRequest) (responses.SearchUsersResponse, error) {
 	var (
-		user    = searchUsersRequest.ToUserModel()
-		page    = searchUsersRequest.Page
-		perPage = searchUsersRequest.PerPage
+		user    = request.ToUserModel()
+		page    = request.Page
+		perPage = request.PerPage
 	)
 
 	users, err := user.Search(s.repository, page, perPage)
@@ -111,20 +111,20 @@ func (s *service) SearchUsers(searchUsersRequest requests.SearchUsersRequest) (r
 //     CHANGE PASSWORD
 //--------------------------
 
-func (s *service) ChangePassword(changePasswordRequest requests.ChangePasswordRequest) (responses.ChangePasswordResponse, error) {
-	user := changePasswordRequest.ToUserModel()
+func (s *service) ChangePassword(request requests.ChangePasswordRequest) (responses.ChangePasswordResponse, error) {
+	user := request.ToUserModel()
 
 	if err := user.Get(s.repository, options.WithoutDeleted); err != nil {
 		return responses.ChangePasswordResponse{}, common.Wrap("ChangePassword: user.Get", err)
 	}
 
 	// Check if old password matches
-	if !user.PasswordMatches(changePasswordRequest.OldPassword, s.config.JWT.HashSalt) {
+	if !user.PasswordMatches(request.OldPassword, s.config.JWT.HashSalt) {
 		return responses.ChangePasswordResponse{}, common.Wrap("ChangePassword: !user.PasswordMatches", common.ErrWrongPassword)
 	}
 
 	// Swap passwords
-	user.Password = changePasswordRequest.NewPassword
+	user.Password = request.NewPassword
 
 	// Hash new password
 	user.HashPassword(s.config.JWT.HashSalt)
@@ -142,8 +142,8 @@ func (s *service) ChangePassword(changePasswordRequest requests.ChangePasswordRe
 //      CREATE USER POST
 //------------------------------
 
-func (s *service) CreateUserPost(createUserPostRequest requests.CreateUserPostRequest) (responses.CreateUserPostResponse, error) {
-	userPost := createUserPostRequest.ToUserPostModel()
+func (s *service) CreateUserPost(request requests.CreateUserPostRequest) (responses.CreateUserPostResponse, error) {
+	userPost := request.ToUserPostModel()
 
 	if err := userPost.Create(s.repository); err != nil {
 		return responses.CreateUserPostResponse{}, common.Wrap("CreateUserPost: user.CreatePost", err)

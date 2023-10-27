@@ -11,29 +11,29 @@ import (
 var _ ServiceLayer = (*service)(nil)
 
 type ServiceLayer interface {
-	Signup(signupRequest requests.SignupRequest) (responses.SignupResponse, error)
-	Login(loginRequest requests.LoginRequest) (responses.LoginResponse, error)
+	Signup(request requests.SignupRequest) (responses.SignupResponse, error)
+	Login(request requests.LoginRequest) (responses.LoginResponse, error)
 
-	CreateUser(createUserRequest requests.CreateUserRequest) (responses.CreateUserResponse, error)
-	GetUser(getUserRequest requests.GetUserRequest) (responses.GetUserResponse, error)
-	UpdateUser(updateUserRequest requests.UpdateUserRequest) (responses.UpdateUserResponse, error)
-	DeleteUser(deleteUserRequest requests.DeleteUserRequest) (responses.DeleteUserResponse, error)
-	SearchUsers(searchUsersRequest requests.SearchUsersRequest) (responses.SearchUsersResponse, error)
-	ChangePassword(changePasswordRequest requests.ChangePasswordRequest) (responses.ChangePasswordResponse, error)
+	CreateUser(request requests.CreateUserRequest) (responses.CreateUserResponse, error)
+	GetUser(request requests.GetUserRequest) (responses.GetUserResponse, error)
+	UpdateUser(request requests.UpdateUserRequest) (responses.UpdateUserResponse, error)
+	DeleteUser(request requests.DeleteUserRequest) (responses.DeleteUserResponse, error)
+	SearchUsers(request requests.SearchUsersRequest) (responses.SearchUsersResponse, error)
+	ChangePassword(request requests.ChangePasswordRequest) (responses.ChangePasswordResponse, error)
 
-	CreateUserPost(createUserPostRequest requests.CreateUserPostRequest) (responses.CreateUserPostResponse, error)
-}
-
-type service struct {
-	config     *config.Config
-	auth       auth.AuthI
-	repository repository.RepositoryLayer
+	CreateUserPost(request requests.CreateUserPostRequest) (responses.CreateUserPostResponse, error)
 }
 
 func New(repository repository.RepositoryLayer, auth auth.AuthI, config *config.Config) *service {
 	return &service{
 		repository: repository,
-		auth:       auth,
 		config:     config,
+		auth:       auth,
 	}
+}
+
+type service struct {
+	repository repository.RepositoryLayer
+	config     *config.Config
+	auth       auth.AuthI
 }

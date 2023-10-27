@@ -14,8 +14,6 @@ import (
 //      USERS
 //-------------------
 
-type Users []User
-
 func (u User) ToResponseModel() responses.User {
 	return responses.User{
 		ID:        u.ID,
@@ -30,13 +28,6 @@ func (u User) ToResponseModel() responses.User {
 	}
 }
 
-func (u UserDetail) ToResponseModel() responses.UserDetail {
-	return responses.UserDetail{
-		FirstName: u.FirstName,
-		LastName:  u.LastName,
-	}
-}
-
 func (u Users) ToResponseModel() []responses.User {
 	var users []responses.User
 	for _, user := range u {
@@ -45,17 +36,16 @@ func (u Users) ToResponseModel() []responses.User {
 	return users
 }
 
+func (u UserDetail) ToResponseModel() responses.UserDetail {
+	return responses.UserDetail{
+		FirstName: u.FirstName,
+		LastName:  u.LastName,
+	}
+}
+
 //-------------------
 //      POSTS
 //-------------------
-
-func (p UserPosts) ToResponseModel() []responses.UserPost {
-	var posts []responses.UserPost
-	for _, post := range p {
-		posts = append(posts, post.ToResponseModel())
-	}
-	return posts
-}
 
 func (p UserPost) ToResponseModel() responses.UserPost {
 	return responses.UserPost{
@@ -63,4 +53,12 @@ func (p UserPost) ToResponseModel() responses.UserPost {
 		Title: p.Title,
 		Body:  p.Body,
 	}
+}
+
+func (p UserPosts) ToResponseModel() []responses.UserPost {
+	var posts []responses.UserPost
+	for _, post := range p {
+		posts = append(posts, post.ToResponseModel())
+	}
+	return posts
 }

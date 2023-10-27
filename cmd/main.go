@@ -18,7 +18,6 @@ import (
 // - More tests
 // - Add swagger docs
 // - batch insert?
-// - change password
 // - reset password
 // - roles to DB
 // - Fix Readme
@@ -34,7 +33,7 @@ func main() {
 	// Setup dependencies
 	var (
 		// Load configuration settings
-		config = config.New(".env")
+		config = config.New()
 
 		// Initialize logger
 		logger = common.NewLogger()

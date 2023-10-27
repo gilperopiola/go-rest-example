@@ -31,6 +31,8 @@ type User struct {
 	NewPassword string `gorm:"-"`
 }
 
+type Users []User
+
 type UserDetail struct {
 	ID        int    `gorm:"primaryKey"`
 	UserID    int    `gorm:"unique;not null"`
