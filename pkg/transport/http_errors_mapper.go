@@ -7,21 +7,20 @@ import (
 	"strings"
 
 	"github.com/gilperopiola/go-rest-example/pkg/common"
-	"github.com/gilperopiola/go-rest-example/pkg/common/middleware"
 )
 
 // The errorsMapper maps errors to HTTP status codes
 // It also logs errors and warnings
 
 type errorsMapper struct {
-	logger middleware.LoggerI
+	logger common.LoggerI
 }
 
 type errorsMapperI interface {
 	Map(err error) (status int, response common.HTTPResponse)
 }
 
-func NewErrorsMapper(logger middleware.LoggerI) errorsMapper {
+func NewErrorsMapper(logger common.LoggerI) errorsMapper {
 	return errorsMapper{logger: logger}
 }
 

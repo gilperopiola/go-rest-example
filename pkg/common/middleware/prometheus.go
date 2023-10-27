@@ -7,6 +7,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gilperopiola/go-rest-example/pkg/common"
+
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus"
 )
@@ -15,7 +17,7 @@ func NewPrometheusMiddleware(p *Prometheus) gin.HandlerFunc {
 	return p.HandlerFunc()
 }
 
-func NewPrometheus(logger LoggerI) *Prometheus {
+func NewPrometheus(logger common.LoggerI) *Prometheus {
 
 	// Add standard metrics, replace URL keys
 	p := &Prometheus{
@@ -50,7 +52,7 @@ type Prometheus struct {
 
 	ReplaceURLKeys func(c *gin.Context) string
 
-	logger LoggerI
+	logger common.LoggerI
 }
 
 // prometheus.Collector type (i.e. CounterVec, Summary, etc) of each metric

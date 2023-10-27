@@ -3,8 +3,10 @@ package requests
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"testing"
 
 	"github.com/gilperopiola/go-rest-example/pkg/common"
@@ -13,12 +15,9 @@ import (
 )
 
 const (
-	CTX_KEY_USER_ID   = "ID"
-	PARAM_KEY_USER_ID = "user_id"
-
-	VALID_USERNAME = "valid_username"
-	VALID_EMAIL    = "test@email.com"
-	VALID_PASSWORD = "password"
+	validUsername = "valid_username"
+	validEmail    = "test@email.com"
+	validPassword = "password"
 )
 
 func TestMakeSignupRequest(t *testing.T) {
@@ -30,17 +29,17 @@ func TestMakeSignupRequest(t *testing.T) {
 	}
 
 	successBody := SignupBody{
-		Username:       VALID_USERNAME,
-		Email:          VALID_EMAIL,
-		Password:       VALID_PASSWORD,
-		RepeatPassword: VALID_PASSWORD,
+		Username:       validUsername,
+		Email:          validEmail,
+		Password:       validPassword,
+		RepeatPassword: validPassword,
 	}
 
 	successResponse := SignupRequest{
-		Username:       VALID_USERNAME,
-		Email:          VALID_EMAIL,
-		Password:       VALID_PASSWORD,
-		RepeatPassword: VALID_PASSWORD,
+		Username:       validUsername,
+		Email:          validEmail,
+		Password:       validPassword,
+		RepeatPassword: validPassword,
 	}
 
 	tests := []struct {
@@ -73,7 +72,7 @@ func TestMakeSignupRequest(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 
 			// Prepare
-			context := makeTestContextWithHTTPRequest(tt.body)
+			context := makeTestContextWithHTTPRequest(tt.body, "")
 
 			// Act
 			got, err := MakeSignupRequest(context)
@@ -92,13 +91,13 @@ func TestMakeLoginRequest(t *testing.T) {
 	}
 
 	successBody := LoginBody{
-		UsernameOrEmail: VALID_USERNAME,
-		Password:        VALID_PASSWORD,
+		UsernameOrEmail: validUsername,
+		Password:        validPassword,
 	}
 
 	successResponse := LoginRequest{
-		UsernameOrEmail: VALID_USERNAME,
-		Password:        VALID_PASSWORD,
+		UsernameOrEmail: validUsername,
+		Password:        validPassword,
 	}
 
 	tests := []struct {
@@ -131,7 +130,7 @@ func TestMakeLoginRequest(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 
 			// Prepare
-			context := makeTestContextWithHTTPRequest(tt.body)
+			context := makeTestContextWithHTTPRequest(tt.body, "")
 
 			// Act
 			got, err := MakeLoginRequest(context)
@@ -171,8 +170,8 @@ func TestMakeGetUserRequest(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 
 			// Prepare
-			context := makeTestContextWithHTTPRequest(GetUserRequest{})
-			addValueAndParamToContext(context, CTX_KEY_USER_ID, tt.ctxUserID, PARAM_KEY_USER_ID, tt.urlUserID)
+			context := makeTestContextWithHTTPRequest(GetUserRequest{}, "")
+			addValueAndParamToContext(context, "ID", tt.ctxUserID, "user_id", tt.urlUserID)
 
 			// Act
 			got, err := MakeGetUserRequest(context)
@@ -191,40 +190,32 @@ func TestMakeUpdateUserRequest(t *testing.T) {
 		Email    any `json:"email"`
 	}
 
-	successBody := UpdateUserBody{Username: VALID_USERNAME}
-	successResponse := UpdateUserRequest{ID: 1, Username: VALID_USERNAME}
+	successBody := UpdateUserBody{Username: validUsername}
+	successResponse := UpdateUserRequest{ID: 1, Username: validUsername}
 
 	tests := []struct {
-		name      string
-		ctxUserID int
-		urlUserID string
-		body      UpdateUserBody
-		want      UpdateUserRequest
-		wantErr   error
+		name    string
+		body    UpdateUserBody
+		want    UpdateUserRequest
+		wantErr error
 	}{
 		{
-			name:      "error_binding_request",
-			ctxUserID: 1,
-			urlUserID: "1",
-			body:      UpdateUserBody{Username: 5},
-			want:      UpdateUserRequest{},
-			wantErr:   common.ErrBindingRequest,
+			name:    "error_binding_request",
+			body:    UpdateUserBody{Username: 5},
+			want:    UpdateUserRequest{},
+			wantErr: common.ErrBindingRequest,
 		},
 		{
-			name:      "error_validating_request",
-			ctxUserID: 2,
-			urlUserID: "2",
-			body:      UpdateUserBody{Username: VALID_USERNAME, Email: "invalid"},
-			want:      UpdateUserRequest{},
-			wantErr:   common.ErrInvalidEmailFormat,
+			name:    "error_validating_request",
+			body:    UpdateUserBody{Username: validUsername, Email: "invalid"},
+			want:    UpdateUserRequest{},
+			wantErr: common.ErrInvalidEmailFormat,
 		},
 		{
-			name:      "success",
-			ctxUserID: 1,
-			urlUserID: "1",
-			body:      successBody,
-			want:      successResponse,
-			wantErr:   nil,
+			name:    "success",
+			body:    successBody,
+			want:    successResponse,
+			wantErr: nil,
 		},
 	}
 
@@ -232,8 +223,8 @@ func TestMakeUpdateUserRequest(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 
 			// Prepare
-			context := makeTestContextWithHTTPRequest(tt.body)
-			addValueAndParamToContext(context, CTX_KEY_USER_ID, tt.ctxUserID, PARAM_KEY_USER_ID, tt.urlUserID)
+			context := makeTestContextWithHTTPRequest(tt.body, "")
+			addValueAndParamToContext(context, "ID", 1, "user_id", "1")
 
 			// Act
 			got, err := MakeUpdateUserRequest(context)
@@ -245,10 +236,98 @@ func TestMakeUpdateUserRequest(t *testing.T) {
 	}
 }
 
+func TestMakeSearchUsersRequest(t *testing.T) {
+	tests := []struct {
+		name    string
+		path    string
+		want    SearchUsersRequest
+		wantErr error
+	}{
+		{
+			name:    "default_values",
+			want:    SearchUsersRequest{Username: "", Page: 0, PerPage: 10},
+			wantErr: nil,
+		},
+		{
+			name:    "error_invalid_value",
+			path:    "/users?username=john&page=0&per_page=",
+			want:    SearchUsersRequest{},
+			wantErr: common.ErrInvalidValue,
+		},
+		{
+			name:    "success",
+			path:    "/users?username=john&page=1&per_page=20",
+			want:    SearchUsersRequest{Username: "john", Page: 1, PerPage: 20},
+			wantErr: nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			// Prepare
+			context := makeTestContextWithHTTPRequest(SearchUsersRequest{}, tt.path)
+
+			// Act
+			got, err := MakeSearchUsersRequest(context)
+
+			// Assert
+			assert.Equal(t, tt.want, got)
+			if tt.wantErr != nil {
+				assert.True(t, errors.Is(err, tt.wantErr))
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
+}
+
+func TestMakeDeleteUserRequest(t *testing.T) {
+	tests := []struct {
+		name      string
+		ctxUserID int
+		want      DeleteUserRequest
+		wantErr   error
+	}{
+		{
+			name:      "error_reading_from_ctx",
+			ctxUserID: 0,
+			want:      DeleteUserRequest{},
+			wantErr:   common.ErrReadingValueFromCtx,
+		},
+		{
+			name:      "success",
+			ctxUserID: 1,
+			want:      DeleteUserRequest{ID: 1},
+			wantErr:   nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			// Prepare
+			context := makeTestContextWithHTTPRequest(DeleteUserRequest{}, "")
+			addValueAndParamToContext(context, "ID", tt.ctxUserID, "user_id", strconv.Itoa(tt.ctxUserID))
+
+			// Act
+			got, err := MakeDeleteUserRequest(context)
+
+			// Assert
+			assert.Equal(t, tt.want, got)
+			if tt.wantErr != nil {
+				assert.ErrorIs(t, err, tt.wantErr)
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
+}
+
 //----------------------------------------------
 
-func makeTestHTTPRequest(body []byte) *http.Request {
-	req, _ := http.NewRequest("", "", bytes.NewBuffer(body))
+func makeTestHTTPRequest(body []byte, path string) *http.Request {
+	req, _ := http.NewRequest("", path, bytes.NewBuffer(body))
 	req.Header.Set("Content-Type", "application/json")
 	return req
 }
@@ -260,9 +339,9 @@ func addRequestToContext(request *http.Request) *gin.Context {
 	return c
 }
 
-func makeTestContextWithHTTPRequest(body any) *gin.Context {
+func makeTestContextWithHTTPRequest(body any, path string) *gin.Context {
 	jsonData, _ := json.Marshal(body)
-	httpReq := makeTestHTTPRequest(jsonData)
+	httpReq := makeTestHTTPRequest(jsonData, path)
 	return addRequestToContext(httpReq)
 }
 

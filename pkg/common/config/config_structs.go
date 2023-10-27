@@ -2,6 +2,8 @@ package config
 
 import "fmt"
 
+// If you add something here, remember to add it to the .env_example file
+
 type General struct {
 	Debug     bool   `envconfig:"GO_REST_EXAMPLE_DEBUG"`
 	Port      string `envconfig:"GO_REST_EXAMPLE_PORT"`
@@ -23,6 +25,11 @@ type Database struct {
 
 	AdminInsert   bool   `envconfig:"GO_REST_EXAMPLE_DATABASE_ADMIN_INSERT"`
 	AdminPassword string `envconfig:"GO_REST_EXAMPLE_DATABASE_ADMIN_PASSWORD"`
+
+	MaxIdleConns int `envconfig:"GO_REST_EXAMPLE_DATABASE_MAX_IDLE_CONNS"`
+	MaxOpenConns int `envconfig:"GO_REST_EXAMPLE_DATABASE_MAX_OPEN_CONNS"`
+	MaxRetries   int `envconfig:"GO_REST_EXAMPLE_DATABASE_MAX_RETRIES"`
+	RetryDelay   int `envconfig:"GO_REST_EXAMPLE_DATABASE_RETRY_DELAY_SECONDS"`
 }
 
 func (config *Database) GetConnectionString() string {

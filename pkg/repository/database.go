@@ -1,14 +1,12 @@
 package repository
 
 import (
-	"database/sql"
 	"fmt"
 	"os"
 	"time"
 
 	"github.com/gilperopiola/go-rest-example/pkg/common"
 	"github.com/gilperopiola/go-rest-example/pkg/common/config"
-	"github.com/gilperopiola/go-rest-example/pkg/common/middleware"
 	"github.com/gilperopiola/go-rest-example/pkg/common/models"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -16,43 +14,20 @@ import (
 )
 
 type database struct {
-	db DB
+	db *gorm.DB
 }
 
-// Gorm is quite difficult to mock, not completed
-type DB interface {
-	Create(value interface{}) *gorm.DB
-	Preload(column string, conditions ...interface{}) *gorm.DB
-	Where(query interface{}, args ...interface{}) *gorm.DB
-	Find(out interface{}, where ...interface{}) *gorm.DB
-	Model(value interface{}) *gorm.DB
-	Update(attrs ...interface{}) *gorm.DB
-	Delete(value interface{}, where ...interface{}) *gorm.DB
-	Offset(offset interface{}) *gorm.DB
-	Limit(limit interface{}) *gorm.DB
-	Close() error
-	LogMode(enable bool) *gorm.DB
-	DB() *sql.DB
-	AutoMigrate(values ...interface{}) *gorm.DB
-	DropTable(values ...interface{}) *gorm.DB
-}
-
-func NewDatabase(config config.Config, logger middleware.LoggerI) database {
+func NewDatabase(config config.Config, logger common.LoggerI) database {
 	var database database
 	database.setup(config, logger)
 	return database
 }
 
-const (
-	maxRetries = 5
-	retryDelay = 5 // In seconds
-)
-
-func (database *database) DB() DB {
+func (database *database) DB() *gorm.DB {
 	return database.db
 }
 
-func (database *database) setup(config config.Config, logger middleware.LoggerI) {
+func (database *database) setup(config config.Config, logger common.LoggerI) {
 
 	// Create connection. It's deferred closed in main.go.
 	// Retry connection if it fails due to Docker's orchestration.
@@ -65,6 +40,7 @@ func (database *database) setup(config config.Config, logger middleware.LoggerI)
 	// Log queries if debug = true
 	// Destroy or clean tables
 	// AutoMigrate fields
+	// Create admin
 	database.configure(config)
 }
 
@@ -72,20 +48,20 @@ func (database *database) Close() {
 	database.db.Close()
 }
 
-func (database *database) connectToDB(config config.Config, logger middleware.LoggerI) error {
+func (database *database) connectToDB(config config.Config, logger common.LoggerI) error {
 	var err error
 	retries := 0
 	dbConfig := config.Database
 
 	// Retry connection if it fails due to Docker's orchestration
-	for retries < maxRetries {
+	for retries < dbConfig.MaxRetries {
 		if database.db, err = gorm.Open(dbConfig.Type, dbConfig.GetConnectionString()); err != nil {
 			retries++
-			if retries == maxRetries {
-				return fmt.Errorf("error connecting to database after %d retries: %v", maxRetries, err)
+			if retries == dbConfig.MaxRetries {
+				return fmt.Errorf("error connecting to database after %d retries: %v", dbConfig.MaxRetries, err)
 			}
 			logger.Warn("error connecting to database, retrying... ")
-			time.Sleep(retryDelay * time.Second)
+			time.Sleep(time.Duration(dbConfig.RetryDelay) * time.Second)
 			continue
 		}
 		break
@@ -97,8 +73,8 @@ func (database *database) configure(config config.Config) {
 	dbConfig := config.Database
 
 	// Set connection pool limits
-	database.db.DB().SetMaxIdleConns(10)
-	database.db.DB().SetMaxOpenConns(100)
+	database.db.DB().SetMaxIdleConns(dbConfig.MaxIdleConns)
+	database.db.DB().SetMaxOpenConns(dbConfig.MaxOpenConns)
 	database.db.DB().SetConnMaxLifetime(time.Hour)
 
 	// Log queries if debug = true
@@ -108,13 +84,13 @@ func (database *database) configure(config config.Config) {
 
 	// Destroy or clean tables
 	if dbConfig.Destroy {
-		database.db.DropTable(&models.User{})
-		database.db.DropTable(&models.UserDetail{})
-		database.db.DropTable(&models.UserPost{})
+		for _, model := range models.AllModels {
+			database.db.DropTable(model)
+		}
 	} else if dbConfig.Purge {
-		database.db.Delete(models.User{})
-		database.db.Delete(models.UserDetail{})
-		database.db.Delete(models.UserPost{})
+		for _, model := range models.AllModels {
+			database.db.Delete(model)
+		}
 	}
 
 	// AutoMigrate fields
@@ -122,12 +98,12 @@ func (database *database) configure(config config.Config) {
 
 	// Insert admin user
 	if dbConfig.AdminInsert {
-		adminUserModel := models.User{
+		adminUser := models.User{
 			Username: "admin", Email: "ferra.main@gmail.com", IsAdmin: true,
 			Password: common.Hash(dbConfig.AdminPassword, config.JWT.HashSalt),
 		}
-		if err := database.DB().Create(&adminUserModel).Error; err != nil {
-			fmt.Printf(err.Error())
+		if err := database.DB().Create(&adminUser).Error; err != nil {
+			fmt.Print(err.Error())
 		}
 	}
 }

@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 
+	"github.com/gilperopiola/go-rest-example/pkg/common"
 	"github.com/gilperopiola/go-rest-example/pkg/common/auth"
 	"github.com/gilperopiola/go-rest-example/pkg/common/config"
 	"github.com/gilperopiola/go-rest-example/pkg/common/middleware"
@@ -21,6 +22,7 @@ import (
 // - reset password
 // - roles to DB
 // - Fix Readme
+// - Prometheus enable flag
 
 // Note: The HTTP Requests entrypoint is the Prometheus HandlerFunc
 
@@ -35,7 +37,7 @@ func main() {
 		config = config.New(".env")
 
 		// Initialize logger
-		logger = middleware.NewLogger()
+		logger = common.NewLogger()
 
 		// We use prometheus to get metrics
 		prometheus = middleware.NewPrometheus(logger)
@@ -45,11 +47,11 @@ func main() {
 
 		// Initialize middlewares
 		middlewares = []gin.HandlerFunc{
-			gin.Recovery(),
-			middleware.NewCORSConfigMiddleware(),
-			middleware.NewNewRelicMiddleware(newRelic),
-			middleware.NewPrometheusMiddleware(prometheus),
-			middleware.NewTimeoutMiddleware(config.General.Timeout),
+			gin.Recovery(),                                          // Panic recovery
+			middleware.NewCORSConfigMiddleware(),                    // CORS
+			middleware.NewNewRelicMiddleware(newRelic),              // New Relic (monitoring)
+			middleware.NewPrometheusMiddleware(prometheus),          // Prometheus (metrics)
+			middleware.NewTimeoutMiddleware(config.General.Timeout), // Timeout
 		}
 
 		// Initialize authentication module

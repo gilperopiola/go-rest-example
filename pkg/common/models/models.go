@@ -7,7 +7,7 @@ import (
 )
 
 // Models are the representation of the database schema. They are used in the Service & Repository Layers.
-// If you add a new one, you should add it to the methods in pkg/repository/database.go
+// They are probably the most important part of the app.
 
 var AllModels = []interface{}{
 	&User{},
@@ -46,6 +46,7 @@ type UserPost struct {
 
 type UserPosts []UserPost
 
+// We have a RepositoryLayer here to avoid circular dependencies, models talk to the repository layer
 type RepositoryLayer interface {
 	CreateUser(user User) (User, error)
 	UpdateUser(user User) (User, error)
