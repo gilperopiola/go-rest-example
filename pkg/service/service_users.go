@@ -107,6 +107,37 @@ func (s *service) SearchUsers(searchUsersRequest requests.SearchUsersRequest) (r
 	}, nil
 }
 
+//--------------------------
+//     CHANGE PASSWORD
+//--------------------------
+
+func (s *service) ChangePassword(changePasswordRequest requests.ChangePasswordRequest) (responses.ChangePasswordResponse, error) {
+	user := changePasswordRequest.ToUserModel()
+
+	if err := user.Get(s.repository, options.WithoutDeleted); err != nil {
+		return responses.ChangePasswordResponse{}, common.Wrap("ChangePassword: user.Get", err)
+	}
+
+	// Check if old password matches
+	if !user.PasswordMatches(changePasswordRequest.OldPassword, s.config.JWT.HashSalt) {
+		return responses.ChangePasswordResponse{}, common.Wrap("ChangePassword: !user.PasswordMatches", common.ErrWrongPassword)
+	}
+
+	// Swap passwords
+	user.Password = changePasswordRequest.NewPassword
+
+	// Hash new password
+	user.HashPassword(s.config.JWT.HashSalt)
+
+	if err := user.Update(s.repository); err != nil {
+		return responses.ChangePasswordResponse{}, common.Wrap("ChangePassword: user.Update", err)
+	}
+
+	return responses.ChangePasswordResponse{
+		User: user.ToResponseModel(),
+	}, nil
+}
+
 //------------------------------
 //      CREATE USER POST
 //------------------------------

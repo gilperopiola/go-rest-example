@@ -5,13 +5,13 @@ import (
 
 	"github.com/gilperopiola/go-rest-example/pkg/common/auth"
 	"github.com/gilperopiola/go-rest-example/pkg/common/config"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 //-----------------------------
-//      ROUTES / ENDPOINTS
+//     ROUTES / ENDPOINTS
 //-----------------------------
 
 func (router *router) setEndpoints(transport TransportLayer, cfg config.General, authI auth.AuthI) {
@@ -44,6 +44,7 @@ func (router *router) setV1Endpoints(v1 *gin.RouterGroup, transport TransportLay
 		users.GET("/:user_id", transport.getUser)
 		users.PATCH("/:user_id", transport.updateUser)
 		users.DELETE("/:user_id", transport.deleteUser)
+		users.PATCH("/:user_id/password", transport.changePassword)
 
 		// User posts
 		posts := users.Group("/:user_id/posts")
@@ -52,7 +53,7 @@ func (router *router) setV1Endpoints(v1 *gin.RouterGroup, transport TransportLay
 		}
 	}
 
-	// Admin endpoints
+	// Admins
 	admin := v1.Group("/admin", authI.ValidateToken(auth.AdminRole, false))
 	{
 		admin.POST("/user", transport.createUser)

@@ -41,6 +41,10 @@ type SearchUsersResponse struct {
 	PerPage int    `json:"per_page"`
 }
 
+type ChangePasswordResponse struct {
+	User User `json:"user"`
+}
+
 //-----------------------
 //      USER POSTS
 //-----------------------

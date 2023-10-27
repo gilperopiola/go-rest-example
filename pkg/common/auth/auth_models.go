@@ -15,3 +15,10 @@ type User struct {
 	Password string `json:"password,omitempty"`
 	IsAdmin  bool   `json:"is_admin,omitempty"`
 }
+
+func (u User) GetRole() Role {
+	if u.IsAdmin {
+		return AdminRole
+	}
+	return UserRole
+}

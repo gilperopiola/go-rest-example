@@ -39,7 +39,7 @@ func (req *GetUserRequest) Build(c GinI) error {
 		return err
 	}
 
-	req.ID = userToGetID
+	req.UserID = userToGetID
 
 	return nil
 }
@@ -54,7 +54,7 @@ func (req *UpdateUserRequest) Build(c GinI) error {
 		return err
 	}
 
-	req.ID = userToUpdateID
+	req.UserID = userToUpdateID
 	return nil
 }
 
@@ -64,7 +64,7 @@ func (req *DeleteUserRequest) Build(c GinI) error {
 		return err
 	}
 
-	req.ID = userToDeleteID
+	req.UserID = userToDeleteID
 	return nil
 }
 
@@ -86,6 +86,21 @@ func (req *SearchUsersRequest) Build(c GinI) error {
 	if err != nil {
 		return common.ErrInvalidValue
 	}
+
+	return nil
+}
+
+func (req *ChangePasswordRequest) Build(c GinI) error {
+	if err := c.ShouldBindJSON(&req); err != nil {
+		return common.ErrBindingRequest
+	}
+
+	userToChangePasswordID, err := getIntFromContext(c, "ID")
+	if err != nil {
+		return err
+	}
+
+	req.UserID = userToChangePasswordID
 
 	return nil
 }

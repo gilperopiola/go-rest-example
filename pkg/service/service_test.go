@@ -253,7 +253,7 @@ func TestDeleteUser(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			got, err := newTestService(tc.mockRepository).DeleteUser(requests.DeleteUserRequest{ID: VALID_ID})
+			got, err := newTestService(tc.mockRepository).DeleteUser(requests.DeleteUserRequest{UserID: VALID_ID})
 			assertTC(t, tc.want, tc.wantErr, got, err, tc.mockRepository)
 		})
 	}

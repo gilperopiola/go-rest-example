@@ -161,7 +161,7 @@ func TestMakeGetUserRequest(t *testing.T) {
 			name:      "success",
 			ctxUserID: 1,
 			urlUserID: "1",
-			want:      GetUserRequest{ID: 1},
+			want:      GetUserRequest{UserID: 1},
 			wantErr:   nil,
 		},
 	}
@@ -191,7 +191,7 @@ func TestMakeUpdateUserRequest(t *testing.T) {
 	}
 
 	successBody := UpdateUserBody{Username: validUsername}
-	successResponse := UpdateUserRequest{ID: 1, Username: validUsername}
+	successResponse := UpdateUserRequest{UserID: 1, Username: validUsername}
 
 	tests := []struct {
 		name    string
@@ -298,7 +298,7 @@ func TestMakeDeleteUserRequest(t *testing.T) {
 		{
 			name:      "success",
 			ctxUserID: 1,
-			want:      DeleteUserRequest{ID: 1},
+			want:      DeleteUserRequest{UserID: 1},
 			wantErr:   nil,
 		},
 	}

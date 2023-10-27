@@ -55,7 +55,7 @@ func (r *CreateUserRequest) ToUserModel() models.User {
 }
 
 func (r *GetUserRequest) ToUserModel() models.User {
-	return models.User{ID: r.ID}
+	return models.User{ID: r.UserID}
 }
 
 func (r *UpdateUserRequest) ToUserModel() models.User {
@@ -69,7 +69,7 @@ func (r *UpdateUserRequest) ToUserModel() models.User {
 	}
 
 	return models.User{
-		ID:       r.ID,
+		ID:       r.UserID,
 		Username: r.Username,
 		Email:    r.Email,
 		Details: models.UserDetail{
@@ -80,11 +80,19 @@ func (r *UpdateUserRequest) ToUserModel() models.User {
 }
 
 func (r *DeleteUserRequest) ToUserModel() models.User {
-	return models.User{ID: r.ID}
+	return models.User{ID: r.UserID}
 }
 
 func (r *SearchUsersRequest) ToUserModel() models.User {
 	return models.User{Username: r.Username}
+}
+
+func (r *ChangePasswordRequest) ToUserModel() models.User {
+	return models.User{
+		ID:          r.UserID,
+		Password:    r.OldPassword,
+		NewPassword: r.NewPassword,
+	}
 }
 
 //--------------------------------

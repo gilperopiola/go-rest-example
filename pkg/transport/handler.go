@@ -48,6 +48,7 @@ type Request interface {
 		requests.UpdateUserRequest |
 		requests.DeleteUserRequest |
 		requests.SearchUsersRequest |
+		requests.ChangePasswordRequest |
 		requests.CreateUserPostRequest
 }
 type Response interface {
@@ -58,5 +59,6 @@ type Response interface {
 		responses.UpdateUserResponse |
 		responses.DeleteUserResponse |
 		responses.SearchUsersResponse |
+		responses.ChangePasswordResponse |
 		responses.CreateUserPostResponse
 }

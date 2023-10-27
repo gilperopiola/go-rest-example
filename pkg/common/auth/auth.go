@@ -6,7 +6,7 @@ import (
 )
 
 type AuthI interface {
-	GenerateToken(user User, role Role) (string, error)
+	GenerateToken(user User) (string, error)
 	ValidateToken(role Role, shouldMatchUserID bool) gin.HandlerFunc
 }
 

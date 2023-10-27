@@ -42,6 +42,10 @@ func (t transport) searchUsers(c *gin.Context) {
 	HandleRequest(c, requests.MakeSearchUsersRequest, t.Service().SearchUsers, t.ErrorsMapper())
 }
 
+func (t transport) changePassword(c *gin.Context) {
+	HandleRequest(c, requests.MakeChangePasswordRequest, t.Service().ChangePassword, t.ErrorsMapper())
+}
+
 //-------------------
 //      POSTS
 //-------------------

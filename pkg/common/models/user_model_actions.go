@@ -10,14 +10,7 @@ import (
 //       AUTH
 //-------------------
 
-func (u *User) GetAuthRole() auth.Role {
-	if u.IsAdmin {
-		return auth.AdminRole
-	}
-	return auth.UserRole
-}
-
-func (u *User) ToAuthEntity() auth.User {
+func (u *User) ToAuthModel() auth.User {
 	return auth.User{
 		ID:       u.ID,
 		Username: u.Username,
@@ -27,7 +20,7 @@ func (u *User) ToAuthEntity() auth.User {
 }
 
 func (u *User) GenerateTokenString(a auth.AuthI) (string, error) {
-	return a.GenerateToken(u.ToAuthEntity(), u.GetAuthRole())
+	return a.GenerateToken(u.ToAuthModel())
 }
 
 //----------------
@@ -112,7 +105,7 @@ func (u *User) OverwriteDetails(firstName, lastName *string) {
 }
 
 //-----------------------
-//       USER POSTS
+//      USER POSTS
 //-----------------------
 
 func (up *UserPost) Create(r RepositoryLayer) error {

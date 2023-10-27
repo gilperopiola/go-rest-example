@@ -26,7 +26,7 @@ func MakeCreateUserRequest(c GinI) (request CreateUserRequest, err error) {
 }
 
 type GetUserRequest struct {
-	ID int `json:"id"`
+	UserID int `json:"user_id"`
 }
 
 func MakeGetUserRequest(c GinI) (request GetUserRequest, err error) {
@@ -40,7 +40,7 @@ func MakeGetUserRequest(c GinI) (request GetUserRequest, err error) {
 }
 
 type UpdateUserRequest struct {
-	ID       int    `json:"id"`
+	UserID   int    `json:"user_id"`
 	Username string `json:"username"`
 	Email    string `json:"email"`
 
@@ -60,7 +60,7 @@ func MakeUpdateUserRequest(c GinI) (request UpdateUserRequest, err error) {
 }
 
 type DeleteUserRequest struct {
-	ID int `json:"id"`
+	UserID int `json:"user_id"`
 }
 
 func MakeDeleteUserRequest(c GinI) (request DeleteUserRequest, err error) {
@@ -85,6 +85,23 @@ func MakeSearchUsersRequest(c GinI) (request SearchUsersRequest, err error) {
 	}
 	if err = request.Validate(); err != nil {
 		return SearchUsersRequest{}, common.Wrap("makeSearchUsersRequest", err)
+	}
+	return request, nil
+}
+
+type ChangePasswordRequest struct {
+	UserID         int    `json:"user_id"`
+	OldPassword    string `json:"old_password"`
+	NewPassword    string `json:"new_password"`
+	RepeatPassword string `json:"repeat_password"`
+}
+
+func MakeChangePasswordRequest(c GinI) (request ChangePasswordRequest, err error) {
+	if err = request.Build(c); err != nil {
+		return ChangePasswordRequest{}, common.Wrap("makeChangePasswordRequest", err)
+	}
+	if err = request.Validate(); err != nil {
+		return ChangePasswordRequest{}, common.Wrap("makeChangePasswordRequest", err)
 	}
 	return request, nil
 }

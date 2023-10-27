@@ -14,11 +14,11 @@ type router struct {
 
 func NewRouter(t TransportLayer, cfg config.General, auth auth.AuthI, middlewares middleware.Middlewares) router {
 	var router router
-	router.Setup(t, cfg, auth, middlewares)
+	router.setup(t, cfg, auth, middlewares)
 	return router
 }
 
-func (router *router) Setup(t TransportLayer, cfg config.General, auth auth.AuthI, middlewares middleware.Middlewares) {
+func (router *router) setup(t TransportLayer, cfg config.General, auth auth.AuthI, middlewares middleware.Middlewares) {
 
 	// Create router. Set debug/release mode
 	router.prepare(!cfg.Debug)

@@ -7,10 +7,10 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
-func (auth *Auth) GenerateToken(user User, role Role) (string, error) {
+func (auth *Auth) GenerateToken(user User) (string, error) {
 
 	var (
-		// Session duration can be set in the config
+		role      = user.GetRole()
 		issuedAt  = time.Now()
 		expiresAt = time.Now().Add(time.Hour * 24 * time.Duration(auth.sessionDurationDays))
 	)

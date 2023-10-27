@@ -26,6 +26,9 @@ type User struct {
 	Deleted   bool
 	CreatedAt time.Time
 	UpdatedAt time.Time
+
+	// DTOs
+	NewPassword string `gorm:"-"`
 }
 
 type UserDetail struct {

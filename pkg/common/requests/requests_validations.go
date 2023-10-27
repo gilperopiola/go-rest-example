@@ -50,14 +50,14 @@ func (req CreateUserRequest) Validate() error {
 }
 
 func (req GetUserRequest) Validate() error {
-	if req.ID == 0 {
+	if req.UserID == 0 {
 		return common.ErrAllFieldsRequired
 	}
 	return nil
 }
 
 func (req UpdateUserRequest) Validate() error {
-	if req.ID == 0 || (req.Email == "" && req.Username == "") {
+	if req.UserID == 0 || (req.Email == "" && req.Username == "") {
 		return common.ErrAllFieldsRequired
 	}
 
@@ -75,7 +75,7 @@ func (req UpdateUserRequest) Validate() error {
 }
 
 func (req DeleteUserRequest) Validate() error {
-	if req.ID == 0 {
+	if req.UserID == 0 {
 		return common.ErrAllFieldsRequired
 	}
 
@@ -85,6 +85,26 @@ func (req DeleteUserRequest) Validate() error {
 func (req SearchUsersRequest) Validate() error {
 	if req.Page < 0 || req.PerPage <= 0 {
 		return common.ErrAllFieldsRequired
+	}
+
+	return nil
+}
+
+func (req ChangePasswordRequest) Validate() error {
+	if req.UserID == 0 {
+		return common.ErrAllFieldsRequired
+	}
+
+	if req.OldPassword == "" || req.NewPassword == "" || req.RepeatPassword == "" {
+		return common.ErrAllFieldsRequired
+	}
+
+	if len(req.NewPassword) < passwordMinLength || len(req.NewPassword) > passwordMaxLength {
+		return common.ErrInvalidPasswordLength
+	}
+
+	if req.NewPassword != req.RepeatPassword {
+		return common.ErrPasswordsDontMatch
 	}
 
 	return nil

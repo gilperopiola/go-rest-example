@@ -30,7 +30,8 @@ func (r *repository) GetUser(user models.User, opts ...options.QueryOption) (mod
 	}
 
 	// preload user details and posts
-	err := r.database.db.Preload("Details").Preload("Posts").Where(query, user.ID, user.Username, user.Email).First(&user).Error
+	db := r.database.db
+	err := db.Preload("Details").Preload("Posts").Where(query, user.ID, user.Username, user.Email).First(&user).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return models.User{}, common.Wrap(err.Error(), common.ErrUserNotFound)
@@ -75,19 +76,20 @@ func (r *repository) DeleteUser(id int) (models.User, error) {
 
 func (r *repository) SearchUsers(username string, page, perPage int, opts ...options.PreloadOption) (models.Users, error) {
 	var users models.Users
+	db := r.database.db
 
 	// preload user details and posts
 	for _, opt := range opts {
-		r.database.db = opt(r.database.db)
+		db = opt(r.database.db)
 	}
 
 	// if username is provided, apply the filter
 	if username != "" {
 		searchPattern := "%" + username + "%"
-		r.database.db = r.database.db.Where("username LIKE ?", searchPattern)
+		db = db.Where("username LIKE ?", searchPattern)
 	}
 
-	if err := r.database.db.Offset(page * perPage).Limit(perPage).Find(&users).Error; err != nil {
+	if err := db.Offset(page * perPage).Limit(perPage).Find(&users).Error; err != nil {
 		return models.Users{}, common.Wrap(err.Error(), common.ErrSearchingUsers)
 	}
 
@@ -102,7 +104,8 @@ func (r *repository) UserExists(username, email string, opts ...options.QueryOpt
 	}
 
 	var count int64
-	r.database.db.Model(&models.User{}).Where(query, username, email).Count(&count)
+	db := r.database.db
+	db.Model(&models.User{}).Where(query, username, email).Count(&count)
 	return count > 0
 }
 
