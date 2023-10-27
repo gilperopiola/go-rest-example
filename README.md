@@ -1,6 +1,6 @@
 # Go REST Example
 
-**`Hey Kidd0!`** If you write (or wanna write) HTTP REST APIs in Golang this repo will be pretty handy. 
+**`Hey Kidd0!`** If you write (or wanna write) **HTTP REST APIs** in Golang this is your lucky day. 
 
 Here you have **`Easy To Follow Code`** without having to learn an entire framework. Is it perfect? **Yes**. Well no, but it's pretty easy to understand and modify and extend. It has that **`Simplicity`** most other boilerplates don't, it has a fuckload of features and it's actually quite solid and robust, perfect for a large microservice. If your project is smaller, you should check out [v1.2.0](https://github.com/gilperopiola/go-rest-example/releases/tag/v1.2.0). 
 
@@ -8,7 +8,7 @@ Here you have **`Easy To Follow Code`** without having to learn an entire framew
 
 |User Management|Easy Config|JWT Auth|MySQL Storage
 |:-------------:|:-------------:|:-------------:|:-------------:|
-|**Gin Routing**|**Unit Tests**|**Logrus Logging**|**24/7 Support**|
+|**Gin Routing**|**Unit Tests**|**Logrus Logging**|**24/7 Support 🤥**|
 |**Clean Architecture**|**SOLID**|**Design Patterns**|**Prometheus Metrics**|
 |**Best Practices**|**Great Error Handling**|**Dependency Injection**|**Profiling**|
 |**NewRelic Monitoring**|**Fully Dockerized**|**Modular Interfaces**|**E2E Testing**|
@@ -41,15 +41,12 @@ All you require to run this is having **Go 1.x.x** and a **MySQL Database** runn
    make run-local
    ```
 
-The only potential issue you could have is the DB connection, but you'll fix it. I know.
+The only potential issue you could have is the DB connection, but you'll fix it. I know. 🌈
 
 ## Contributing and License
 
-I don't care. Do what you will. I think there's a `LICENSE` file in here, who reads those anyways.
+**I don't care**. Do what you will. I think there's a `LICENSE` file in here, who reads those anyways.
 
 ---
 
-
-[^1]: If you are aiming for a small or medium microservice, you should check out this repo's [v1.2.0](https://github.com/gilperopiola/go-rest-example/releases/tag/v1.2.0).
-
-# Thanks for reading! 🐿️
+# Thanks for your time! 🐿️
