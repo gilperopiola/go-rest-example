@@ -1,6 +1,6 @@
 # Go REST Example
 
-**`Hey Kidd0!`** If you write (or wanna write) an HTTP REST APIs in Golang this repo will be pretty handy. 
+**`Hey Kidd0!`** If you write (or wanna write) HTTP REST APIs in Golang this repo will be pretty handy. 
 
 Here you have **`Easy To Follow Code`** without having to learn an entire framework. Is it perfect? **Yes**. Well no, but it's pretty easy to understand and modify and extend. It has that **`Simplicity`** most other boilerplates don't, it has a fuckload of features and it's actually quite solid and robust, perfect for a large microservice. If your project is smaller, you should check out [v1.2.0](https://github.com/gilperopiola/go-rest-example/releases/tag/v1.2.0). 
 
