@@ -16,7 +16,7 @@ Here you have **`Easy To Follow Code`** without having to learn an entire framew
 
 ## Interested? ;)
 
-Here below lies the installation and configuration guide (it's pretty short, I swear), and on the **`README2.md`** file you will find a small guide that will help you on this beautiful journey you've embarked.
+Here below lies the installation and configuration guide (it's pretty short, I swear), and on the [**`README2.md`**](https://github.com/gilperopiola/go-rest-example/blob/master/README2.md) file you will find a small guide that will help you on this beautiful journey you've embarked.
 
 ## Installation and Usage
 
