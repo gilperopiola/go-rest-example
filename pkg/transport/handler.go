@@ -18,10 +18,10 @@ import (
 //
 // It writes an HTTP response with the result of the service call.
 
-func HandleRequest[req requests.All, resp responses.All](c *gin.Context, makeRequestFn func(requests.GinI) (req, error), serviceCallFn func(req) (resp, error)) {
+func HandleRequest[req requests.All, resp responses.All](c *gin.Context, emptyReq req, makeRequestFn func(requests.GinI, req) (req, error), serviceCallFn func(req) (resp, error)) {
 
 	// Build, validate and get request
-	request, err := makeRequestFn(c)
+	request, err := makeRequestFn(c, emptyReq)
 	if err != nil {
 		c.Error(err)
 		return

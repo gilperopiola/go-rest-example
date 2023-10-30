@@ -12,7 +12,7 @@ import (
 //-------------------------
 
 // CreateUser is an admins only endpoint
-func (s *service) CreateUser(request requests.CreateUserRequest) (responses.CreateUserResponse, error) {
+func (s *service) CreateUser(request *requests.CreateUserRequest) (responses.CreateUserResponse, error) {
 	user := request.ToUserModel()
 
 	if user.Exists(s.repository) {
@@ -32,7 +32,7 @@ func (s *service) CreateUser(request requests.CreateUserRequest) (responses.Crea
 //       GET USER
 //-----------------------
 
-func (s *service) GetUser(request requests.GetUserRequest) (responses.GetUserResponse, error) {
+func (s *service) GetUser(request *requests.GetUserRequest) (responses.GetUserResponse, error) {
 	user := request.ToUserModel()
 
 	if err := user.Get(s.repository, options.WithoutDeleted); err != nil {
@@ -46,13 +46,15 @@ func (s *service) GetUser(request requests.GetUserRequest) (responses.GetUserRes
 //       UPDATE USER
 //--------------------------
 
-func (s *service) UpdateUser(request requests.UpdateUserRequest) (responses.UpdateUserResponse, error) {
+func (s *service) UpdateUser(request *requests.UpdateUserRequest) (responses.UpdateUserResponse, error) {
 	user := request.ToUserModel()
 
+	// Check Username/Email availability
 	if user.Exists(s.repository) {
 		return responses.UpdateUserResponse{}, common.Wrap("UpdateUser: user.Exists", common.ErrUsernameOrEmailAlreadyInUse)
 	}
 
+	// Get User
 	if err := user.Get(s.repository, options.WithoutDeleted); err != nil {
 		return responses.UpdateUserResponse{}, common.Wrap("UpdateUser: user.Get", err)
 	}
@@ -72,7 +74,7 @@ func (s *service) UpdateUser(request requests.UpdateUserRequest) (responses.Upda
 //       DELETE USER
 //--------------------------
 
-func (s *service) DeleteUser(request requests.DeleteUserRequest) (responses.DeleteUserResponse, error) {
+func (s *service) DeleteUser(request *requests.DeleteUserRequest) (responses.DeleteUserResponse, error) {
 	user := request.ToUserModel()
 
 	// This returns an error if the user is already deleted
@@ -88,7 +90,7 @@ func (s *service) DeleteUser(request requests.DeleteUserRequest) (responses.Dele
 //--------------------------
 
 // SearchUsers is an admins only endpoint
-func (s *service) SearchUsers(request requests.SearchUsersRequest) (responses.SearchUsersResponse, error) {
+func (s *service) SearchUsers(request *requests.SearchUsersRequest) (responses.SearchUsersResponse, error) {
 	var (
 		user    = request.ToUserModel()
 		page    = request.Page
@@ -111,7 +113,7 @@ func (s *service) SearchUsers(request requests.SearchUsersRequest) (responses.Se
 //     CHANGE PASSWORD
 //--------------------------
 
-func (s *service) ChangePassword(request requests.ChangePasswordRequest) (responses.ChangePasswordResponse, error) {
+func (s *service) ChangePassword(request *requests.ChangePasswordRequest) (responses.ChangePasswordResponse, error) {
 	user := request.ToUserModel()
 
 	if err := user.Get(s.repository, options.WithoutDeleted); err != nil {
@@ -142,7 +144,7 @@ func (s *service) ChangePassword(request requests.ChangePasswordRequest) (respon
 //      CREATE USER POST
 //------------------------------
 
-func (s *service) CreateUserPost(request requests.CreateUserPostRequest) (responses.CreateUserPostResponse, error) {
+func (s *service) CreateUserPost(request *requests.CreateUserPostRequest) (responses.CreateUserPostResponse, error) {
 	userPost := request.ToUserPostModel()
 
 	if err := userPost.Create(s.repository); err != nil {

@@ -26,6 +26,7 @@ import (
 // - Fix errors handling so that we can have errors with parameters
 // - Request IDs
 // - Requests pkg divide by endpoint files
+// - Logic from DeleteUser to service layer
 
 // Note: This is the entrypoint of the application.
 // The HTTP Requests entrypoint is the Prometheus HandlerFunc in prometheus.go

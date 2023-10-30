@@ -76,17 +76,16 @@ func (r *repository) DeleteUser(id int) (models.User, error) {
 
 func (r *repository) SearchUsers(username string, page, perPage int, opts ...options.PreloadOption) (models.Users, error) {
 	var users models.Users
-	db := r.database.db
+	var db = r.database.db
 
 	// preload user details and posts
 	for _, opt := range opts {
-		db = opt(r.database.db)
+		db = opt(db)
 	}
 
 	// if username is provided, apply the filter
 	if username != "" {
-		searchPattern := "%" + username + "%"
-		db = db.Where("username LIKE ?", searchPattern)
+		db = db.Where("username LIKE ?", "%"+username+"%")
 	}
 
 	if err := db.Offset(page * perPage).Limit(perPage).Find(&users).Error; err != nil {

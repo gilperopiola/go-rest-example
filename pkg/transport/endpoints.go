@@ -21,11 +21,11 @@ func (t transport) healthCheck(c *gin.Context) {
 //-------------------
 
 func (t transport) signup(c *gin.Context) {
-	HandleRequest(c, requests.MakeSignupRequest, t.Service().Signup)
+	HandleRequest(c, &requests.SignupRequest{}, requests.MakeRequest[*requests.SignupRequest], t.Service().Signup)
 }
 
 func (t transport) login(c *gin.Context) {
-	HandleRequest(c, requests.MakeLoginRequest, t.Service().Login)
+	HandleRequest(c, &requests.LoginRequest{}, requests.MakeRequest[*requests.LoginRequest], t.Service().Login)
 }
 
 //------------------
@@ -33,27 +33,27 @@ func (t transport) login(c *gin.Context) {
 //------------------
 
 func (t transport) createUser(c *gin.Context) {
-	HandleRequest(c, requests.MakeCreateUserRequest, t.Service().CreateUser)
+	HandleRequest(c, &requests.CreateUserRequest{}, requests.MakeRequest[*requests.CreateUserRequest], t.Service().CreateUser)
 }
 
 func (t transport) getUser(c *gin.Context) {
-	HandleRequest(c, requests.MakeGetUserRequest, t.Service().GetUser)
+	HandleRequest(c, &requests.GetUserRequest{}, requests.MakeRequest[*requests.GetUserRequest], t.Service().GetUser)
 }
 
 func (t transport) updateUser(c *gin.Context) {
-	HandleRequest(c, requests.MakeUpdateUserRequest, t.Service().UpdateUser)
+	HandleRequest(c, &requests.UpdateUserRequest{}, requests.MakeRequest[*requests.UpdateUserRequest], t.Service().UpdateUser)
 }
 
 func (t transport) deleteUser(c *gin.Context) {
-	HandleRequest(c, requests.MakeDeleteUserRequest, t.Service().DeleteUser)
+	HandleRequest(c, &requests.DeleteUserRequest{}, requests.MakeRequest[*requests.DeleteUserRequest], t.Service().DeleteUser)
 }
 
 func (t transport) searchUsers(c *gin.Context) {
-	HandleRequest(c, requests.MakeSearchUsersRequest, t.Service().SearchUsers)
+	HandleRequest(c, &requests.SearchUsersRequest{}, requests.MakeRequest[*requests.SearchUsersRequest], t.Service().SearchUsers)
 }
 
 func (t transport) changePassword(c *gin.Context) {
-	HandleRequest(c, requests.MakeChangePasswordRequest, t.Service().ChangePassword)
+	HandleRequest(c, &requests.ChangePasswordRequest{}, requests.MakeRequest[*requests.ChangePasswordRequest], t.Service().ChangePassword)
 }
 
 //-------------------
@@ -61,5 +61,5 @@ func (t transport) changePassword(c *gin.Context) {
 //-------------------
 
 func (t transport) createUserPost(c *gin.Context) {
-	HandleRequest(c, requests.MakeCreateUserPostRequest, t.Service().CreateUserPost)
+	HandleRequest(c, &requests.CreateUserPostRequest{}, requests.MakeRequest[*requests.CreateUserPostRequest], t.Service().CreateUserPost)
 }

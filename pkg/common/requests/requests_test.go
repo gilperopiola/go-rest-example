@@ -35,7 +35,7 @@ func TestMakeSignupRequest(t *testing.T) {
 		RepeatPassword: validPassword,
 	}
 
-	successResponse := SignupRequest{
+	successRequest := SignupRequest{
 		Username:       validUsername,
 		Email:          validEmail,
 		Password:       validPassword,
@@ -45,25 +45,25 @@ func TestMakeSignupRequest(t *testing.T) {
 	tests := []struct {
 		name    string
 		body    SignupBody
-		want    SignupRequest
+		want    *SignupRequest
 		wantErr error
 	}{
 		{
 			name:    "error_binding_request",
 			body:    SignupBody{Email: 5},
-			want:    SignupRequest{},
+			want:    nil,
 			wantErr: common.ErrBindingRequest,
 		},
 		{
 			name:    "error_validating_request",
 			body:    SignupBody{Email: "invalid"},
-			want:    SignupRequest{},
+			want:    nil,
 			wantErr: common.ErrAllFieldsRequired,
 		},
 		{
 			name:    "success",
 			body:    successBody,
-			want:    successResponse,
+			want:    &successRequest,
 			wantErr: nil,
 		},
 	}
@@ -75,7 +75,7 @@ func TestMakeSignupRequest(t *testing.T) {
 			context := makeTestContextWithHTTPRequest(tt.body, "")
 
 			// Act
-			got, err := MakeSignupRequest(context)
+			got, err := MakeRequest(context, &SignupRequest{})
 
 			// Assert
 			assert.Equal(t, tt.want, got)
@@ -103,25 +103,25 @@ func TestMakeLoginRequest(t *testing.T) {
 	tests := []struct {
 		name    string
 		body    LoginBody
-		want    LoginRequest
+		want    *LoginRequest
 		wantErr error
 	}{
 		{
 			name:    "error_binding_request",
 			body:    LoginBody{UsernameOrEmail: 5},
-			want:    LoginRequest{},
+			want:    nil,
 			wantErr: common.ErrBindingRequest,
 		},
 		{
 			name:    "error_validating_request",
 			body:    LoginBody{UsernameOrEmail: "invalid"},
-			want:    LoginRequest{},
+			want:    nil,
 			wantErr: common.ErrAllFieldsRequired,
 		},
 		{
 			name:    "success",
 			body:    successBody,
-			want:    successResponse,
+			want:    &successResponse,
 			wantErr: nil,
 		},
 	}
@@ -133,7 +133,7 @@ func TestMakeLoginRequest(t *testing.T) {
 			context := makeTestContextWithHTTPRequest(tt.body, "")
 
 			// Act
-			got, err := MakeLoginRequest(context)
+			got, err := MakeRequest(context, &LoginRequest{})
 
 			// Assert
 			assert.Equal(t, tt.want, got)
@@ -147,14 +147,14 @@ func TestMakeGetUserRequest(t *testing.T) {
 		name      string
 		ctxUserID int
 		urlUserID string
-		want      GetUserRequest
+		want      *GetUserRequest
 		wantErr   error
 	}{
 		{
 			name:      "success",
 			ctxUserID: 1,
 			urlUserID: "1",
-			want:      GetUserRequest{UserID: 1},
+			want:      &GetUserRequest{UserID: 1},
 			wantErr:   nil,
 		},
 	}
@@ -167,7 +167,7 @@ func TestMakeGetUserRequest(t *testing.T) {
 			addValueAndParamToContext(context, contextUserIDKey, tt.ctxUserID, pathUserIDKey, tt.urlUserID)
 
 			// Act
-			got, err := MakeGetUserRequest(context)
+			got, err := MakeRequest(context, &GetUserRequest{})
 
 			// Assert
 			assert.Equal(t, tt.want, got)
@@ -189,25 +189,25 @@ func TestMakeUpdateUserRequest(t *testing.T) {
 	tests := []struct {
 		name    string
 		body    UpdateUserBody
-		want    UpdateUserRequest
+		want    *UpdateUserRequest
 		wantErr error
 	}{
 		{
 			name:    "error_binding_request",
 			body:    UpdateUserBody{Username: 5},
-			want:    UpdateUserRequest{},
+			want:    nil,
 			wantErr: common.ErrBindingRequest,
 		},
 		{
 			name:    "error_validating_request",
 			body:    UpdateUserBody{Username: validUsername, Email: "invalid"},
-			want:    UpdateUserRequest{},
+			want:    nil,
 			wantErr: common.ErrInvalidEmailFormat,
 		},
 		{
 			name:    "success",
 			body:    successBody,
-			want:    successResponse,
+			want:    &successResponse,
 			wantErr: nil,
 		},
 	}
@@ -220,7 +220,7 @@ func TestMakeUpdateUserRequest(t *testing.T) {
 			addValueAndParamToContext(context, contextUserIDKey, 1, pathUserIDKey, "1")
 
 			// Act
-			got, err := MakeUpdateUserRequest(context)
+			got, err := MakeRequest(context, &UpdateUserRequest{})
 
 			// Assert
 			assert.Equal(t, tt.want, got)
@@ -233,24 +233,24 @@ func TestMakeSearchUsersRequest(t *testing.T) {
 	tests := []struct {
 		name    string
 		path    string
-		want    SearchUsersRequest
+		want    *SearchUsersRequest
 		wantErr error
 	}{
 		{
 			name:    "default_values",
-			want:    SearchUsersRequest{Username: "", Page: 0, PerPage: 10},
+			want:    &SearchUsersRequest{Username: "", Page: 0, PerPage: 10},
 			wantErr: nil,
 		},
 		{
 			name:    "error_invalid_value",
 			path:    "/users?username=john&page=0&per_page=",
-			want:    SearchUsersRequest{},
+			want:    nil,
 			wantErr: common.ErrInvalidValue,
 		},
 		{
 			name:    "success",
 			path:    "/users?username=john&page=1&per_page=20",
-			want:    SearchUsersRequest{Username: "john", Page: 1, PerPage: 20},
+			want:    &SearchUsersRequest{Username: "john", Page: 1, PerPage: 20},
 			wantErr: nil,
 		},
 	}
@@ -262,7 +262,7 @@ func TestMakeSearchUsersRequest(t *testing.T) {
 			context := makeTestContextWithHTTPRequest(SearchUsersRequest{}, tt.path)
 
 			// Act
-			got, err := MakeSearchUsersRequest(context)
+			got, err := MakeRequest(context, &SearchUsersRequest{})
 
 			// Assert
 			assert.Equal(t, tt.want, got)
@@ -279,13 +279,13 @@ func TestMakeDeleteUserRequest(t *testing.T) {
 	tests := []struct {
 		name      string
 		ctxUserID int
-		want      DeleteUserRequest
+		want      *DeleteUserRequest
 		wantErr   error
 	}{
 		{
 			name:      "success",
 			ctxUserID: 1,
-			want:      DeleteUserRequest{UserID: 1},
+			want:      &DeleteUserRequest{UserID: 1},
 			wantErr:   nil,
 		},
 	}
@@ -298,7 +298,7 @@ func TestMakeDeleteUserRequest(t *testing.T) {
 			addValueAndParamToContext(context, contextUserIDKey, tt.ctxUserID, pathUserIDKey, strconv.Itoa(tt.ctxUserID))
 
 			// Act
-			got, err := MakeDeleteUserRequest(context)
+			got, err := MakeRequest(context, &DeleteUserRequest{})
 
 			// Assert
 			assert.Equal(t, tt.want, got)

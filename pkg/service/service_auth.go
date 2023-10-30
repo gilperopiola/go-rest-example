@@ -11,7 +11,7 @@ import (
 //       SIGNUP
 //-----------------------
 
-func (s *service) Signup(request requests.SignupRequest) (responses.SignupResponse, error) {
+func (s *service) Signup(request *requests.SignupRequest) (responses.SignupResponse, error) {
 	user := request.ToUserModel()
 
 	if user.Exists(s.repository) {
@@ -31,7 +31,7 @@ func (s *service) Signup(request requests.SignupRequest) (responses.SignupRespon
 //       LOGIN
 //---------------------
 
-func (s *service) Login(request requests.LoginRequest) (responses.LoginResponse, error) {
+func (s *service) Login(request *requests.LoginRequest) (responses.LoginResponse, error) {
 	user := request.ToUserModel()
 
 	if err := user.Get(s.repository, options.WithoutDeleted); err != nil {
