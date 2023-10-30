@@ -17,52 +17,17 @@ func NewPrometheusMiddleware(p *Prometheus) gin.HandlerFunc {
 	return p.HandlerFunc()
 }
 
-func NewPrometheus(logger common.LoggerI) *Prometheus {
+func NewPrometheus() *Prometheus {
 
-	// Add standard metrics, replace URL keys
 	p := &Prometheus{
-		MetricsList: standardMetrics,
-		ReplaceURLKeys: func(c *gin.Context) string {
-			url := c.Request.URL.Path
-			for _, p := range c.Params {
-				if p.Key == "user_id" {
-					url = strings.Replace(url, p.Value, ":user_id", 1)
-					break
-				}
-			}
-			return url
-		},
-		logger: logger,
+		metricsList:    standardMetrics,
+		replaceURLKeys: replaceURLKeys,
 	}
 
 	// Register metrics with prefix
-	p.registerMetrics("go_rest_example")
+	p.registerMetrics("go_rest_example") // TODO this to config
 
 	return p
-}
-
-// Prometheus contains the metrics gathered by the instance and its path
-type Prometheus struct {
-	MetricsList []*Metric
-
-	totalRequests    *prometheus.CounterVec
-	requestsDuration *prometheus.HistogramVec
-	requestsSize     prometheus.Summary
-	responsesSize    prometheus.Summary
-
-	ReplaceURLKeys func(c *gin.Context) string
-
-	logger common.LoggerI
-}
-
-// prometheus.Collector type (i.e. CounterVec, Summary, etc) of each metric
-type Metric struct {
-	MetricCollector prometheus.Collector // the type of the metric: counter_vec, gauge, etc
-	ID              string
-	Name            string
-	Description     string
-	Type            string
-	Args            []string
 }
 
 // HandlerFunc is the actual middleware, it's where the magic happens
@@ -82,11 +47,11 @@ func (p *Prometheus) HandlerFunc() gin.HandlerFunc {
 		c.Next()
 
 		// Get relevant info
-		method := c.Request.Method
-		status := strconv.Itoa(c.Writer.Status())
-		endpoint := p.ReplaceURLKeys(c)
-		elapsed := float64(time.Since(start)) / float64(time.Second)
-		responseSize := float64(c.Writer.Size())
+		method := c.Request.Method                                   // e.g. GET
+		status := strconv.Itoa(c.Writer.Status())                    // e.g. 200
+		endpoint := p.replaceURLKeys(c)                              // e.g. /users/:user_id
+		elapsed := float64(time.Since(start)) / float64(time.Second) // e.g. 0.0123 (seconds)
+		responseSize := float64(c.Writer.Size())                     // e.g. 1234 (bytes)
 
 		// Increment & Observe metrics
 		p.totalRequests.WithLabelValues(status, endpoint, method).Inc()
@@ -94,6 +59,30 @@ func (p *Prometheus) HandlerFunc() gin.HandlerFunc {
 		p.requestsSize.Observe(float64(requestSize))
 		p.responsesSize.Observe(responseSize)
 	}
+}
+
+// Prometheus contains the metrics gathered by the instance and its path
+type Prometheus struct {
+	metricsList []*Metric
+
+	totalRequests    *prometheus.CounterVec
+	requestsDuration *prometheus.HistogramVec
+	requestsSize     prometheus.Summary
+	responsesSize    prometheus.Summary
+
+	replaceURLKeys func(c *gin.Context) string
+
+	logger common.LoggerI
+}
+
+// prometheus.Collector type (i.e. CounterVec, Summary, etc) of each metric
+type Metric struct {
+	MetricCollector prometheus.Collector // the type of the metric: counter_vec, gauge, etc
+	ID              string
+	Name            string
+	Description     string
+	Type            string
+	Args            []string
 }
 
 // Available metrics are:
@@ -217,7 +206,7 @@ func NewMetric(m *Metric, subsystem string) (metric prometheus.Collector) {
 func (p *Prometheus) registerMetrics(subsystem string) {
 
 	// For each metric create the appropiate Collector and register it
-	for _, metricDefinition := range p.MetricsList {
+	for _, metricDefinition := range p.metricsList {
 		metric := NewMetric(metricDefinition, subsystem)
 		if err := prometheus.Register(metric); err != nil {
 			p.logger.Error(err, fmt.Errorf("%s could not be registered in Prometheus", metricDefinition.Name))
@@ -259,4 +248,15 @@ func getApproxRequestSize(r *http.Request) int {
 		s += int(r.ContentLength)
 	}
 	return s
+}
+
+func replaceURLKeys(c *gin.Context) string {
+	url := c.Request.URL.Path
+	for _, p := range c.Params {
+		if p.Key == "user_id" {
+			url = strings.Replace(url, p.Value, ":user_id", 1)
+			break
+		}
+	}
+	return url
 }

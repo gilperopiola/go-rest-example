@@ -10,6 +10,7 @@ import (
 	"github.com/gilperopiola/go-rest-example/pkg/repository"
 	"github.com/gilperopiola/go-rest-example/pkg/service"
 	"github.com/gilperopiola/go-rest-example/pkg/transport"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -22,9 +23,12 @@ import (
 // - roles to DB
 // - Fix Readme
 // - Prometheus enable flag
+// - Fix errors handling so that we can have errors with parameters
+// - Request IDs
+// - Requests pkg divide by endpoint files
 
-// Note: The HTTP Requests entrypoint is the Prometheus HandlerFunc
-
+// Note: This is the entrypoint of the application.
+// The HTTP Requests entrypoint is the Prometheus HandlerFunc in prometheus.go
 func main() {
 
 	// It all starts here
@@ -38,26 +42,22 @@ func main() {
 		// Initialize logger
 		logger = common.NewLogger()
 
-		// We use prometheus to get metrics
-		prometheus = middleware.NewPrometheus(logger)
-
-		// We use New Relic to monitor the app
-		newRelic = middleware.NewMonitoringNewRelic(config.Monitoring)
-
 		// Initialize middlewares
 		middlewares = []gin.HandlerFunc{
-			gin.Recovery(),                                          // Panic recovery
-			middleware.NewCORSConfigMiddleware(),                    // CORS
-			middleware.NewNewRelicMiddleware(newRelic),              // New Relic (monitoring)
-			middleware.NewPrometheusMiddleware(prometheus),          // Prometheus (metrics)
-			middleware.NewTimeoutMiddleware(config.General.Timeout), // Timeout
+			gin.Recovery(), // Panic recovery
+			middleware.NewRateLimiterMiddleware(middleware.NewRateLimiter(200)),         // Rate Limiter
+			middleware.NewCORSConfigMiddleware(),                                        // CORS
+			middleware.NewNewRelicMiddleware(middleware.NewNewRelic(config.Monitoring)), // New Relic (monitoring)
+			middleware.NewPrometheusMiddleware(middleware.NewPrometheus()),              // Prometheus (metrics)
+			middleware.NewTimeoutMiddleware(config.General.Timeout),                     // Timeout
+			middleware.NewErrorHandlerMiddleware(logger),                                // Error Handler
 		}
 
 		// Initialize authentication module
 		auth = auth.NewAuth(config.JWT.Secret, config.JWT.SessionDurationDays)
 
 		// Establish database connection
-		database = repository.NewDatabase(*config, logger)
+		database = repository.NewDatabase(config)
 
 		// Initialize repository layer with the database connection
 		repository = repository.New(database)
@@ -66,7 +66,7 @@ func main() {
 		service = service.New(repository, auth, config)
 
 		// Setup endpoints & transport layer
-		endpoints = transport.New(service, transport.NewErrorsMapper(logger))
+		endpoints = transport.New(service)
 
 		// Initialize the router with the endpoints
 		router = transport.NewRouter(endpoints, config.General, auth, middlewares)

@@ -89,7 +89,7 @@ func (auth *Auth) decodeTokenString(tokenString string) (*jwt.Token, error) {
 
 func addUserInfoToContext(c *gin.Context, claims *CustomClaims) {
 	idInt, _ := strconv.Atoi(claims.ID)
-	c.Set("ID", idInt)
+	c.Set("UserID", idInt)
 	c.Set("Username", claims.Username)
 	c.Set("Email", claims.Email)
 }

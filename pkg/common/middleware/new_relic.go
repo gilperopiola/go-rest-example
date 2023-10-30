@@ -14,9 +14,9 @@ func NewNewRelicMiddleware(app *newrelic.Application) gin.HandlerFunc {
 	return nrgin.Middleware(app)
 }
 
-func NewMonitoringNewRelic(config config.Monitoring) *newrelic.Application {
+func NewNewRelic(config config.Monitoring) *newrelic.Application {
 
-	// If monitoring is not enabled, return empty middleware
+	// If monitoring is not enabled, return empty app
 	if !config.Enabled {
 		return nil
 	}

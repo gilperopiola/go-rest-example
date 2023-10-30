@@ -10,7 +10,6 @@ var _ TransportLayer = (*transport)(nil)
 
 type TransportLayer interface {
 	Service() service.ServiceLayer
-	ErrorsMapper() errorsMapperI
 	healthCheck(c *gin.Context)
 
 	// Auth
@@ -29,24 +28,18 @@ type TransportLayer interface {
 	createUserPost(c *gin.Context)
 }
 
-func New(service service.ServiceLayer, errorsMapper errorsMapperI) *transport {
+func New(service service.ServiceLayer) *transport {
 	return &transport{
-		service:      service,
-		errorsMapper: errorsMapper,
+		service: service,
 	}
 }
 
 type transport struct {
-	service      service.ServiceLayer
-	errorsMapper errorsMapperI
+	service service.ServiceLayer
 }
 
 func (t transport) Service() service.ServiceLayer {
 	return t.service
-}
-
-func (t transport) ErrorsMapper() errorsMapperI {
-	return t.errorsMapper
 }
 
 func (t transport) healthCheck(c *gin.Context) {

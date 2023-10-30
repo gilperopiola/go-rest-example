@@ -2,6 +2,7 @@ package repository
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"time"
 
@@ -17,9 +18,9 @@ type database struct {
 	db *gorm.DB
 }
 
-func NewDatabase(config config.Config, logger common.LoggerI) database {
+func NewDatabase(config *config.Config) database {
 	var database database
-	database.setup(config, logger)
+	database.setup(config)
 	return database
 }
 
@@ -27,12 +28,16 @@ func (database *database) DB() *gorm.DB {
 	return database.db
 }
 
-func (database *database) setup(config config.Config, logger common.LoggerI) {
+func (database *database) Close() {
+	database.db.Close()
+}
+
+func (database *database) setup(config *config.Config) {
 
 	// Create connection. It's deferred closed in main.go.
 	// Retry connection if it fails due to Docker's orchestration.
-	if err := database.connectToDB(config, logger); err != nil {
-		logger.Fatalf("error connecting to database: %v", err)
+	if err := database.connectToDB(config); err != nil {
+		log.Fatalf("error connecting to database: %v", err)
 		os.Exit(1)
 	}
 
@@ -44,11 +49,7 @@ func (database *database) setup(config config.Config, logger common.LoggerI) {
 	database.configure(config)
 }
 
-func (database *database) Close() {
-	database.db.Close()
-}
-
-func (database *database) connectToDB(config config.Config, logger common.LoggerI) error {
+func (database *database) connectToDB(config *config.Config) error {
 	var err error
 	retries := 0
 	dbConfig := config.Database
@@ -60,7 +61,7 @@ func (database *database) connectToDB(config config.Config, logger common.Logger
 			if retries == dbConfig.MaxRetries {
 				return fmt.Errorf("error connecting to database after %d retries: %v", dbConfig.MaxRetries, err)
 			}
-			logger.Warn("error connecting to database, retrying... ")
+			fmt.Printf("error connecting to database, retrying... ")
 			time.Sleep(time.Duration(dbConfig.RetryDelay) * time.Second)
 			continue
 		}
@@ -69,7 +70,7 @@ func (database *database) connectToDB(config config.Config, logger common.Logger
 	return nil
 }
 
-func (database *database) configure(config config.Config) {
+func (database *database) configure(config *config.Config) {
 	dbConfig := config.Database
 
 	// Set connection pool limits
@@ -78,9 +79,7 @@ func (database *database) configure(config config.Config) {
 	database.db.DB().SetConnMaxLifetime(time.Hour)
 
 	// Log queries if debug = true
-	if dbConfig.Debug {
-		database.db.LogMode(true)
-	}
+	database.db.LogMode(dbConfig.Debug)
 
 	// Destroy or clean tables
 	if dbConfig.Destroy {
@@ -98,11 +97,13 @@ func (database *database) configure(config config.Config) {
 
 	// Insert admin user
 	if dbConfig.AdminInsert {
-		adminUser := models.User{
-			Username: "admin", Email: "ferra.main@gmail.com", IsAdmin: true,
+		admin := &models.User{
+			Username: "admin",
+			Email:    "ferra.main@gmail.com",
 			Password: common.Hash(dbConfig.AdminPassword, config.JWT.HashSalt),
+			IsAdmin:  true,
 		}
-		if err := database.DB().Create(&adminUser).Error; err != nil {
+		if err := database.DB().Create(admin).Error; err != nil {
 			fmt.Print(err.Error())
 		}
 	}

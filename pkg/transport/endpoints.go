@@ -11,11 +11,11 @@ import (
 //-------------------
 
 func (t transport) signup(c *gin.Context) {
-	HandleRequest(c, requests.MakeSignupRequest, t.Service().Signup, t.ErrorsMapper())
+	HandleRequest(c, requests.MakeSignupRequest, t.Service().Signup)
 }
 
 func (t transport) login(c *gin.Context) {
-	HandleRequest(c, requests.MakeLoginRequest, t.Service().Login, t.ErrorsMapper())
+	HandleRequest(c, requests.MakeLoginRequest, t.Service().Login)
 }
 
 //------------------
@@ -23,27 +23,27 @@ func (t transport) login(c *gin.Context) {
 //------------------
 
 func (t transport) createUser(c *gin.Context) {
-	HandleRequest(c, requests.MakeCreateUserRequest, t.Service().CreateUser, t.ErrorsMapper())
+	HandleRequest(c, requests.MakeCreateUserRequest, t.Service().CreateUser)
 }
 
 func (t transport) getUser(c *gin.Context) {
-	HandleRequest(c, requests.MakeGetUserRequest, t.Service().GetUser, t.ErrorsMapper())
+	HandleRequest(c, requests.MakeGetUserRequest, t.Service().GetUser)
 }
 
 func (t transport) updateUser(c *gin.Context) {
-	HandleRequest(c, requests.MakeUpdateUserRequest, t.Service().UpdateUser, t.ErrorsMapper())
+	HandleRequest(c, requests.MakeUpdateUserRequest, t.Service().UpdateUser)
 }
 
 func (t transport) deleteUser(c *gin.Context) {
-	HandleRequest(c, requests.MakeDeleteUserRequest, t.Service().DeleteUser, t.ErrorsMapper())
+	HandleRequest(c, requests.MakeDeleteUserRequest, t.Service().DeleteUser)
 }
 
 func (t transport) searchUsers(c *gin.Context) {
-	HandleRequest(c, requests.MakeSearchUsersRequest, t.Service().SearchUsers, t.ErrorsMapper())
+	HandleRequest(c, requests.MakeSearchUsersRequest, t.Service().SearchUsers)
 }
 
 func (t transport) changePassword(c *gin.Context) {
-	HandleRequest(c, requests.MakeChangePasswordRequest, t.Service().ChangePassword, t.ErrorsMapper())
+	HandleRequest(c, requests.MakeChangePasswordRequest, t.Service().ChangePassword)
 }
 
 //-------------------
@@ -51,5 +51,5 @@ func (t transport) changePassword(c *gin.Context) {
 //-------------------
 
 func (t transport) createUserPost(c *gin.Context) {
-	HandleRequest(c, requests.MakeCreateUserPostRequest, t.Service().CreateUserPost, t.ErrorsMapper())
+	HandleRequest(c, requests.MakeCreateUserPostRequest, t.Service().CreateUserPost)
 }

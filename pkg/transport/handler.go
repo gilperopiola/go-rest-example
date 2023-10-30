@@ -16,20 +16,21 @@ import (
 //   - a function that makes a request from the gin context
 //   - a function that calls the service with that request
 //
-// It returns a response with the result of the service call.
-func HandleRequest[req Request, resp Response](c *gin.Context, makeRequest func(requests.GinI) (req, error), serviceCall func(req) (resp, error), e errorsMapperI) {
+// It writes an HTTP response with the result of the service call.
+
+func HandleRequest[req requests.All, resp responses.All](c *gin.Context, makeRequestFn func(requests.GinI) (req, error), serviceCallFn func(req) (resp, error)) {
 
 	// Build, validate and get request
-	request, err := makeRequest(c)
+	request, err := makeRequestFn(c)
 	if err != nil {
-		c.JSON(e.Map(err))
+		c.Error(err)
 		return
 	}
 
 	// Call service with that request
-	response, err := serviceCall(request)
+	response, err := serviceCallFn(request)
 	if err != nil {
-		c.JSON(e.Map(err))
+		c.Error(err)
 		return
 	}
 
@@ -38,27 +39,4 @@ func HandleRequest[req Request, resp Response](c *gin.Context, makeRequest func(
 		Success: true,
 		Content: response,
 	})
-}
-
-type Request interface {
-	requests.SignupRequest |
-		requests.LoginRequest |
-		requests.CreateUserRequest |
-		requests.GetUserRequest |
-		requests.UpdateUserRequest |
-		requests.DeleteUserRequest |
-		requests.SearchUsersRequest |
-		requests.ChangePasswordRequest |
-		requests.CreateUserPostRequest
-}
-type Response interface {
-	responses.SignupResponse |
-		responses.LoginResponse |
-		responses.CreateUserResponse |
-		responses.GetUserResponse |
-		responses.UpdateUserResponse |
-		responses.DeleteUserResponse |
-		responses.SearchUsersResponse |
-		responses.ChangePasswordResponse |
-		responses.CreateUserPostResponse
 }

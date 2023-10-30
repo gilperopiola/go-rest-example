@@ -3,6 +3,18 @@ package responses
 // These aren't the HTTP Responses that the API will return, but the responses that the Service Layer
 // returns to the Transport Layer.
 
+type All interface {
+	SignupResponse |
+		LoginResponse |
+		CreateUserResponse |
+		GetUserResponse |
+		UpdateUserResponse |
+		DeleteUserResponse |
+		SearchUsersResponse |
+		ChangePasswordResponse |
+		CreateUserPostResponse
+}
+
 //-------------------
 //      AUTH
 //-------------------

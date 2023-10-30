@@ -6,13 +6,6 @@ import (
 	"github.com/gilperopiola/go-rest-example/pkg/common"
 )
 
-type GinI interface {
-	ShouldBindJSON(obj interface{}) error
-	GetInt(key string) int
-	Query(key string) (value string)
-	DefaultQuery(key string, defaultValue string) string
-}
-
 //--------------------------
 //	    AUTH BUILDERS
 //--------------------------
@@ -34,7 +27,7 @@ func (req *CreateUserRequest) Build(c GinI) error {
 }
 
 func (req *GetUserRequest) Build(c GinI) error {
-	userToGetID, err := getIntFromContext(c, "ID")
+	userToGetID, err := getIntFromContext(c, "UserID")
 	if err != nil {
 		return err
 	}
@@ -49,7 +42,7 @@ func (req *UpdateUserRequest) Build(c GinI) error {
 		return common.ErrBindingRequest
 	}
 
-	userToUpdateID, err := getIntFromContext(c, "ID")
+	userToUpdateID, err := getIntFromContext(c, "UserID")
 	if err != nil {
 		return err
 	}
@@ -59,7 +52,7 @@ func (req *UpdateUserRequest) Build(c GinI) error {
 }
 
 func (req *DeleteUserRequest) Build(c GinI) error {
-	userToDeleteID, err := getIntFromContext(c, "ID")
+	userToDeleteID, err := getIntFromContext(c, "UserID")
 	if err != nil {
 		return err
 	}
@@ -95,7 +88,7 @@ func (req *ChangePasswordRequest) Build(c GinI) error {
 		return common.ErrBindingRequest
 	}
 
-	userToChangePasswordID, err := getIntFromContext(c, "ID")
+	userToChangePasswordID, err := getIntFromContext(c, "UserID")
 	if err != nil {
 		return err
 	}
@@ -114,7 +107,7 @@ func (req *CreateUserPostRequest) Build(c GinI) error {
 		return common.ErrBindingRequest
 	}
 
-	postOwnerID, err := getIntFromContext(c, "ID")
+	postOwnerID, err := getIntFromContext(c, "UserID")
 	if err != nil {
 		return err
 	}

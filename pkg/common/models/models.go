@@ -51,7 +51,7 @@ type UserPost struct {
 
 type UserPosts []UserPost
 
-// We have a RepositoryLayer here to avoid circular dependencies, models talk to the repository layer
+// We have a RepositoryLayer here to avoid circular dependencies, our models talk to the repository layer
 type RepositoryLayer interface {
 	CreateUser(user User) (User, error)
 	UpdateUser(user User) (User, error)

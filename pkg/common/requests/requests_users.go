@@ -4,6 +4,10 @@ import (
 	"github.com/gilperopiola/go-rest-example/pkg/common"
 )
 
+//---------------
+//	CREATE USER
+//---------------
+
 type CreateUserRequest struct {
 	Username string `json:"username"`
 	Email    string `json:"email"`
@@ -25,6 +29,10 @@ func MakeCreateUserRequest(c GinI) (request CreateUserRequest, err error) {
 	return request, nil
 }
 
+//--------------
+//	GET USER
+//--------------
+
 type GetUserRequest struct {
 	UserID int `json:"user_id"`
 }
@@ -38,6 +46,10 @@ func MakeGetUserRequest(c GinI) (request GetUserRequest, err error) {
 	}
 	return request, nil
 }
+
+//-----------------
+//	UPDATE USER
+//-----------------
 
 type UpdateUserRequest struct {
 	UserID   int    `json:"user_id"`
@@ -59,6 +71,10 @@ func MakeUpdateUserRequest(c GinI) (request UpdateUserRequest, err error) {
 	return request, nil
 }
 
+//----------------
+//	DELETE USER
+//----------------
+
 type DeleteUserRequest struct {
 	UserID int `json:"user_id"`
 }
@@ -72,6 +88,10 @@ func MakeDeleteUserRequest(c GinI) (request DeleteUserRequest, err error) {
 	}
 	return request, nil
 }
+
+//-----------------
+//	SEARCH USERS
+//-----------------
 
 type SearchUsersRequest struct {
 	Username string `json:"username"`
@@ -89,6 +109,10 @@ func MakeSearchUsersRequest(c GinI) (request SearchUsersRequest, err error) {
 	return request, nil
 }
 
+//-------------------
+//	CHANGE PASSWORD
+//-------------------
+
 type ChangePasswordRequest struct {
 	UserID         int    `json:"user_id"`
 	OldPassword    string `json:"old_password"`
@@ -105,6 +129,10 @@ func MakeChangePasswordRequest(c GinI) (request ChangePasswordRequest, err error
 	}
 	return request, nil
 }
+
+//---------------------
+//	CREATE USER POST
+//---------------------
 
 type CreateUserPostRequest struct {
 	UserID int    `json:"user_id"`
