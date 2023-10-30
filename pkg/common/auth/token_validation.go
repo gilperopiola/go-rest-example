@@ -2,7 +2,6 @@ package auth
 
 import (
 	"fmt"
-	"net/http"
 	"strconv"
 	"strings"
 
@@ -12,6 +11,10 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
+var (
+	pathUserIDKey = "user_id"
+)
+
 // ValidateToken validates a token for a specific role and sets ID and Email in context
 func (auth *Auth) ValidateToken(role Role, shouldMatchUserID bool) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -19,48 +22,47 @@ func (auth *Auth) ValidateToken(role Role, shouldMatchUserID bool) gin.HandlerFu
 		// Get token string and then convert it to a *jwt.Token
 		token, err := auth.getTokenStructFromContext(c)
 		if err != nil {
-			abortRequest(c)
+			c.Error(common.Wrap("auth.getTokenStructFromContext", common.ErrUnauthorized))
+			c.Abort()
 			return
 		}
 
 		// Get custom claims from token
 		customClaims, ok := token.Claims.(*CustomClaims)
 
-		// Check if claims and token are valid
-		if !ok || !token.Valid || customClaims.Valid() != nil {
-			abortRequest(c)
-			return
-		}
-
-		// Check if role is valid
-		if role != AnyRole && customClaims.Role != role {
-			abortRequest(c)
+		// Check if claims and token and role are valid
+		if !ok || !token.Valid || customClaims.Valid() != nil || (role != AnyRole && customClaims.Role != role) {
+			c.Error(common.Wrap("!token.Valid || customClaims.Role != role", common.ErrUnauthorized))
+			c.Abort()
 			return
 		}
 
 		// Check if user ID in URL matches user ID in token
 		if shouldMatchUserID {
-			urlUserID, err := getIntFromContextURLParams(c.Params, "user_id")
-			if err != nil {
-				abortRequest(c)
-				return
-			}
-
-			if customClaims.ID != fmt.Sprint(urlUserID) {
-				abortRequest(c)
+			urlUserID, err := getIntFromURLPath(c.Params, pathUserIDKey)
+			if err != nil || customClaims.ID != fmt.Sprint(urlUserID) {
+				c.Error(common.Wrap("!shouldMatchUserID", common.ErrUnauthorized))
+				c.Abort()
 				return
 			}
 		}
 
-		// If OK, set ID, Username and Email inside of context
-		addUserInfoToContext(c, customClaims)
+		// If OK, set UserID, Username and Email inside of context
+		userID, _ := strconv.Atoi(customClaims.ID)
+		addUserInfoToContext(c, userID, customClaims.Username, customClaims.Email)
 	}
+}
+
+func addUserInfoToContext(c *gin.Context, id int, username, email string) {
+	c.Set("UserID", id)
+	c.Set("Username", username)
+	c.Set("Email", email)
 }
 
 func (auth *Auth) getTokenStructFromContext(c *gin.Context) (*jwt.Token, error) {
 
-	// Get token string from context
-	tokenString := removeBearerPrefix(getJWTStringFromHeader(c.Request.Header))
+	// Get token string from headers
+	tokenString := strings.TrimPrefix(c.Request.Header.Get("Authorization"), "Bearer ")
 
 	// Decode string into actual *jwt.Token
 	token, err := auth.decodeTokenString(tokenString)
@@ -87,30 +89,7 @@ func (auth *Auth) decodeTokenString(tokenString string) (*jwt.Token, error) {
 	return jwt.ParseWithClaims(tokenString, &CustomClaims{}, keyFunc)
 }
 
-func addUserInfoToContext(c *gin.Context, claims *CustomClaims) {
-	idInt, _ := strconv.Atoi(claims.ID)
-	c.Set("UserID", idInt)
-	c.Set("Username", claims.Username)
-	c.Set("Email", claims.Email)
-}
-
-func getJWTStringFromHeader(header http.Header) string {
-	return header.Get("Authorization")
-}
-
-func removeBearerPrefix(token string) string {
-	return strings.TrimPrefix(token, "Bearer ")
-}
-
-func abortRequest(c *gin.Context) {
-	c.AbortWithStatusJSON(http.StatusUnauthorized, common.HTTPResponse{
-		Success: false,
-		Content: nil,
-		Error:   "unauthorized",
-	})
-}
-
-func getIntFromContextURLParams(params gin.Params, key string) (int, error) {
+func getIntFromURLPath(params gin.Params, key string) (int, error) {
 	value, ok := params.Get(key)
 	if !ok {
 		return 0, fmt.Errorf("error getting %s from URL params", key)

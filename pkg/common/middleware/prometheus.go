@@ -252,8 +252,10 @@ func getApproxRequestSize(r *http.Request) int {
 
 func replaceURLKeys(c *gin.Context) string {
 	url := c.Request.URL.Path
+	pathUserIDKey := "user_id"
+
 	for _, p := range c.Params {
-		if p.Key == "user_id" {
+		if p.Key == pathUserIDKey {
 			url = strings.Replace(url, p.Value, ":user_id", 1)
 			break
 		}

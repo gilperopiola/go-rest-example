@@ -6,7 +6,7 @@ import (
 )
 
 type AuthI interface {
-	GenerateToken(user User) (string, error)
+	GenerateToken(id int, username, email string, role Role) (string, error)
 	ValidateToken(role Role, shouldMatchUserID bool) gin.HandlerFunc
 }
 
@@ -21,6 +21,14 @@ type Auth struct {
 	secret              string
 	sessionDurationDays int
 }
+
+type Role string
+
+const (
+	AnyRole   Role = "any"
+	UserRole  Role = "user"
+	AdminRole Role = "admin"
+)
 
 type CustomClaims struct {
 	Username string `json:"username"`

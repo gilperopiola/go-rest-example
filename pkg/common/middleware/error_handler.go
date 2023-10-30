@@ -17,32 +17,32 @@ func NewErrorHandlerMiddleware(logger common.LoggerI) gin.HandlerFunc {
 		c.Next()
 
 		// Check the context for errors
-		// If there are no errors, return
 		if len(c.Errors) == 0 {
 			return
 		}
 
 		// If there are, get the last one
 		err := c.Errors.Last()
-		if err == nil {
-			err = &gin.Error{Err: common.ErrNilError}
-		}
 
 		statusCode, stackTrace := getStatusCodeFromError(err), err.Error()
 
 		// Log the error depending on severity
-		logContext := logger.WithField("status", statusCode).WithField("path", c.FullPath())
-		if statusCode >= 500 {
-			logContext.Error(stackTrace)
-		} else {
-			logContext.Info(stackTrace)
-		}
+		logStackTrace(logger, statusCode, stackTrace, c.FullPath())
 
 		c.JSON(statusCode, common.HTTPResponse{
 			Success: false,
 			Content: nil,
 			Error:   getHumanReadableError(err),
 		})
+	}
+}
+
+func logStackTrace(logger common.LoggerI, status int, stackTrace, path string) {
+	logContext := logger.WithField("status", status).WithField("path", path)
+	if status >= http.StatusInternalServerError {
+		logContext.Error(stackTrace)
+	} else {
+		logContext.Info(stackTrace)
 	}
 }
 
@@ -74,8 +74,10 @@ var errorsMapToHTTPCode = map[error]int{
 	common.ErrDeletingUser:     500,
 	common.ErrSearchingUsers:   500,
 	common.ErrUnknown:          500,
-	common.ErrNilError:         500,
 	common.ErrCreatingUserPost: 500,
+
+	// Other
+	common.ErrTooManyRequests: 429,
 }
 
 // getHumanReadableError returns the first error in the chain of errors

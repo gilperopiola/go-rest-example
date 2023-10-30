@@ -20,13 +20,12 @@ func (e *Error) Error() string {
 
 var (
 	// - General errors
-	ErrUnknown             = NewError(fmt.Errorf("error unknown"))
-	ErrNilError            = NewError(fmt.Errorf("error, unexpected nil error"))
-	ErrUnauthorized        = NewError(fmt.Errorf("error, unauthorized"))
-	ErrBindingRequest      = NewError(fmt.Errorf("error binding request"))
-	ErrAllFieldsRequired   = NewError(fmt.Errorf("error, all fields required"))
-	ErrReadingValueFromCtx = NewError(fmt.Errorf("error reading value from context"))
-	ErrInvalidValue        = NewError(fmt.Errorf("error, invalid value"))
+	ErrUnknown           = NewError(fmt.Errorf("error unknown"))
+	ErrUnauthorized      = NewError(fmt.Errorf("error, unauthorized"))
+	ErrBindingRequest    = NewError(fmt.Errorf("error binding request"))
+	ErrAllFieldsRequired = NewError(fmt.Errorf("error, all fields required"))
+	ErrInvalidValue      = NewError(fmt.Errorf("error, invalid value"))
+	ErrTooManyRequests   = NewError(fmt.Errorf("error, too many server requests"))
 
 	// - User errors
 	ErrCreatingUser                = NewError(fmt.Errorf("error creating user"))

@@ -6,16 +6,21 @@ import (
 	"github.com/gilperopiola/go-rest-example/pkg/common"
 )
 
+var (
+	contextUserIDKey = "UserID"
+	pathUserIDKey    = "user_id"
+)
+
 //--------------------------
 //	    AUTH BUILDERS
 //--------------------------
 
 func (req *SignupRequest) Build(c GinI) error {
-	return buildDefaultRequestBody(c, req)
+	return bindRequestBody(c, req)
 }
 
 func (req *LoginRequest) Build(c GinI) error {
-	return buildDefaultRequestBody(c, req)
+	return bindRequestBody(c, req)
 }
 
 //--------------------------
@@ -23,41 +28,26 @@ func (req *LoginRequest) Build(c GinI) error {
 //--------------------------
 
 func (req *CreateUserRequest) Build(c GinI) error {
-	return buildDefaultRequestBody(c, req)
+	return bindRequestBody(c, req)
 }
 
 func (req *GetUserRequest) Build(c GinI) error {
-	userToGetID, err := getIntFromContext(c, "UserID")
-	if err != nil {
-		return err
-	}
-
-	req.UserID = userToGetID
-
+	req.UserID = c.GetInt(contextUserIDKey)
 	return nil
 }
 
 func (req *UpdateUserRequest) Build(c GinI) error {
-	if err := c.ShouldBindJSON(&req); err != nil {
-		return common.ErrBindingRequest
-	}
-
-	userToUpdateID, err := getIntFromContext(c, "UserID")
-	if err != nil {
+	if err := bindRequestBody(c, req); err != nil {
 		return err
 	}
 
-	req.UserID = userToUpdateID
+	req.UserID = c.GetInt(contextUserIDKey)
+
 	return nil
 }
 
 func (req *DeleteUserRequest) Build(c GinI) error {
-	userToDeleteID, err := getIntFromContext(c, "UserID")
-	if err != nil {
-		return err
-	}
-
-	req.UserID = userToDeleteID
+	req.UserID = c.GetInt(contextUserIDKey)
 	return nil
 }
 
@@ -84,16 +74,12 @@ func (req *SearchUsersRequest) Build(c GinI) error {
 }
 
 func (req *ChangePasswordRequest) Build(c GinI) error {
-	if err := c.ShouldBindJSON(&req); err != nil {
-		return common.ErrBindingRequest
-	}
-
-	userToChangePasswordID, err := getIntFromContext(c, "UserID")
+	err := bindRequestBody(c, req)
 	if err != nil {
 		return err
 	}
 
-	req.UserID = userToChangePasswordID
+	req.UserID = c.GetInt(contextUserIDKey)
 
 	return nil
 }
@@ -103,16 +89,13 @@ func (req *ChangePasswordRequest) Build(c GinI) error {
 //-----------------------------
 
 func (req *CreateUserPostRequest) Build(c GinI) error {
-	if err := c.ShouldBindJSON(&req); err != nil {
-		return common.ErrBindingRequest
-	}
-
-	postOwnerID, err := getIntFromContext(c, "UserID")
+	err := bindRequestBody(c, req)
 	if err != nil {
 		return err
 	}
 
-	req.UserID = postOwnerID
+	req.UserID = c.GetInt(contextUserIDKey)
+
 	return nil
 }
 
@@ -120,18 +103,10 @@ func (req *CreateUserPostRequest) Build(c GinI) error {
 //	    HELPERS
 //--------------------
 
-// buildDefaultRequestBody just binds the request body to the request struct
-func buildDefaultRequestBody(c GinI, request interface{}) error {
+// bindRequestBody just binds the request body to the request struct
+func bindRequestBody(c GinI, request interface{}) error {
 	if err := c.ShouldBindJSON(&request); err != nil {
 		return common.ErrBindingRequest
 	}
 	return nil
-}
-
-func getIntFromContext(c GinI, key string) (int, error) {
-	value := c.GetInt(key)
-	if value == 0 {
-		return 0, common.ErrReadingValueFromCtx
-	}
-	return value, nil
 }

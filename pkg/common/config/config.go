@@ -30,7 +30,7 @@ func (config *Config) setup() {
 		envFilePath = "../.env"
 	}
 
-	// Load .env file
+	// Load .env file into environment variables
 	err := godotenv.Load(envFilePath)
 	if err != nil {
 		log.Fatalf("error loading .env file: %v", err)

@@ -2,8 +2,6 @@ package models
 
 import (
 	"time"
-
-	"github.com/gilperopiola/go-rest-example/pkg/repository/options"
 )
 
 // Models are the representation of the database schema. They are used in the Service & Repository Layers.
@@ -14,6 +12,8 @@ var AllModels = []interface{}{
 	&UserDetail{},
 	&UserPost{},
 }
+
+type Users []User
 
 type User struct {
 	ID        int    `gorm:"primaryKey"`
@@ -31,8 +31,6 @@ type User struct {
 	NewPassword string `gorm:"-"`
 }
 
-type Users []User
-
 type UserDetail struct {
 	ID        int    `gorm:"primaryKey"`
 	UserID    int    `gorm:"unique;not null"`
@@ -42,23 +40,11 @@ type UserDetail struct {
 	UpdatedAt time.Time
 }
 
+type UserPosts []UserPost
+
 type UserPost struct {
 	ID     int    `gorm:"primaryKey"`
 	Title  string `gorm:"not null"`
 	Body   string `gorm:"type:text"`
 	UserID int    `gorm:"not null"`
-}
-
-type UserPosts []UserPost
-
-// We have a RepositoryLayer here to avoid circular dependencies, our models talk to the repository layer
-type RepositoryLayer interface {
-	CreateUser(user User) (User, error)
-	UpdateUser(user User) (User, error)
-	GetUser(user User, opts ...options.QueryOption) (User, error)
-	DeleteUser(id int) (User, error)
-	SearchUsers(username string, page, perPage int, opts ...options.PreloadOption) (Users, error)
-	UserExists(username, email string, opts ...options.QueryOption) bool
-
-	CreateUserPost(post UserPost) (UserPost, error)
 }

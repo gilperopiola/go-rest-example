@@ -13,7 +13,7 @@ type HTTPResponse struct {
 }
 
 func Wrap(trace string, err error) error {
-	return fmt.Errorf("%s: %w", trace, err)
+	return fmt.Errorf("%s -> %w", trace, err)
 }
 
 func Hash(data string, salt string) string {

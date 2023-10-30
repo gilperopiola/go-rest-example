@@ -61,7 +61,7 @@ func (database *database) connectToDB(config *config.Config) error {
 			if retries == dbConfig.MaxRetries {
 				return fmt.Errorf("error connecting to database after %d retries: %v", dbConfig.MaxRetries, err)
 			}
-			fmt.Printf("error connecting to database, retrying... ")
+			fmt.Println("error connecting to database, retrying... ")
 			time.Sleep(time.Duration(dbConfig.RetryDelay) * time.Second)
 			continue
 		}

@@ -6,73 +6,79 @@ import (
 	"github.com/gilperopiola/go-rest-example/pkg/repository/options"
 )
 
+// We have a RepositoryI here to avoid circular dependencies, our models talk to the repository layer
+type RepositoryI interface {
+	CreateUser(user User) (User, error)
+	UpdateUser(user User) (User, error)
+	GetUser(user User, opts ...options.QueryOption) (User, error)
+	DeleteUser(id int) (User, error)
+	SearchUsers(username string, page, perPage int, opts ...options.PreloadOption) (Users, error)
+	UserExists(username, email string, opts ...options.QueryOption) bool
+
+	CreateUserPost(post UserPost) (UserPost, error)
+}
+
 //-------------------
 //       AUTH
 //-------------------
 
-func (u *User) ToAuthModel() auth.User {
-	return auth.User{
-		ID:       u.ID,
-		Username: u.Username,
-		Email:    u.Email,
-		IsAdmin:  u.IsAdmin,
-	}
-}
-
 func (u *User) GenerateTokenString(a auth.AuthI) (string, error) {
-	return a.GenerateToken(u.ToAuthModel())
+	return a.GenerateToken(u.ID, u.Username, u.Email, u.GetRole())
 }
 
 //----------------
 //     USERS
 //----------------
 
-func (u *User) Create(r RepositoryLayer) error {
-	user, err := r.CreateUser(*u)
+func (u *User) Create(r RepositoryI) (err error) {
+	*u, err = r.CreateUser(*u)
 	if err != nil {
-		return common.Wrap("User.Create", err)
+		return common.Wrap("r.CreateUser", err)
 	}
-	*u = user
 	return nil
 }
 
-func (u *User) Get(r RepositoryLayer, opts ...options.QueryOption) error {
-	user, err := r.GetUser(*u, opts...)
+func (u *User) Get(r RepositoryI, opts ...options.QueryOption) (err error) {
+	*u, err = r.GetUser(*u, opts...)
 	if err != nil {
-		return common.Wrap("User.Get", err)
+		return common.Wrap("r.GetUser", err)
 	}
-	*u = user
 	return nil
 }
 
-func (u *User) Update(r RepositoryLayer) error {
-	user, err := r.UpdateUser(*u)
+func (u *User) Update(r RepositoryI) (err error) {
+	*u, err = r.UpdateUser(*u)
 	if err != nil {
-		return common.Wrap("User.Update", err)
+		return common.Wrap("r.UpdateUser", err)
 	}
-	*u = user
 	return nil
 }
 
-func (u *User) Delete(r RepositoryLayer) error {
-	user, err := r.DeleteUser(u.ID)
+func (u *User) Delete(r RepositoryI) (err error) {
+	*u, err = r.DeleteUser(u.ID)
 	if err != nil {
-		return common.Wrap("User.Delete", err)
+		return common.Wrap("r.DeleteUser", err)
 	}
-	*u = user
 	return nil
 }
 
-func (u *User) Search(r RepositoryLayer, page, perPage int) (Users, error) {
+func (u *User) Search(r RepositoryI, page, perPage int) (Users, error) {
 	users, err := r.SearchUsers(u.Username, page, perPage, options.WithDetails)
 	if err != nil {
-		return []User{}, common.Wrap("User.Search", err)
+		return []User{}, common.Wrap("r.SearchUsers", err)
 	}
 	return users, nil
 }
 
-func (u *User) Exists(r RepositoryLayer) bool {
+func (u *User) Exists(r RepositoryI) bool {
 	return r.UserExists(u.Username, u.Email)
+}
+
+func (u *User) GetRole() auth.Role {
+	if u.IsAdmin {
+		return auth.AdminRole
+	}
+	return auth.UserRole
 }
 
 func (u *User) HashPassword(salt string) {
@@ -108,10 +114,10 @@ func (u *User) OverwriteDetails(firstName, lastName *string) {
 //      USER POSTS
 //-----------------------
 
-func (up *UserPost) Create(r RepositoryLayer) error {
+func (up *UserPost) Create(r RepositoryI) error {
 	userPost, err := r.CreateUserPost(*up)
 	if err != nil {
-		return common.Wrap("UserPost.CreateUserPost", err)
+		return common.Wrap("r.CreateUserPost", err)
 	}
 	*up = userPost
 	return nil

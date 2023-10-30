@@ -151,13 +151,6 @@ func TestMakeGetUserRequest(t *testing.T) {
 		wantErr   error
 	}{
 		{
-			name:      "error_invalid_id",
-			ctxUserID: 0,
-			urlUserID: "0",
-			want:      GetUserRequest{},
-			wantErr:   common.ErrReadingValueFromCtx,
-		},
-		{
 			name:      "success",
 			ctxUserID: 1,
 			urlUserID: "1",
@@ -171,7 +164,7 @@ func TestMakeGetUserRequest(t *testing.T) {
 
 			// Prepare
 			context := makeTestContextWithHTTPRequest(GetUserRequest{}, "")
-			addValueAndParamToContext(context, "UserID", tt.ctxUserID, "user_id", tt.urlUserID)
+			addValueAndParamToContext(context, contextUserIDKey, tt.ctxUserID, pathUserIDKey, tt.urlUserID)
 
 			// Act
 			got, err := MakeGetUserRequest(context)
@@ -224,7 +217,7 @@ func TestMakeUpdateUserRequest(t *testing.T) {
 
 			// Prepare
 			context := makeTestContextWithHTTPRequest(tt.body, "")
-			addValueAndParamToContext(context, "UserID", 1, "user_id", "1")
+			addValueAndParamToContext(context, contextUserIDKey, 1, pathUserIDKey, "1")
 
 			// Act
 			got, err := MakeUpdateUserRequest(context)
@@ -290,12 +283,6 @@ func TestMakeDeleteUserRequest(t *testing.T) {
 		wantErr   error
 	}{
 		{
-			name:      "error_reading_from_ctx",
-			ctxUserID: 0,
-			want:      DeleteUserRequest{},
-			wantErr:   common.ErrReadingValueFromCtx,
-		},
-		{
 			name:      "success",
 			ctxUserID: 1,
 			want:      DeleteUserRequest{UserID: 1},
@@ -308,7 +295,7 @@ func TestMakeDeleteUserRequest(t *testing.T) {
 
 			// Prepare
 			context := makeTestContextWithHTTPRequest(DeleteUserRequest{}, "")
-			addValueAndParamToContext(context, "UserID", tt.ctxUserID, "user_id", strconv.Itoa(tt.ctxUserID))
+			addValueAndParamToContext(context, contextUserIDKey, tt.ctxUserID, pathUserIDKey, strconv.Itoa(tt.ctxUserID))
 
 			// Act
 			got, err := MakeDeleteUserRequest(context)

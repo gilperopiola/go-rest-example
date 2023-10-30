@@ -7,21 +7,20 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
-func (auth *Auth) GenerateToken(user User) (string, error) {
+func (auth *Auth) GenerateToken(id int, username, email string, role Role) (string, error) {
 
 	var (
-		role      = user.GetRole()
 		issuedAt  = time.Now()
 		expiresAt = time.Now().Add(time.Hour * 24 * time.Duration(auth.sessionDurationDays))
 	)
 
 	// Generate claims containing Username, Email, Role and ID
 	claims := &CustomClaims{
-		Username: user.Username,
-		Email:    user.Email,
+		Username: username,
+		Email:    email,
 		Role:     role,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ID:        fmt.Sprint(user.ID),
+			ID:        fmt.Sprint(id),
 			IssuedAt:  jwt.NewNumericDate(issuedAt),
 			ExpiresAt: jwt.NewNumericDate(expiresAt),
 		},

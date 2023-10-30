@@ -1,5 +1,7 @@
 package requests
 
+import "github.com/gilperopiola/go-rest-example/pkg/common"
+
 type All interface {
 	SignupRequest |
 		LoginRequest |
@@ -10,6 +12,21 @@ type All interface {
 		SearchUsersRequest |
 		ChangePasswordRequest |
 		CreateUserPostRequest
+}
+
+type RequestMaker interface {
+	Build(c GinI) error
+	Validate() error
+}
+
+func makeRequest[req RequestMaker](c GinI, request req) (err error) {
+	if err := request.Build(c); err != nil {
+		return common.Wrap("request.Build", err)
+	}
+	if err = request.Validate(); err != nil {
+		return common.Wrap("request.Validate", err)
+	}
+	return nil
 }
 
 type GinI interface {

@@ -15,8 +15,8 @@ func NewAuthMock() *AuthMock {
 	return &AuthMock{Mock: &mock.Mock{}}
 }
 
-func (m *AuthMock) GenerateToken(user auth.User) (string, error) {
-	args := m.Called(user)
+func (m *AuthMock) GenerateToken(id int, username, email string, role auth.Role) (string, error) {
+	args := m.Called(id, username, email, role)
 	return args.String(0), args.Error(1)
 }
 

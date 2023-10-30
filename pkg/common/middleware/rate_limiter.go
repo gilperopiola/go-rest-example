@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"net/http"
 	"time"
 
 	"github.com/gilperopiola/go-rest-example/pkg/common"
@@ -13,11 +12,8 @@ import (
 func NewRateLimiterMiddleware(limiter *rate.Limiter) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if !limiter.Allow() {
-			c.AbortWithStatusJSON(http.StatusTooManyRequests, common.HTTPResponse{
-				Success: false,
-				Content: nil,
-				Error:   "too many requests",
-			})
+			c.Error(common.ErrTooManyRequests)
+			c.Abort()
 			return
 		}
 		c.Next()

@@ -41,7 +41,3 @@ type transport struct {
 func (t transport) Service() service.ServiceLayer {
 	return t.service
 }
-
-func (t transport) healthCheck(c *gin.Context) {
-	c.JSON(200, gin.H{"status": "API is up and running :)"})
-}

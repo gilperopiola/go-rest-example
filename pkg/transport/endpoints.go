@@ -1,10 +1,20 @@
 package transport
 
 import (
+	"net/http"
+
+	"github.com/gilperopiola/go-rest-example/pkg/common"
 	"github.com/gilperopiola/go-rest-example/pkg/common/requests"
 
 	"github.com/gin-gonic/gin"
 )
+
+func (t transport) healthCheck(c *gin.Context) {
+	c.JSON(http.StatusOK, common.HTTPResponse{
+		Success: true,
+		Content: "service is up and running :)",
+	})
+}
 
 //-------------------
 //       AUTH
