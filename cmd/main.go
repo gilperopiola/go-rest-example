@@ -21,11 +21,9 @@ import (
 // - batch insert?
 // - reset password
 // - roles to DB
-// - Fix Readme
 // - Prometheus enable flag
 // - Fix errors handling so that we can have errors with parameters
 // - Request IDs
-// - Requests pkg divide by endpoint files
 // - Logic from DeleteUser to service layer
 
 // Note: This is the entrypoint of the application.
@@ -55,7 +53,7 @@ func main() {
 		}
 
 		// Initialize authentication module
-		auth = auth.NewAuth(config.JWT.Secret, config.JWT.SessionDurationDays)
+		auth = auth.New(config.JWT.Secret, config.JWT.SessionDurationDays)
 
 		// Establish database connection
 		database = repository.NewDatabase(config)

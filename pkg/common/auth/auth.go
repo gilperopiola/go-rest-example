@@ -10,7 +10,7 @@ type AuthI interface {
 	ValidateToken(role Role, shouldMatchUserID bool) gin.HandlerFunc
 }
 
-func NewAuth(secret string, sessionDurationDays int) *Auth {
+func New(secret string, sessionDurationDays int) *Auth {
 	return &Auth{
 		secret:              secret,
 		sessionDurationDays: sessionDurationDays,

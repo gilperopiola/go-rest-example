@@ -46,7 +46,7 @@ func logStackTrace(logger common.LoggerI, status int, stackTrace, path string) {
 	}
 }
 
-var errorsMapToHTTPCode = map[error]int{
+var httpErrorsCodeMap = map[error]int{
 	// 400 - Bad Request
 	common.ErrBindingRequest:        400,
 	common.ErrAllFieldsRequired:     400,
@@ -95,7 +95,7 @@ func getStatusCodeFromError(err error) int {
 	statusCode := http.StatusInternalServerError
 
 	// This is done through strings comparison!!! (not ideal)
-	for key, value := range errorsMapToHTTPCode {
+	for key, value := range httpErrorsCodeMap {
 		if strings.Contains(err.Error(), key.Error()) {
 			statusCode = value
 			break

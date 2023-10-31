@@ -30,14 +30,14 @@ type TransportLayer interface {
 	healthCheck(c *gin.Context)
 }
 
+type transport struct {
+	service service.ServiceLayer
+}
+
 func New(service service.ServiceLayer) *transport {
 	return &transport{
 		service: service,
 	}
-}
-
-type transport struct {
-	service service.ServiceLayer
 }
 
 func (t transport) Service() service.ServiceLayer {

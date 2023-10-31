@@ -18,11 +18,7 @@ func NewPrometheusMiddleware(p *Prometheus) gin.HandlerFunc {
 }
 
 func NewPrometheus() *Prometheus {
-
-	p := &Prometheus{
-		metricsList:    standardMetrics,
-		replaceURLKeys: replaceURLKeys,
-	}
+	p := &Prometheus{metricsList: standardMetrics, replaceURLKeys: replaceURLKeys}
 
 	// Register metrics with prefix
 	p.registerMetrics("go_rest_example") // TODO this to config

@@ -24,16 +24,16 @@ type ServiceLayer interface {
 	CreateUserPost(request *requests.CreateUserPostRequest) (responses.CreateUserPostResponse, error)
 }
 
+type service struct {
+	repository repository.RepositoryLayer
+	config     *config.Config
+	auth       auth.AuthI
+}
+
 func New(repository repository.RepositoryLayer, auth auth.AuthI, config *config.Config) *service {
 	return &service{
 		repository: repository,
 		config:     config,
 		auth:       auth,
 	}
-}
-
-type service struct {
-	repository repository.RepositoryLayer
-	config     *config.Config
-	auth       auth.AuthI
 }
