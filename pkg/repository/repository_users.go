@@ -12,7 +12,8 @@ import (
 
 // CreateUser inserts a user. Table structure can be found on the models package
 func (r *repository) CreateUser(user models.User) (models.User, error) {
-	if err := r.database.db.Create(&user).Error; err != nil {
+	db := r.database.db
+	if err := db.Create(&user).Error; err != nil {
 		return models.User{}, common.Wrap(err.Error(), common.ErrCreatingUser)
 	}
 	return user, nil
@@ -20,6 +21,7 @@ func (r *repository) CreateUser(user models.User) (models.User, error) {
 
 // GetUser retrieves a user, if it exists
 func (r *repository) GetUser(user models.User, opts ...options.QueryOption) (models.User, error) {
+	db := r.database.db
 
 	// get by id, username or email
 	query := "(id = ? OR username = ? OR email = ?)"
@@ -30,7 +32,6 @@ func (r *repository) GetUser(user models.User, opts ...options.QueryOption) (mod
 	}
 
 	// preload user details and posts
-	db := r.database.db
 	err := db.Preload("Details").Preload("Posts").Where(query, user.ID, user.Username, user.Email).First(&user).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -44,7 +45,8 @@ func (r *repository) GetUser(user models.User, opts ...options.QueryOption) (mod
 
 // UpdateUser updates the fields that are not empty on the model
 func (r *repository) UpdateUser(user models.User) (models.User, error) {
-	if err := r.database.db.Model(&user).Update(&user).Error; err != nil {
+	db := r.database.db
+	if err := db.Model(&user).Update(&user).Error; err != nil {
 		return models.User{}, common.Wrap(err.Error(), common.ErrUpdatingUser)
 	}
 	return user, nil
@@ -75,8 +77,8 @@ func (r *repository) DeleteUser(id int) (models.User, error) {
 }
 
 func (r *repository) SearchUsers(username string, page, perPage int, opts ...options.PreloadOption) (models.Users, error) {
+	db := r.database.db
 	var users models.Users
-	var db = r.database.db
 
 	// preload user details and posts
 	for _, opt := range opts {
@@ -97,20 +99,22 @@ func (r *repository) SearchUsers(username string, page, perPage int, opts ...opt
 
 // UserExists checks if a user with username or email exists
 func (r *repository) UserExists(username, email string, opts ...options.QueryOption) bool {
+	db := r.database.db
+
 	query := "(username = ? OR email = ?)"
 	for _, opt := range opts {
 		opt(&query)
 	}
 
 	var count int64
-	db := r.database.db
 	db.Model(&models.User{}).Where(query, username, email).Count(&count)
 	return count > 0
 }
 
 // CreateUserPost inserts a new post on the database. Title is required, body is optional
 func (r *repository) CreateUserPost(post models.UserPost) (models.UserPost, error) {
-	if err := r.database.db.Create(&post).Error; err != nil {
+	db := r.database.db
+	if err := db.Create(&post).Error; err != nil {
 		return models.UserPost{}, common.Wrap(err.Error(), common.ErrCreatingUserPost)
 	}
 	return post, nil

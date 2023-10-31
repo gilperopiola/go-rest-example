@@ -10,7 +10,6 @@ var _ TransportLayer = (*transport)(nil)
 
 type TransportLayer interface {
 	Service() service.ServiceLayer
-	healthCheck(c *gin.Context)
 
 	// Auth
 	signup(c *gin.Context)
@@ -26,6 +25,9 @@ type TransportLayer interface {
 
 	// User Posts
 	createUserPost(c *gin.Context)
+
+	// Misc
+	healthCheck(c *gin.Context)
 }
 
 func New(service service.ServiceLayer) *transport {

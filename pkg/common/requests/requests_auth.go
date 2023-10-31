@@ -7,6 +7,10 @@ import (
 	"github.com/gilperopiola/go-rest-example/pkg/common/models"
 )
 
+//--------------
+//    SIGNUP
+//--------------
+
 type SignupRequest struct {
 	Username       string `json:"username"`
 	Email          string `json:"email"`
@@ -46,9 +50,13 @@ func (req SignupRequest) Validate() error {
 	return nil
 }
 
-func (req *SignupRequest) Build(c GinI) error {
+func (req *SignupRequest) Build(c common.GinI) error {
 	return bindRequestBody(c, req)
 }
+
+//--------------
+//    LOGIN
+//--------------
 
 type LoginRequest struct {
 	UsernameOrEmail string `json:"username_or_email"`
@@ -75,6 +83,6 @@ func (req LoginRequest) Validate() error {
 	return nil
 }
 
-func (req *LoginRequest) Build(c GinI) error {
+func (req *LoginRequest) Build(c common.GinI) error {
 	return bindRequestBody(c, req)
 }

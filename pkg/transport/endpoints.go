@@ -5,14 +5,40 @@ import (
 
 	"github.com/gilperopiola/go-rest-example/pkg/common"
 	"github.com/gilperopiola/go-rest-example/pkg/common/requests"
+	"github.com/gilperopiola/go-rest-example/pkg/common/responses"
 
 	"github.com/gin-gonic/gin"
 )
 
-func (t transport) healthCheck(c *gin.Context) {
+// HandleRequest takes:
+//
+//   - a transport and a gin context
+//   - an empty request struct
+//   - a function that makes a request struct from the gin context
+//   - a function that calls the service with that request
+//
+// It writes an HTTP response with the result of the service call.
+
+func HandleRequest[req requests.All, resp responses.All](c *gin.Context, emptyReq req, makeRequestFn func(common.GinI, req) (req, error), serviceCallFn func(req) (resp, error)) {
+
+	// Build, validate and get request
+	request, err := makeRequestFn(c, emptyReq)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	// Call service with that request
+	response, err := serviceCallFn(request)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	// Return OK
 	c.JSON(http.StatusOK, common.HTTPResponse{
 		Success: true,
-		Content: "service is up and running :)",
+		Content: response,
 	})
 }
 
@@ -62,4 +88,15 @@ func (t transport) changePassword(c *gin.Context) {
 
 func (t transport) createUserPost(c *gin.Context) {
 	HandleRequest(c, &requests.CreateUserPostRequest{}, requests.MakeRequest[*requests.CreateUserPostRequest], t.Service().CreateUserPost)
+}
+
+//-------------------
+//       MISC
+//-------------------
+
+func (t transport) healthCheck(c *gin.Context) {
+	c.JSON(http.StatusOK, common.HTTPResponse{
+		Success: true,
+		Content: "service is up and running :)",
+	})
 }

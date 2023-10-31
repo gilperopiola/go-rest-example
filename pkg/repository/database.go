@@ -56,16 +56,17 @@ func (database *database) connectToDB(config *config.Config) error {
 
 	// Retry connection if it fails due to Docker's orchestration
 	for retries < dbConfig.MaxRetries {
-		if database.db, err = gorm.Open(dbConfig.Type, dbConfig.GetConnectionString()); err != nil {
-			retries++
-			if retries == dbConfig.MaxRetries {
-				return fmt.Errorf("error connecting to database after %d retries: %v", dbConfig.MaxRetries, err)
-			}
-			fmt.Println("error connecting to database, retrying... ")
-			time.Sleep(time.Duration(dbConfig.RetryDelay) * time.Second)
-			continue
+		if database.db, err = gorm.Open(dbConfig.Type, dbConfig.GetConnectionString()); err == nil {
+			break
 		}
-		break
+
+		retries++
+		if retries >= dbConfig.MaxRetries {
+			return fmt.Errorf("error connecting to database after %d retries: %v", dbConfig.MaxRetries, err)
+		}
+
+		fmt.Println("error connecting to database, retrying... ")
+		time.Sleep(time.Duration(dbConfig.RetryDelay) * time.Second)
 	}
 	return nil
 }
@@ -97,14 +98,18 @@ func (database *database) configure(config *config.Config) {
 
 	// Insert admin user
 	if dbConfig.AdminInsert {
-		admin := &models.User{
-			Username: "admin",
-			Email:    "ferra.main@gmail.com",
-			Password: common.Hash(dbConfig.AdminPassword, config.JWT.HashSalt),
-			IsAdmin:  true,
-		}
+		admin := makeAdminModel("ferra.main@gmail.com", common.Hash(dbConfig.AdminPassword, config.JWT.HashSalt))
 		if err := database.DB().Create(admin).Error; err != nil {
 			fmt.Print(err.Error())
 		}
+	}
+}
+
+func makeAdminModel(email, password string) *models.User {
+	return &models.User{
+		Username: "admin",
+		Email:    email,
+		Password: password,
+		IsAdmin:  true,
 	}
 }

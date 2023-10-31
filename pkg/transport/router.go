@@ -14,13 +14,13 @@ type router struct {
 	*gin.Engine
 }
 
-func NewRouter(t TransportLayer, cfg config.General, auth auth.AuthI, middlewares []gin.HandlerFunc) router {
+func NewRouter(t TransportLayer, cfg config.General, auth auth.AuthI, middlewares ...gin.HandlerFunc) router {
 	var router router
-	router.setup(t, cfg, auth, middlewares)
+	router.setup(t, cfg, auth, middlewares...)
 	return router
 }
 
-func (router *router) setup(t TransportLayer, cfg config.General, auth auth.AuthI, middlewares []gin.HandlerFunc) {
+func (router *router) setup(t TransportLayer, cfg config.General, auth auth.AuthI, middlewares ...gin.HandlerFunc) {
 
 	// Create router. Set debug/release mode
 	router.prepare(!cfg.Debug)
@@ -93,6 +93,7 @@ func (router *router) setV1Endpoints(v1 *gin.RouterGroup, transport TransportLay
 	}
 }
 
+// Profiling, only called if the config is set to true
 func (r *router) profiling() {
 	pprofGroup := r.Group("/debug/pprof")
 	pprofGroup.GET("/", gin.WrapF(pprof.Index))

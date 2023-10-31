@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/gilperopiola/go-rest-example/pkg/common"
+
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )

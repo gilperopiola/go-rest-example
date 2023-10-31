@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 
-	"github.com/gilperopiola/go-rest-example/pkg/common"
 	"github.com/gilperopiola/go-rest-example/pkg/common/auth"
 	"github.com/gilperopiola/go-rest-example/pkg/common/config"
 	"github.com/gilperopiola/go-rest-example/pkg/common/middleware"
@@ -12,6 +11,7 @@ import (
 	"github.com/gilperopiola/go-rest-example/pkg/transport"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 // TODO
@@ -41,7 +41,7 @@ func main() {
 		config = config.New()
 
 		// Initialize logger
-		logger = common.NewLogger()
+		logger = logrus.New()
 
 		// Initialize middlewares
 		middlewares = []gin.HandlerFunc{
@@ -70,7 +70,7 @@ func main() {
 		endpoints = transport.New(service)
 
 		// Initialize the router with the endpoints
-		router = transport.NewRouter(endpoints, config.General, auth, middlewares)
+		router = transport.NewRouter(endpoints, config.General, auth, middlewares...)
 	)
 
 	// Defer closing open connections

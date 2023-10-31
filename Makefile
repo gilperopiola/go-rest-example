@@ -10,3 +10,5 @@ run-local:
 test:
 	go test ./... -short -cover -race
 
+prometheus:
+	prometheus --config.file=prometheus.yml

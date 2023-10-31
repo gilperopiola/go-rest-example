@@ -20,6 +20,14 @@ var (
 	validEmailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`)
 )
 
+// bindRequestBody just binds the request body to the request struct
+func bindRequestBody(c common.GinI, request interface{}) error {
+	if err := c.ShouldBindJSON(&request); err != nil {
+		return common.ErrBindingRequest
+	}
+	return nil
+}
+
 //--------------------
 //    CREATE USER
 //--------------------
@@ -39,7 +47,7 @@ func (req CreateUserRequest) Validate() error {
 	return validateUsernameEmailAndPassword(req.Username, req.Email, req.Password)
 }
 
-func (req *CreateUserRequest) Build(c GinI) error {
+func (req *CreateUserRequest) Build(c common.GinI) error {
 	return bindRequestBody(c, req)
 }
 
@@ -74,7 +82,7 @@ func (req GetUserRequest) Validate() error {
 	return nil
 }
 
-func (req *GetUserRequest) Build(c GinI) error {
+func (req *GetUserRequest) Build(c common.GinI) error {
 	req.UserID = c.GetInt(contextUserIDKey)
 	return nil
 }
@@ -115,7 +123,7 @@ func (req UpdateUserRequest) Validate() error {
 	return nil
 }
 
-func (req *UpdateUserRequest) Build(c GinI) error {
+func (req *UpdateUserRequest) Build(c common.GinI) error {
 	if err := bindRequestBody(c, req); err != nil {
 		return err
 	}
@@ -161,7 +169,7 @@ func (req DeleteUserRequest) Validate() error {
 	return nil
 }
 
-func (req *DeleteUserRequest) Build(c GinI) error {
+func (req *DeleteUserRequest) Build(c common.GinI) error {
 	req.UserID = c.GetInt(contextUserIDKey)
 	return nil
 }
@@ -188,7 +196,7 @@ func (req SearchUsersRequest) Validate() error {
 	return nil
 }
 
-func (req *SearchUsersRequest) Build(c GinI) error {
+func (req *SearchUsersRequest) Build(c common.GinI) error {
 	var (
 		err            = error(nil)
 		defaultPage    = "0"
@@ -245,7 +253,7 @@ func (req ChangePasswordRequest) Validate() error {
 	return nil
 }
 
-func (req *ChangePasswordRequest) Build(c GinI) error {
+func (req *ChangePasswordRequest) Build(c common.GinI) error {
 	err := bindRequestBody(c, req)
 	if err != nil {
 		return err
@@ -258,9 +266,8 @@ func (req *ChangePasswordRequest) Build(c GinI) error {
 
 func (r *ChangePasswordRequest) ToUserModel() models.User {
 	return models.User{
-		ID:          r.UserID,
-		Password:    r.OldPassword,
-		NewPassword: r.NewPassword,
+		ID:       r.UserID,
+		Password: r.OldPassword,
 	}
 }
 
@@ -281,7 +288,7 @@ func (req CreateUserPostRequest) Validate() error {
 	return nil
 }
 
-func (req *CreateUserPostRequest) Build(c GinI) error {
+func (req *CreateUserPostRequest) Build(c common.GinI) error {
 	err := bindRequestBody(c, req)
 	if err != nil {
 		return err

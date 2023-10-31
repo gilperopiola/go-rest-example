@@ -2,6 +2,13 @@ package common
 
 import "github.com/sirupsen/logrus"
 
+type GinI interface {
+	ShouldBindJSON(obj interface{}) error
+	GetInt(key string) int
+	Query(key string) (value string)
+	DefaultQuery(key string, defaultValue string) string
+}
+
 type LoggerI interface {
 	Info(args ...interface{})
 	Warn(args ...interface{})
@@ -10,8 +17,4 @@ type LoggerI interface {
 	WithField(key string, value interface{}) *logrus.Entry
 
 	Fatalf(format string, args ...interface{})
-}
-
-func NewLogger() LoggerI {
-	return logrus.New()
 }
