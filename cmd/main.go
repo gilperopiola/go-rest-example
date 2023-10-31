@@ -25,6 +25,9 @@ import (
 // - Fix errors handling so that we can have errors with parameters
 // - Request IDs
 // - Logic from DeleteUser to service layer
+// - Logs: Replace :user_id
+// - Search & Fix TODOs
+// - Replace user.Exists when you can
 
 // Note: This is the entrypoint of the application.
 // The HTTP Requests entrypoint is the Prometheus HandlerFunc in prometheus.go
