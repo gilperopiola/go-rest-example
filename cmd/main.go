@@ -11,7 +11,6 @@ import (
 	"github.com/gilperopiola/go-rest-example/pkg/transport"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 )
 
 // TODO
@@ -28,12 +27,13 @@ import (
 // - Logs: Replace :user_id
 // - Search & Fix TODOs
 // - Replace user.Exists when you can
+// - Change in config JWT -> Auth
 
 // Note: This is the entrypoint of the application.
 // The HTTP Requests entrypoint is the Prometheus HandlerFunc in prometheus.go
+
 func main() {
 
-	// It all starts here
 	log.Println("Server starting ;)")
 
 	// Setup dependencies
@@ -42,7 +42,7 @@ func main() {
 		config = config.New()
 
 		// Initialize logger
-		logger = logrus.New()
+		logger = middleware.NewLogger()
 
 		// Initialize middlewares
 		middlewares = []gin.HandlerFunc{
@@ -59,7 +59,7 @@ func main() {
 		auth = auth.New(config.JWT.Secret, config.JWT.SessionDurationDays)
 
 		// Establish database connection
-		database = repository.NewDatabase(config)
+		database = repository.NewDatabase(config, repository.NewDBLogger(logger.Out))
 
 		// Initialize repository layer with the database connection
 		repository = repository.New(database)
@@ -73,9 +73,6 @@ func main() {
 		// Initialize the router with the endpoints
 		router = transport.NewRouter(endpoints, config.General, auth, middlewares...)
 	)
-
-	// Defer closing open connections
-	defer database.Close()
 
 	// Start server
 	port := config.General.Port

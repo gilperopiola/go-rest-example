@@ -12,7 +12,7 @@ type RepositoryI interface {
 	UpdateUser(user User) (User, error)
 	GetUser(user User, opts ...options.QueryOption) (User, error)
 	DeleteUser(id int) (User, error)
-	SearchUsers(username string, page, perPage int, opts ...options.PreloadOption) (Users, error)
+	SearchUsers(page, perPage int, opts ...options.QueryOption) (Users, error)
 	UserExists(username, email string, opts ...options.QueryOption) bool
 
 	CreateUserPost(post UserPost) (UserPost, error)
@@ -62,8 +62,8 @@ func (u *User) Delete(r RepositoryI) (err error) {
 	return nil
 }
 
-func (u *User) Search(r RepositoryI, page, perPage int) (Users, error) {
-	users, err := r.SearchUsers(u.Username, page, perPage, options.WithDetails)
+func (u *User) Search(r RepositoryI, page, perPage int, opts ...options.QueryOption) (Users, error) {
+	users, err := r.SearchUsers(page, perPage, opts...)
 	if err != nil {
 		return []User{}, common.Wrap("r.SearchUsers", err)
 	}

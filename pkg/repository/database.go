@@ -10,17 +10,17 @@ import (
 	"github.com/gilperopiola/go-rest-example/pkg/common/config"
 	"github.com/gilperopiola/go-rest-example/pkg/common/models"
 
-	_ "github.com/go-sql-driver/mysql"
-	"github.com/jinzhu/gorm"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
 type database struct {
 	db *gorm.DB
 }
 
-func NewDatabase(config *config.Config) database {
+func NewDatabase(config *config.Config, logger *DBLogger) database {
 	var database database
-	database.setup(config)
+	database.setup(config, logger)
 	return database
 }
 
@@ -28,15 +28,11 @@ func (database *database) DB() *gorm.DB {
 	return database.db
 }
 
-func (database *database) Close() {
-	database.db.Close()
-}
-
-func (database *database) setup(config *config.Config) {
+func (database *database) setup(config *config.Config, logger *DBLogger) {
 
 	// Create connection. It's deferred closed in main.go.
 	// Retry connection if it fails due to Docker's orchestration.
-	if err := database.connectToDB(config); err != nil {
+	if err := database.connectToDB(config, logger); err != nil {
 		log.Fatalf("error connecting to database: %v", err)
 		os.Exit(1)
 	}
@@ -49,14 +45,14 @@ func (database *database) setup(config *config.Config) {
 	database.configure(config)
 }
 
-func (database *database) connectToDB(config *config.Config) error {
+func (database *database) connectToDB(config *config.Config, logger *DBLogger) error {
 	var err error
 	retries := 0
 	dbConfig := config.Database
 
 	// Retry connection if it fails due to Docker's orchestration
 	for retries < dbConfig.MaxRetries {
-		if database.db, err = gorm.Open(dbConfig.Type, dbConfig.GetConnectionString()); err == nil {
+		if database.db, err = gorm.Open(mysql.Open(dbConfig.GetConnectionString()), &gorm.Config{Logger: logger}); err == nil {
 			break
 		}
 
@@ -72,20 +68,23 @@ func (database *database) connectToDB(config *config.Config) error {
 }
 
 func (database *database) configure(config *config.Config) {
+	mySQLDB, _ := database.db.DB()
 	dbConfig := config.Database
 
 	// Set connection pool limits
-	database.db.DB().SetMaxIdleConns(dbConfig.MaxIdleConns)
-	database.db.DB().SetMaxOpenConns(dbConfig.MaxOpenConns)
-	database.db.DB().SetConnMaxLifetime(time.Hour)
+	mySQLDB.SetMaxIdleConns(dbConfig.MaxIdleConns)
+	mySQLDB.SetMaxOpenConns(dbConfig.MaxOpenConns)
+	mySQLDB.SetConnMaxLifetime(time.Hour)
 
 	// Log queries if debug = true
-	database.db.LogMode(dbConfig.Debug)
+	if dbConfig.Debug {
+		database.db.Debug()
+	}
 
 	// Destroy or clean tables
 	if dbConfig.Destroy {
 		for _, model := range models.AllModels {
-			database.db.DropTable(model)
+			database.db.Migrator().DropTable(model)
 		}
 	} else if dbConfig.Purge {
 		for _, model := range models.AllModels {
@@ -100,7 +99,7 @@ func (database *database) configure(config *config.Config) {
 	if dbConfig.AdminInsert {
 		admin := makeAdminModel("ferra.main@gmail.com", common.Hash(dbConfig.AdminPassword, config.JWT.HashSalt))
 		if err := database.DB().Create(admin).Error; err != nil {
-			fmt.Print(err.Error())
+			fmt.Println(err.Error())
 		}
 	}
 }

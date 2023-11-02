@@ -10,6 +10,7 @@ type GinI interface {
 }
 
 type LoggerI interface {
+	Print(args ...interface{})
 	Info(args ...interface{})
 	Warn(args ...interface{})
 	Error(args ...interface{})

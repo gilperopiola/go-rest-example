@@ -3,7 +3,6 @@ package middleware
 import (
 	"errors"
 	"net/http"
-	"strings"
 
 	"github.com/gilperopiola/go-rest-example/pkg/common"
 
@@ -24,82 +23,49 @@ func NewErrorHandlerMiddleware(logger common.LoggerI) gin.HandlerFunc {
 		// If there are, get the last one
 		err := c.Errors.Last()
 
-		statusCode, stackTrace := getStatusCodeFromError(err), err.Error()
+		statusCode, humanReadable, stackTrace := getErrorInfo(err)
+		method := c.Request.Method
 
 		// Log the error depending on severity
-		logStackTrace(logger, statusCode, stackTrace, c.FullPath())
+		logStackTrace(logger, statusCode, stackTrace, c.Request.URL.Path, method)
 
 		c.JSON(statusCode, common.HTTPResponse{
 			Success: false,
 			Content: nil,
-			Error:   getHumanReadableError(err),
+			Error:   humanReadable,
 		})
 	}
 }
 
-func logStackTrace(logger common.LoggerI, status int, stackTrace, path string) {
-	logContext := logger.WithField("status", status).WithField("path", path)
+// getErrorInfo returns the status, the human-readable string & the stack trace of the error
+func getErrorInfo(err error) (int, string, string) {
+	var (
+		stackTrace = err.Error()
+		messages   []string
+		lastErr    error
+	)
+
+	// Unwrap the error and get all the messages
+	for err != nil {
+		messages = append(messages, err.Error())
+		lastErr = err
+		err = errors.Unwrap(err)
+	}
+
+	// Assert the type of the second-to-last error
+	if customErr, ok := lastErr.(*common.Error); ok {
+		return customErr.Status(), messages[len(messages)-1], stackTrace
+	}
+
+	// Not a custom error, send 500
+	return http.StatusInternalServerError, err.Error(), stackTrace
+}
+
+func logStackTrace(logger common.LoggerI, status int, stackTrace, path, method string) {
+	logContext := logger.WithField("status", status).WithField("path", path).WithField("method", method)
 	if status >= http.StatusInternalServerError {
 		logContext.Error(stackTrace)
 	} else {
 		logContext.Info(stackTrace)
 	}
-}
-
-var httpErrorsCodeMap = map[error]int{
-	// 400 - Bad Request
-	common.ErrBindingRequest:        400,
-	common.ErrAllFieldsRequired:     400,
-	common.ErrPasswordsDontMatch:    400,
-	common.ErrInvalidEmailFormat:    400,
-	common.ErrInvalidUsernameLength: 400,
-	common.ErrInvalidPasswordLength: 400,
-	common.ErrInvalidValue:          400,
-
-	// 401 - Unauthorized
-	common.ErrUnauthorized:  401,
-	common.ErrWrongPassword: 401,
-
-	// 404 - Not Found
-	common.ErrUserNotFound:       404,
-	common.ErrUserAlreadyDeleted: 404,
-
-	// 409 - Conflict
-	common.ErrUsernameOrEmailAlreadyInUse: 409,
-
-	// 500 - Internal Server Error
-	common.ErrCreatingUser:     500,
-	common.ErrGettingUser:      500,
-	common.ErrUpdatingUser:     500,
-	common.ErrDeletingUser:     500,
-	common.ErrSearchingUsers:   500,
-	common.ErrUnknown:          500,
-	common.ErrCreatingUserPost: 500,
-
-	// Other
-	common.ErrTooManyRequests: 429,
-}
-
-// getHumanReadableError returns the first error in the chain of errors
-func getHumanReadableError(err error) string {
-	var messages []string
-	for err != nil {
-		messages = append(messages, err.Error())
-		err = errors.Unwrap(err)
-	}
-	return messages[len(messages)-1]
-}
-
-// getStatusCodeFromError returns the HTTP status code that corresponds to the error
-func getStatusCodeFromError(err error) int {
-	statusCode := http.StatusInternalServerError
-
-	// This is done through strings comparison!!! (not ideal)
-	for key, value := range httpErrorsCodeMap {
-		if strings.Contains(err.Error(), key.Error()) {
-			statusCode = value
-			break
-		}
-	}
-	return statusCode
 }

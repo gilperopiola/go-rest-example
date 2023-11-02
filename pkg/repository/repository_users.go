@@ -7,7 +7,7 @@ import (
 	"github.com/gilperopiola/go-rest-example/pkg/common/models"
 	"github.com/gilperopiola/go-rest-example/pkg/repository/options"
 
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 // CreateUser inserts a user. Table structure can be found on the models package
@@ -23,17 +23,16 @@ func (r *repository) CreateUser(user models.User) (models.User, error) {
 func (r *repository) GetUser(user models.User, opts ...options.QueryOption) (models.User, error) {
 	db := r.database.db
 
-	// get by id, username or email
+	// Query by ID, username or email
 	query := "(id = ? OR username = ? OR email = ?)"
 
-	// only non deleted users
+	// WithoutDeleted, WithDetails, WithPosts
 	for _, opt := range opts {
-		opt(&query)
+		db = opt(db, &query)
 	}
 
-	// preload user details and posts
-	err := db.Preload("Details").Preload("Posts").Where(query, user.ID, user.Username, user.Email).First(&user).Error
-	if err != nil {
+	// Get user
+	if err := db.Where(query, user.ID, user.Username, user.Email).First(&user).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return models.User{}, common.Wrap(err.Error(), common.ErrUserNotFound)
 		}
@@ -46,28 +45,38 @@ func (r *repository) GetUser(user models.User, opts ...options.QueryOption) (mod
 // UpdateUser updates the fields that are not empty on the model
 func (r *repository) UpdateUser(user models.User) (models.User, error) {
 	db := r.database.db
-	if err := db.Model(&user).Update(&user).Error; err != nil {
+
+	// Update user
+	if err := db.Omit("Details").Save(&user).Error; err != nil {
 		return models.User{}, common.Wrap(err.Error(), common.ErrUpdatingUser)
 	}
+
+	// Update user details
+	if user.Details.ID != 0 {
+		if err := db.Save(&user.Details).Error; err != nil {
+			return models.User{}, common.Wrap(err.Error(), common.ErrUpdatingUserDetail)
+		}
+	}
+
 	return user, nil
 }
 
 // DeleteUser soft-deletes a user. if it is already deleted it throws an error
 func (r *repository) DeleteUser(id int) (models.User, error) {
-
-	// first, retrieve the user
-	user := models.User{ID: id}
 	var err error
+	user := models.User{ID: id}
+
+	// First, retrieve the user
 	if user, err = r.GetUser(user); err != nil {
 		return models.User{}, common.Wrap(err.Error(), common.ErrGettingUser)
 	}
 
-	// if it's already deleted, return an error
+	// If it's already deleted, return an error
 	if user.Deleted {
 		return models.User{}, common.ErrUserAlreadyDeleted
 	}
 
-	// then, mark the user as deleted and save it
+	// Then, mark the user as deleted and save it
 	user.Deleted = true
 	if _, err := r.UpdateUser(user); err != nil {
 		return models.User{}, common.Wrap(err.Error(), common.ErrUpdatingUser)
@@ -76,18 +85,13 @@ func (r *repository) DeleteUser(id int) (models.User, error) {
 	return user, nil
 }
 
-func (r *repository) SearchUsers(username string, page, perPage int, opts ...options.PreloadOption) (models.Users, error) {
-	db := r.database.db
+func (r *repository) SearchUsers(page, perPage int, opts ...options.QueryOption) (models.Users, error) {
 	var users models.Users
+	db := r.database.db
 
-	// preload user details and posts
+	// WithUsername, WithDetails, WithPosts, WithoutDeleted
 	for _, opt := range opts {
-		db = opt(db)
-	}
-
-	// if username is provided, apply the filter
-	if username != "" {
-		db = db.Where("username LIKE ?", "%"+username+"%")
+		db = opt(db, nil)
 	}
 
 	if err := db.Offset(page * perPage).Limit(perPage).Find(&users).Error; err != nil {
@@ -100,10 +104,11 @@ func (r *repository) SearchUsers(username string, page, perPage int, opts ...opt
 // UserExists checks if a user with username or email exists
 func (r *repository) UserExists(username, email string, opts ...options.QueryOption) bool {
 	db := r.database.db
-
 	query := "(username = ? OR email = ?)"
+
+	// WithoutDeleted
 	for _, opt := range opts {
-		opt(&query)
+		db = opt(db, &query)
 	}
 
 	var count int64

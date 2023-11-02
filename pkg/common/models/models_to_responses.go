@@ -29,7 +29,7 @@ func (u User) ToResponseModel() responses.User {
 }
 
 func (u Users) ToResponseModel() []responses.User {
-	var users []responses.User
+	users := []responses.User{}
 	for _, user := range u {
 		users = append(users, user.ToResponseModel())
 	}
@@ -56,7 +56,7 @@ func (p UserPost) ToResponseModel() responses.UserPost {
 }
 
 func (p UserPosts) ToResponseModel() []responses.UserPost {
-	var posts []responses.UserPost
+	posts := []responses.UserPost{}
 	for _, post := range p {
 		posts = append(posts, post.ToResponseModel())
 	}

@@ -1,23 +1,38 @@
 package options
 
 import (
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
-// QueryOptions are used to modify the query string
-type QueryOption func(*string)
+// QueryOptions are used to modify the DB object & query string
+type QueryOption func(db *gorm.DB, query *string) *gorm.DB
 
-func WithoutDeleted(query *string) {
-	*query += " AND deleted = false"
+// Filters
+func WithoutDeleted() QueryOption {
+	return func(db *gorm.DB, query *string) *gorm.DB {
+		*query += " AND deleted = false"
+		return db
+	}
 }
 
-// PreloadOptions are used to preload fields on a search query
-type PreloadOption func(*gorm.DB) *gorm.DB
-
-func WithDetails(db *gorm.DB) *gorm.DB {
-	return db.Preload("Details")
+func WithUsername(username string) QueryOption {
+	return func(db *gorm.DB, query *string) *gorm.DB {
+		if username == "" {
+			return db
+		}
+		return db.Where("username LIKE ?", "%"+username+"%")
+	}
 }
 
-func WithPosts(db *gorm.DB) *gorm.DB {
-	return db.Preload("Posts")
+// Preloaders
+func WithDetails() QueryOption {
+	return func(db *gorm.DB, query *string) *gorm.DB {
+		return db.Preload("Details")
+	}
+}
+
+func WithPosts() QueryOption {
+	return func(db *gorm.DB, query *string) *gorm.DB {
+		return db.Preload("Posts")
+	}
 }

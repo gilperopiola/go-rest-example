@@ -106,7 +106,7 @@ type UpdateUserRequest struct {
 }
 
 func (req UpdateUserRequest) Validate() error {
-	if req.UserID == 0 || (req.Email == "" && req.Username == "") {
+	if req.UserID == 0 || (req.Email == "" && req.Username == "" && req.FirstName == nil && req.LastName == nil) {
 		return common.ErrAllFieldsRequired
 	}
 

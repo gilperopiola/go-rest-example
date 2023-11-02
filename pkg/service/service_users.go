@@ -35,8 +35,12 @@ func (s *service) CreateUser(request *requests.CreateUserRequest) (responses.Cre
 func (s *service) GetUser(request *requests.GetUserRequest) (responses.GetUserResponse, error) {
 	user := request.ToUserModel()
 
-	if err := user.Get(s.repository, options.WithoutDeleted); err != nil {
+	if err := user.Get(s.repository, options.WithDetails(), options.WithPosts()); err != nil {
 		return responses.GetUserResponse{}, common.Wrap("GetUser: user.Get", err)
+	}
+
+	if user.Deleted {
+		return responses.GetUserResponse{}, common.Wrap("GetUser: user.Deleted", common.ErrUserAlreadyDeleted)
 	}
 
 	return responses.GetUserResponse{User: user.ToResponseModel()}, nil
@@ -55,7 +59,7 @@ func (s *service) UpdateUser(request *requests.UpdateUserRequest) (responses.Upd
 	}
 
 	// Get User
-	if err := user.Get(s.repository, options.WithoutDeleted); err != nil {
+	if err := user.Get(s.repository, options.WithoutDeleted(), options.WithDetails()); err != nil {
 		return responses.UpdateUserResponse{}, common.Wrap("UpdateUser: user.Get", err)
 	}
 
@@ -63,6 +67,7 @@ func (s *service) UpdateUser(request *requests.UpdateUserRequest) (responses.Upd
 	user.OverwriteFields(request.Username, request.Email, "")
 	user.OverwriteDetails(request.FirstName, request.LastName)
 
+	// Update
 	if err := user.Update(s.repository); err != nil {
 		return responses.UpdateUserResponse{}, common.Wrap("UpdateUser: user.Update", err)
 	}
@@ -97,7 +102,7 @@ func (s *service) SearchUsers(request *requests.SearchUsersRequest) (responses.S
 		perPage = request.PerPage
 	)
 
-	users, err := user.Search(s.repository, page, perPage)
+	users, err := user.Search(s.repository, page, perPage, options.WithDetails(), options.WithUsername(user.Username))
 	if err != nil {
 		return responses.SearchUsersResponse{}, common.Wrap("SearchUsers: user.Search", err)
 	}
@@ -116,7 +121,7 @@ func (s *service) SearchUsers(request *requests.SearchUsersRequest) (responses.S
 func (s *service) ChangePassword(request *requests.ChangePasswordRequest) (responses.ChangePasswordResponse, error) {
 	user := request.ToUserModel()
 
-	if err := user.Get(s.repository, options.WithoutDeleted); err != nil {
+	if err := user.Get(s.repository, options.WithoutDeleted()); err != nil {
 		return responses.ChangePasswordResponse{}, common.Wrap("ChangePassword: user.Get", err)
 	}
 

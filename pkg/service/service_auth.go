@@ -14,12 +14,15 @@ import (
 func (s *service) Signup(request *requests.SignupRequest) (responses.SignupResponse, error) {
 	user := request.ToUserModel()
 
+	// Check availability
 	if user.Exists(s.repository) {
 		return responses.SignupResponse{}, common.Wrap("Signup: user.Exists", common.ErrUsernameOrEmailAlreadyInUse)
 	}
 
+	// Hash password
 	user.HashPassword(s.config.JWT.HashSalt)
 
+	// Create
 	if err := user.Create(s.repository); err != nil {
 		return responses.SignupResponse{}, common.Wrap("Signup: user.Create", err)
 	}
@@ -34,14 +37,17 @@ func (s *service) Signup(request *requests.SignupRequest) (responses.SignupRespo
 func (s *service) Login(request *requests.LoginRequest) (responses.LoginResponse, error) {
 	user := request.ToUserModel()
 
-	if err := user.Get(s.repository, options.WithoutDeleted); err != nil {
+	// Get user
+	if err := user.Get(s.repository, options.WithoutDeleted()); err != nil {
 		return responses.LoginResponse{}, common.Wrap("Login: user.Get", err)
 	}
 
+	// Check password
 	if !user.PasswordMatches(request.Password, s.config.JWT.HashSalt) {
 		return responses.LoginResponse{}, common.Wrap("Login: !user.PasswordMatches", common.ErrWrongPassword)
 	}
 
+	// Generate token
 	tokenString, err := user.GenerateTokenString(s.auth)
 	if err != nil {
 		return responses.LoginResponse{}, common.Wrap("Login: user.GenerateTokenString", common.ErrUnauthorized)
