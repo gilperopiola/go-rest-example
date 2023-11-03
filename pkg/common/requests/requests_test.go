@@ -3,7 +3,6 @@ package requests
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
@@ -246,7 +245,7 @@ func TestMakeSearchUsersRequest(t *testing.T) {
 			name:    "error_invalid_value",
 			path:    "/users?username=john&page=0&per_page=",
 			want:    nil,
-			wantErr: common.ErrInvalidValue,
+			wantErr: common.Wrap("request.Build", common.ErrInvalidValue("per_page")),
 		},
 		{
 			name:    "success",
@@ -268,7 +267,7 @@ func TestMakeSearchUsersRequest(t *testing.T) {
 			// Assert
 			assert.Equal(t, tt.want, got)
 			if tt.wantErr != nil {
-				assert.True(t, errors.Is(err, tt.wantErr))
+				assert.Error(t, err, tt.wantErr)
 			} else {
 				assert.NoError(t, err)
 			}

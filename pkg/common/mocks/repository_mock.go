@@ -35,8 +35,8 @@ func (m *RepositoryMock) DeleteUser(id int) (models.User, error) {
 	return args.Get(0).(models.User), args.Error(1)
 }
 
-func (m *RepositoryMock) SearchUsers(username string, page, perPage int, opts ...options.QueryOption) (models.Users, error) {
-	args := m.Called(username, page, perPage)
+func (m *RepositoryMock) SearchUsers(page, perPage int, opts ...options.QueryOption) (models.Users, error) {
+	args := m.Called(page, perPage)
 	return args.Get(0).(models.Users), args.Error(1)
 }
 

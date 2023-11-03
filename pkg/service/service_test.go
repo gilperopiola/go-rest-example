@@ -28,8 +28,8 @@ const (
 )
 
 var (
-	modelUser  = models.User{ID: VALID_ID, Email: VALID_EMAIL}
-	entityUser = responses.User{ID: VALID_ID, Email: VALID_EMAIL}
+	modelUser    = models.User{ID: VALID_ID, Email: VALID_EMAIL, Posts: []models.UserPost{}}
+	responseUser = responses.User{ID: VALID_ID, Email: VALID_EMAIL, Posts: []responses.UserPost{}}
 )
 
 func TestSignup(t *testing.T) {
@@ -58,7 +58,7 @@ func TestSignup(t *testing.T) {
 		{
 			name:           "success",
 			mockRepository: makeMockRepositoryWithCreateUser(models.User{}, nil),
-			want:           responses.SignupResponse{},
+			want:           responses.SignupResponse{User: responses.User{Posts: []responses.UserPost{}}},
 			wantErr:        nil,
 		},
 	}
@@ -138,7 +138,7 @@ func TestCreateUser(t *testing.T) {
 		{
 			name:           "success",
 			mockRepository: makeMockRepositoryWithCreateUser(modelUser, nil),
-			want:           responses.CreateUserResponse{User: entityUser},
+			want:           responses.CreateUserResponse{User: responseUser},
 			wantErr:        nil,
 		},
 	}
@@ -168,7 +168,7 @@ func TestGetUser(t *testing.T) {
 		{
 			name:           "success",
 			mockRepository: makeMockRepositoryWithGetUser(modelUser, nil),
-			want:           responses.GetUserResponse{User: entityUser},
+			want:           responses.GetUserResponse{User: responseUser},
 			wantErr:        nil,
 		},
 	}
@@ -219,7 +219,7 @@ func TestUpdateUser(t *testing.T) {
 		{
 			name:           "success",
 			mockRepository: makeMockRepositoryWithUpdateUser(modelUser, nil),
-			want:           responses.UpdateUserResponse{User: entityUser},
+			want:           responses.UpdateUserResponse{User: responseUser},
 			wantErr:        nil,
 		},
 	}
@@ -247,7 +247,7 @@ func TestDeleteUser(t *testing.T) {
 		{
 			name:           "success",
 			mockRepository: makeMockRepositoryWithDeleteUser(modelUser, nil),
-			want:           responses.DeleteUserResponse{User: entityUser},
+			want:           responses.DeleteUserResponse{User: responseUser},
 		},
 	}
 
@@ -284,7 +284,7 @@ func TestSearchUsers(t *testing.T) {
 			name:           "success",
 			mockRepository: makeMockRepositoryWithSearchUsers([]models.User{modelUser}, nil),
 			request:        requests.SearchUsersRequest{Page: 1, PerPage: 10},
-			want:           responses.SearchUsersResponse{Users: []responses.User{entityUser}, Page: 1, PerPage: 10},
+			want:           responses.SearchUsersResponse{Users: []responses.User{responseUser}, Page: 1, PerPage: 10},
 			wantErr:        nil,
 		},
 	}

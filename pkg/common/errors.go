@@ -3,9 +3,9 @@ package common
 import "fmt"
 
 type Error struct {
-	err     error // This is the wrapped error
-	message string
-	status  int
+	err     error  // This is the wrapped error
+	message string // Error message
+	status  int    // HTTP status code
 }
 
 func NewError(err error, status int) *Error {
@@ -26,16 +26,22 @@ func (e *Error) Status() int {
 
 var (
 	// - Transport errors
-	ErrUnknown               = NewError(fmt.Errorf("error unknown"), 500)
-	ErrTooManyRequests       = NewError(fmt.Errorf("error, too many server requests"), 429)
-	ErrUnauthorized          = NewError(fmt.Errorf("error, unauthorized"), 401)
-	ErrAllFieldsRequired     = NewError(fmt.Errorf("error, all fields required"), 400)
-	ErrInvalidValue          = NewError(fmt.Errorf("error, invalid value"), 400)
-	ErrBindingRequest        = NewError(fmt.Errorf("error binding request"), 400)
-	ErrInvalidEmailFormat    = NewError(fmt.Errorf("error, invalid email format"), 400)
-	ErrInvalidUsernameLength = NewError(fmt.Errorf("error, username either too short or too long"), 400)
-	ErrInvalidPasswordLength = NewError(fmt.Errorf("error, password either too short or too long"), 400)
-	ErrPasswordsDontMatch    = NewError(fmt.Errorf("error, passwords don't match"), 400)
+	ErrUnknown            = NewError(fmt.Errorf("error unknown"), 500)
+	ErrTooManyRequests    = NewError(fmt.Errorf("error, too many server requests"), 429)
+	ErrUnauthorized       = NewError(fmt.Errorf("error, unauthorized"), 401)
+	ErrAllFieldsRequired  = NewError(fmt.Errorf("error, all fields required"), 400)
+	ErrPasswordsDontMatch = NewError(fmt.Errorf("error, passwords don't match"), 400)
+	ErrBindingRequest     = NewError(fmt.Errorf("error binding request"), 400)
+	ErrInvalidEmailFormat = NewError(fmt.Errorf("error, invalid email format"), 400)
+	ErrInvalidValue       = func(field string) error {
+		return NewError(fmt.Errorf("error, invalid value for field %s", field), 400)
+	}
+	ErrInvalidUsernameLength = func(min, max int) error {
+		return NewError(fmt.Errorf("error, username must contain between %d and %d characters", min, max), 400)
+	}
+	ErrInvalidPasswordLength = func(min, max int) error {
+		return NewError(fmt.Errorf("error, password must contain between %d and %d characters", min, max), 400)
+	}
 
 	// - Service & Repository errors
 	// --- Users

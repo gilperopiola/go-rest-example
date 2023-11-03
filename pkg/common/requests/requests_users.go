@@ -116,7 +116,7 @@ func (req UpdateUserRequest) Validate() error {
 
 	if req.Username != "" {
 		if len(req.Username) < usernameMinLength || len(req.Username) > usernameMaxLength {
-			return common.ErrInvalidUsernameLength
+			return common.ErrInvalidUsernameLength(usernameMinLength, usernameMaxLength)
 		}
 	}
 
@@ -207,12 +207,12 @@ func (req *SearchUsersRequest) Build(c common.GinI) error {
 
 	req.Page, err = strconv.Atoi(c.DefaultQuery("page", defaultPage))
 	if err != nil {
-		return common.ErrInvalidValue
+		return common.ErrInvalidValue("page")
 	}
 
 	req.PerPage, err = strconv.Atoi(c.DefaultQuery("per_page", defaultPerPage))
 	if err != nil {
-		return common.ErrInvalidValue
+		return common.ErrInvalidValue("per_page")
 	}
 
 	return nil
@@ -243,7 +243,7 @@ func (req ChangePasswordRequest) Validate() error {
 	}
 
 	if len(req.NewPassword) < passwordMinLength || len(req.NewPassword) > passwordMaxLength {
-		return common.ErrInvalidPasswordLength
+		return common.ErrInvalidPasswordLength(passwordMinLength, passwordMaxLength)
 	}
 
 	if req.NewPassword != req.RepeatPassword {
@@ -321,11 +321,11 @@ func validateUsernameEmailAndPassword(username, email, password string) error {
 	}
 
 	if len(username) < usernameMinLength || len(username) > usernameMaxLength {
-		return common.ErrInvalidUsernameLength
+		return common.ErrInvalidUsernameLength(usernameMinLength, usernameMaxLength)
 	}
 
 	if len(password) < passwordMinLength || len(password) > passwordMaxLength {
-		return common.ErrInvalidPasswordLength
+		return common.ErrInvalidPasswordLength(passwordMinLength, passwordMaxLength)
 	}
 
 	return nil

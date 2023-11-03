@@ -15,12 +15,12 @@ func NewErrorHandlerMiddleware(logger common.LoggerI) gin.HandlerFunc {
 		// Wait until the request is finished
 		c.Next()
 
-		// Check the context for errors
+		// Then, check the context for errors
 		if len(c.Errors) == 0 {
 			return
 		}
 
-		// If there are, get the last one
+		// If there are errors, get the last one
 		err := c.Errors.Last()
 
 		statusCode, humanReadable, stackTrace := getErrorInfo(err)
@@ -53,19 +53,17 @@ func getErrorInfo(err error) (int, string, string) {
 	}
 
 	// Assert the type of the second-to-last error
-	if customErr, ok := lastErr.(*common.Error); ok {
-		return customErr.Status(), messages[len(messages)-1], stackTrace
+	customErr, ok := lastErr.(*common.Error)
+	if !ok {
+		// Return 500 if not custom error
+		return http.StatusInternalServerError, err.Error(), stackTrace
 	}
 
-	// Not a custom error, send 500
-	return http.StatusInternalServerError, err.Error(), stackTrace
+	// Return status, custom error (second-to-last one) and stack trace
+	return customErr.Status(), messages[len(messages)-1], stackTrace
 }
 
 func logStackTrace(logger common.LoggerI, status int, stackTrace, path, method string) {
 	logContext := logger.WithField("status", status).WithField("path", path).WithField("method", method)
-	if status >= http.StatusInternalServerError {
-		logContext.Error(stackTrace)
-	} else {
-		logContext.Info(stackTrace)
-	}
+	logContext.Error(stackTrace)
 }
