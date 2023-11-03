@@ -18,11 +18,10 @@ type database struct {
 	db *gorm.DB
 }
 
-func NewDatabase(config *config.Config, logger *DBLogger) database {
+func NewDatabase(config *config.Config, logger *DBLogger) *database {
 	var database database
 	database.setup(config, logger)
-	log.Println("Database OK")
-	return database
+	return &database
 }
 
 func (database *database) DB() *gorm.DB {
@@ -103,6 +102,9 @@ func (database *database) configure(config *config.Config) {
 			fmt.Println(err.Error())
 		}
 	}
+
+	// Just for formatting the logs :)
+	fmt.Println("")
 }
 
 func makeAdminModel(email, password string) *models.User {

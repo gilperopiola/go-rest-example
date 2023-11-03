@@ -36,9 +36,7 @@ func NewPrometheus(cfg config.Monitoring, logger *Logger) *Prometheus {
 	}
 
 	// Register metrics with prefix
-	p.registerMetrics(cfg.PrometheusAppName) // TODO this to config
-
-	log.Println("Prometheus OK")
+	p.registerMetrics(cfg.PrometheusAppName)
 
 	return p
 }
@@ -236,6 +234,8 @@ func (p *Prometheus) registerMetrics(subsystem string) {
 		}
 		metricDefinition.MetricCollector = metric
 	}
+
+	p.logger.Info("Prometheus metrics registered", map[string]interface{}{"from": "Prometheus"})
 }
 
 // From https://github.com/DanielHeckrath/gin-prometheus/blob/master/gin_prometheus.go

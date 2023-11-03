@@ -32,17 +32,15 @@ func NewNewRelic(config config.Monitoring, logger *Logger) *newrelic.Application
 	newRelicApp, err := newrelic.NewApplication(
 		newrelic.ConfigAppName(config.NewRelicAppName),
 		newrelic.ConfigLicense(license),
+		newrelic.ConfigLogger(logger),
 		newrelic.ConfigAppLogForwardingEnabled(true),
 		newrelic.ConfigDistributedTracerEnabled(true),
-		newrelic.ConfigLogger(logger),
 	)
 
 	// Panic on failure
 	if err != nil {
 		log.Fatalf("Failed to start New Relic: %v", err)
 	}
-
-	log.Println("New Relic OK")
 
 	return newRelicApp
 }

@@ -19,7 +19,6 @@ type Config struct {
 func New() *Config {
 	config := Config{}
 	config.setup()
-	log.Println("Config OK")
 	return &config
 }
 

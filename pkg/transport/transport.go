@@ -1,8 +1,6 @@
 package transport
 
 import (
-	"log"
-
 	"github.com/gilperopiola/go-rest-example/pkg/service"
 
 	"github.com/gin-gonic/gin"
@@ -37,7 +35,6 @@ type transport struct {
 }
 
 func New(service service.ServiceLayer) *transport {
-	log.Println("Transport OK")
 	return &transport{
 		service: service,
 	}

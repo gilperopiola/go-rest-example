@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"errors"
-	"log"
 	"net/http"
 
 	"github.com/gilperopiola/go-rest-example/pkg/common"
@@ -11,9 +10,6 @@ import (
 )
 
 func NewErrorHandlerMiddleware(logger *Logger) gin.HandlerFunc {
-
-	log.Println("ErrorHandler OK")
-
 	return func(c *gin.Context) {
 
 		// Wait until the request is finished

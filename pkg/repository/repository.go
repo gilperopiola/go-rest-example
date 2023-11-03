@@ -1,8 +1,6 @@
 package repository
 
 import (
-	"log"
-
 	"github.com/gilperopiola/go-rest-example/pkg/common/models"
 	"github.com/gilperopiola/go-rest-example/pkg/repository/options"
 )
@@ -21,11 +19,10 @@ type RepositoryLayer interface {
 	CreateUserPost(post models.UserPost) (models.UserPost, error)
 }
 
-func New(database database) *repository {
-	log.Println("Repository OK")
+func New(database *database) *repository {
 	return &repository{database: database}
 }
 
 type repository struct {
-	database database
+	database *database
 }

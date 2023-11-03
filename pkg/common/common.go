@@ -36,5 +36,6 @@ const (
 	RedBold     = "\033[31;1m"
 	YellowBold  = "\033[33;1m"
 	WhiteBold   = "\033[37;1m"
+	GreenBold   = "\033[32;1m"
 	Gray        = "\033[90m"
 )

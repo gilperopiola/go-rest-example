@@ -2,11 +2,11 @@ package transport
 
 import (
 	"fmt"
-	"log"
 	"net/http/pprof"
 
 	"github.com/gilperopiola/go-rest-example/pkg/common/auth"
 	"github.com/gilperopiola/go-rest-example/pkg/common/config"
+	"github.com/gilperopiola/go-rest-example/pkg/common/middleware"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/gin-gonic/gin"
@@ -16,17 +16,16 @@ type router struct {
 	*gin.Engine
 }
 
-func NewRouter(t TransportLayer, cfg config.Config, auth auth.AuthI, middlewares ...gin.HandlerFunc) router {
+func NewRouter(t TransportLayer, cfg *config.Config, auth auth.AuthI, logger *middleware.Logger, middlewares ...gin.HandlerFunc) router {
 	var router router
-	router.setup(t, cfg, auth, middlewares...)
-	log.Println("Router OK")
+	router.setup(t, cfg, auth, logger, middlewares...)
 	return router
 }
 
-func (router *router) setup(t TransportLayer, cfg config.Config, auth auth.AuthI, middlewares ...gin.HandlerFunc) {
+func (router *router) setup(t TransportLayer, cfg *config.Config, auth auth.AuthI, logger *middleware.Logger, middlewares ...gin.HandlerFunc) {
 
 	// Create router. Set debug/release mode
-	router.prepare(!cfg.General.Debug)
+	router.prepare(!cfg.General.Debug, logger)
 
 	// Add middlewares
 	for _, middleware := range middlewares {
@@ -37,10 +36,12 @@ func (router *router) setup(t TransportLayer, cfg config.Config, auth auth.AuthI
 	router.setEndpoints(t, cfg, auth)
 }
 
-func (router *router) prepare(isProd bool) {
+func (router *router) prepare(isProd bool, logger *middleware.Logger) {
 	if isProd {
 		gin.SetMode(gin.ReleaseMode)
 	}
+	gin.DefaultWriter = logger.Writer()
+	gin.DefaultErrorWriter = logger.Writer()
 	router.Engine = gin.New()
 	router.Engine.SetTrustedProxies(nil)
 }
@@ -49,7 +50,7 @@ func (router *router) prepare(isProd bool) {
 //     ROUTES / ENDPOINTS
 //---------------------------*/
 
-func (router *router) setEndpoints(transport TransportLayer, cfg config.Config, authI auth.AuthI) {
+func (router *router) setEndpoints(transport TransportLayer, cfg *config.Config, authI auth.AuthI) {
 
 	// Standard endpoints
 	router.GET("/health", transport.healthCheck)

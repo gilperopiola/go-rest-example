@@ -12,7 +12,7 @@ import (
 
 // CreateUser inserts a user. Table structure can be found on the models package
 func (r *repository) CreateUser(user models.User) (models.User, error) {
-	db := r.database.db
+	db := r.database.DB()
 	if err := db.Create(&user).Error; err != nil {
 		return models.User{}, common.Wrap(err.Error(), common.ErrCreatingUser)
 	}
@@ -21,7 +21,7 @@ func (r *repository) CreateUser(user models.User) (models.User, error) {
 
 // GetUser retrieves a user, if it exists
 func (r *repository) GetUser(user models.User, opts ...options.QueryOption) (models.User, error) {
-	db := r.database.db
+	db := r.database.DB()
 
 	// Query by ID, username or email
 	query := "(id = ? OR username = ? OR email = ?)"
@@ -44,7 +44,7 @@ func (r *repository) GetUser(user models.User, opts ...options.QueryOption) (mod
 
 // UpdateUser updates the fields that are not empty on the model
 func (r *repository) UpdateUser(user models.User) (models.User, error) {
-	db := r.database.db
+	db := r.database.DB()
 	tx := db.Begin()
 
 	// Update user
@@ -94,8 +94,8 @@ func (r *repository) DeleteUser(id int) (models.User, error) {
 }
 
 func (r *repository) SearchUsers(page, perPage int, opts ...options.QueryOption) (models.Users, error) {
+	db := r.database.DB()
 	var users models.Users
-	db := r.database.db
 
 	// WithUsername, WithDetails, WithPosts, WithoutDeleted
 	for _, opt := range opts {
@@ -111,7 +111,7 @@ func (r *repository) SearchUsers(page, perPage int, opts ...options.QueryOption)
 
 // UserExists checks if a user with username or email exists
 func (r *repository) UserExists(username, email string, opts ...options.QueryOption) bool {
-	db := r.database.db
+	db := r.database.DB()
 	query := "(username = ? OR email = ?)"
 
 	// WithoutDeleted
@@ -126,7 +126,7 @@ func (r *repository) UserExists(username, email string, opts ...options.QueryOpt
 
 // CreateUserPost inserts a new post on the database. Title is required, body is optional
 func (r *repository) CreateUserPost(post models.UserPost) (models.UserPost, error) {
-	db := r.database.db
+	db := r.database.DB()
 	if err := db.Create(&post).Error; err != nil {
 		return models.UserPost{}, common.Wrap(err.Error(), common.ErrCreatingUserPost)
 	}

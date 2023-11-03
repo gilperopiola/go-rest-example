@@ -1,8 +1,6 @@
 package auth
 
 import (
-	"log"
-
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 )
@@ -13,7 +11,6 @@ type AuthI interface {
 }
 
 func New(secret string, sessionDurationDays int) *Auth {
-	log.Println("Auth OK")
 	return &Auth{
 		secret:              secret,
 		sessionDurationDays: sessionDurationDays,

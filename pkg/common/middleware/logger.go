@@ -3,9 +3,9 @@ package middleware
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"os"
 	"regexp"
+	"strings"
 
 	c "github.com/gilperopiola/go-rest-example/pkg/common"
 
@@ -21,7 +21,6 @@ func NewLogger() *Logger {
 		Out: os.Stdout, Formatter: &CustomJSONFormatter{},
 		Hooks: make(logrus.LevelHooks), Level: logrus.InfoLevel,
 	}
-	log.Println("Logger OK")
 	return &Logger{l}
 }
 
@@ -40,11 +39,31 @@ type CustomJSONFormatter struct{}
 // -
 func (f *CustomJSONFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 
+	if entry.Message == "" {
+		return nil, nil
+	}
+
+	// We always output first the time
 	formattedTime := entry.Time.Format("2006-01-02 15:04:05")
+
+	// If it's a New Relic log, we put it in BlueBold
+	if isNewRelicLog(entry.Message) {
+		return []byte(fmt.Sprintf("%s%s %s[New Relic]%s %s%s", c.WhiteBold, formattedTime, c.BlueBold, c.Reset, c.White, entry.Message)), nil
+	}
+
+	// If it's a Prometheus log, we put it in MagentaBold
+	if isPrometheusLog(entry.Data) {
+		return []byte(fmt.Sprintf("%s%s %s[Prometheus]%s %s%s", c.WhiteBold, formattedTime, c.MagentaBold, c.Reset, c.White, entry.Message)), nil
+	}
+
+	if isGinLog(entry.Message) {
+		message, _ := strings.CutPrefix(entry.Message, "[GIN-debug]")
+		return []byte(fmt.Sprintf("%s%s %s[GIN]%s %s%s\n", c.WhiteBold, formattedTime, c.GreenBold, c.Reset, c.White, message)), nil
+	}
 
 	// We only use the custom formatter for errors. TODO rework this!
 	if entry.Level > logrus.ErrorLevel {
-		return []byte(fmt.Sprintf("%s %s", formattedTime, entry.Message)), nil
+		return []byte(fmt.Sprintf("%s%s%s %s%s%s", c.WhiteBold, formattedTime, c.Reset, c.White, entry.Message, c.Reset)), nil
 	}
 
 	// Entry to JSON
@@ -91,11 +110,42 @@ func (l *Logger) Warn(msg string, context map[string]interface{}) {
 	l.Logger.Warn(msg, context)
 }
 func (l *Logger) Info(msg string, context map[string]interface{}) {
-	l.Logger.Info(msg, context)
+	log := l.Logger.WithField("msg", msg)
+	for k, v := range context {
+		log = log.WithField(k, v)
+	}
+
+	if !strings.Contains(msg, "\n") {
+		msg += "\n"
+	}
+
+	log.Info(msg)
 }
 func (l *Logger) Debug(msg string, context map[string]interface{}) {
-	l.Logger.Debug(msg, context)
+	log := l.Logger.WithField("msg", msg)
+	for k, v := range context {
+		log = log.WithField(k, v)
+	}
+
+	if !strings.Contains(msg, "\n") {
+		msg += "\n"
+	}
+
+	log.Debug(msg)
 }
 func (l *Logger) DebugEnabled() bool {
 	return l.IsLevelEnabled(logrus.DebugLevel)
+}
+
+func isNewRelicLog(msg string) bool {
+	return msg == "application created\n" || msg == "final configuration\n" || msg == "application connected\n" || msg == "collector message\n"
+}
+
+func isPrometheusLog(data logrus.Fields) bool {
+	val, ok := data["from"]
+	return ok && val == "Prometheus"
+}
+
+func isGinLog(msg string) bool {
+	return strings.Contains(msg, "[GIN-debug]") || strings.Contains(msg, "GIN_MODE") || strings.Contains(msg, "gin.SetMode")
 }
