@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"log"
+
 	"github.com/gilperopiola/go-rest-example/pkg/common/models"
 	"github.com/gilperopiola/go-rest-example/pkg/repository/options"
 )
@@ -20,6 +22,7 @@ type RepositoryLayer interface {
 }
 
 func New(database database) *repository {
+	log.Println("Repository OK")
 	return &repository{database: database}
 }
 

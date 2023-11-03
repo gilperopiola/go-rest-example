@@ -16,18 +16,16 @@ import (
 // TODO
 // - Redis
 // - More tests
-// - Add swagger docs
-// - batch insert?
-// - reset password
-// - roles to DB
+// - Batch insert
+// - Reset password
+// - Roles to DB
 // - Prometheus enable flag
-// - Fix errors handling so that we can have errors with parameters
 // - Request IDs
 // - Logic from DeleteUser to service layer
-// - Logs: Replace :user_id
 // - Search & Fix TODOs
 // - Replace user.Exists when you can
 // - Change in config JWT -> Auth
+// - OpenAPI (Swagger)
 
 // Note: This is the entrypoint of the application.
 // The HTTP Requests entrypoint is the Prometheus HandlerFunc in prometheus.go
@@ -47,31 +45,31 @@ func main() {
 		// Initialize middlewares
 		middlewares = []gin.HandlerFunc{
 			gin.Recovery(), // Panic recovery
-			middleware.NewRateLimiterMiddleware(middleware.NewRateLimiter(200)),         // Rate Limiter
-			middleware.NewCORSConfigMiddleware(),                                        // CORS
-			middleware.NewNewRelicMiddleware(middleware.NewNewRelic(config.Monitoring)), // New Relic (monitoring)
-			middleware.NewPrometheusMiddleware(middleware.NewPrometheus()),              // Prometheus (metrics)
-			middleware.NewTimeoutMiddleware(config.General.Timeout),                     // Timeout
-			middleware.NewErrorHandlerMiddleware(logger),                                // Error Handler
+			middleware.NewRateLimiterMiddleware(middleware.NewRateLimiter(200)),                     // Rate Limiter
+			middleware.NewCORSConfigMiddleware(),                                                    // CORS
+			middleware.NewNewRelicMiddleware(middleware.NewNewRelic(config.Monitoring, logger)),     // New Relic (monitoring)
+			middleware.NewPrometheusMiddleware(middleware.NewPrometheus(config.Monitoring, logger)), // Prometheus (metrics)
+			middleware.NewTimeoutMiddleware(config.General.Timeout),                                 // Timeout
+			middleware.NewErrorHandlerMiddleware(logger),                                            // Error Handler
 		}
 
 		// Initialize authentication module
-		auth = auth.New(config.JWT.Secret, config.JWT.SessionDurationDays)
+		auth = auth.New(config.Auth.JWTSecret, config.Auth.SessionDurationDays)
 
 		// Establish database connection
 		database = repository.NewDatabase(config, repository.NewDBLogger(logger.Out))
 
-		// Initialize repository layer with the database connection
-		repository = repository.New(database)
+		// Initialize repositoryLayer layer with the database connection
+		repositoryLayer = repository.New(database)
 
-		// Setup the main service layer
-		service = service.New(repository, auth, config)
+		// Setup the main serviceLayer layer
+		serviceLayer = service.New(repositoryLayer, auth, config)
 
 		// Setup endpoints & transport layer
-		endpoints = transport.New(service)
+		transportLayer = transport.New(serviceLayer)
 
 		// Initialize the router with the endpoints
-		router = transport.NewRouter(endpoints, config.General, auth, middlewares...)
+		router = transport.NewRouter(transportLayer, *config, auth, middlewares...)
 	)
 
 	// Start server

@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"errors"
+	"log"
 	"net/http"
 
 	"github.com/gilperopiola/go-rest-example/pkg/common"
@@ -9,7 +10,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func NewErrorHandlerMiddleware(logger common.LoggerI) gin.HandlerFunc {
+func NewErrorHandlerMiddleware(logger *Logger) gin.HandlerFunc {
+
+	log.Println("ErrorHandler OK")
+
 	return func(c *gin.Context) {
 
 		// Wait until the request is finished
@@ -63,7 +67,7 @@ func getErrorInfo(err error) (int, string, string) {
 	return customErr.Status(), messages[len(messages)-1], stackTrace
 }
 
-func logStackTrace(logger common.LoggerI, status int, stackTrace, path, method string) {
+func logStackTrace(logger *Logger, status int, stackTrace, path, method string) {
 	logContext := logger.WithField("status", status).WithField("path", path).WithField("method", method)
 	logContext.Error(stackTrace)
 }

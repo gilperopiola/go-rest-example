@@ -15,9 +15,9 @@ type All interface {
 		CreateUserPostResponse
 }
 
-//-------------------
+/*-------------------
 //      AUTH
-//-------------------
+//-----------------*/
 
 type SignupResponse struct {
 	User User `json:"user"`
@@ -27,9 +27,9 @@ type LoginResponse struct {
 	Token string `json:"token"`
 }
 
-//--------------------
+/*--------------------
 //      USERS
-//--------------------
+//------------------*/
 
 type CreateUserResponse struct {
 	User User `json:"user"`
@@ -57,9 +57,9 @@ type ChangePasswordResponse struct {
 	User User `json:"user"`
 }
 
-//-----------------------
+/*-----------------------
 //      USER POSTS
-//-----------------------
+//---------------------*/
 
 type CreateUserPostResponse struct {
 	UserPost UserPost `json:"user_post"`

@@ -1,6 +1,8 @@
 package transport
 
 import (
+	"fmt"
+	"log"
 	"net/http/pprof"
 
 	"github.com/gilperopiola/go-rest-example/pkg/common/auth"
@@ -14,16 +16,17 @@ type router struct {
 	*gin.Engine
 }
 
-func NewRouter(t TransportLayer, cfg config.General, auth auth.AuthI, middlewares ...gin.HandlerFunc) router {
+func NewRouter(t TransportLayer, cfg config.Config, auth auth.AuthI, middlewares ...gin.HandlerFunc) router {
 	var router router
 	router.setup(t, cfg, auth, middlewares...)
+	log.Println("Router OK")
 	return router
 }
 
-func (router *router) setup(t TransportLayer, cfg config.General, auth auth.AuthI, middlewares ...gin.HandlerFunc) {
+func (router *router) setup(t TransportLayer, cfg config.Config, auth auth.AuthI, middlewares ...gin.HandlerFunc) {
 
 	// Create router. Set debug/release mode
-	router.prepare(!cfg.Debug)
+	router.prepare(!cfg.General.Debug)
 
 	// Add middlewares
 	for _, middleware := range middlewares {
@@ -42,15 +45,14 @@ func (router *router) prepare(isProd bool) {
 	router.Engine.SetTrustedProxies(nil)
 }
 
-//-----------------------------
+/*-----------------------------
 //     ROUTES / ENDPOINTS
-//-----------------------------
+//---------------------------*/
 
-func (router *router) setEndpoints(transport TransportLayer, cfg config.General, authI auth.AuthI) {
+func (router *router) setEndpoints(transport TransportLayer, cfg config.Config, authI auth.AuthI) {
 
 	// Standard endpoints
 	router.GET("/health", transport.healthCheck)
-	router.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
 	// V1
 	v1 := router.Group("/v1")
@@ -58,10 +60,17 @@ func (router *router) setEndpoints(transport TransportLayer, cfg config.General,
 		router.setV1Endpoints(v1, transport, authI)
 	}
 
+	// Monitoring
+	if cfg.Monitoring.PrometheusEnabled {
+		router.GET("/metrics", gin.WrapH(promhttp.Handler()))
+	}
+
 	// Profiling
-	if cfg.Profiling {
+	if cfg.General.Profiling {
 		router.profiling()
 	}
+
+	fmt.Println("")
 }
 
 func (router *router) setV1Endpoints(v1 *gin.RouterGroup, transport TransportLayer, authI auth.AuthI) {

@@ -5,10 +5,12 @@ import "fmt"
 // If you add something here, remember to add it to the .env_example file
 
 type General struct {
-	Debug     bool   `envconfig:"GO_REST_EXAMPLE_DEBUG"`
-	Port      string `envconfig:"GO_REST_EXAMPLE_PORT"`
-	Profiling bool   `envconfig:"GO_REST_EXAMPLE_PROFILING"`
-	Timeout   int    `envconfig:"GO_REST_EXAMPLE_TIMEOUT_SECONDS"`
+	AppName        string `envconfig:"GO_REST_EXAMPLE_APP_NAME"`
+	Debug          bool   `envconfig:"GO_REST_EXAMPLE_DEBUG"`
+	Port           string `envconfig:"GO_REST_EXAMPLE_PORT"`
+	Profiling      bool   `envconfig:"GO_REST_EXAMPLE_PROFILING"`
+	Timeout        int    `envconfig:"GO_REST_EXAMPLE_TIMEOUT_SECONDS"`
+	RateLimiterRPS int    `envconfig:"GO_REST_EXAMPLE_RATE_LIMITER_RPS"`
 }
 
 type Database struct {
@@ -19,7 +21,7 @@ type Database struct {
 	Port     string `envconfig:"GO_REST_EXAMPLE_DATABASE_PORT"`
 	Schema   string `envconfig:"GO_REST_EXAMPLE_DATABASE_SCHEMA"`
 
-	Purge   bool `envconfig:"GO_REST_EXAMPLE_DATABASE_PURGE"`
+	Clean   bool `envconfig:"GO_REST_EXAMPLE_DATABASE_CLEAN"`
 	Debug   bool `envconfig:"GO_REST_EXAMPLE_DATABASE_DEBUG"`
 	Destroy bool `envconfig:"GO_REST_EXAMPLE_DATABASE_DESTROY"`
 
@@ -47,14 +49,17 @@ func (config *Database) GetConnectionString() string {
 	)
 }
 
-type JWT struct {
-	Secret              string `envconfig:"GO_REST_EXAMPLE_JWT_SECRET"`
-	SessionDurationDays int    `envconfig:"GO_REST_EXAMPLE_JWT_SESSION_DURATION_DAYS"`
-	HashSalt            string `envconfig:"GO_REST_EXAMPLE_JWT_HASH_SALT"`
+type Auth struct {
+	JWTSecret           string `envconfig:"GO_REST_EXAMPLE_AUTH_JWT_SECRET"`
+	SessionDurationDays int    `envconfig:"GO_REST_EXAMPLE_AUTH_SESSION_DURATION_DAYS"`
+	HashSalt            string `envconfig:"GO_REST_EXAMPLE_AUTH_HASH_SALT"`
 }
 
 type Monitoring struct {
-	Enabled bool   `envconfig:"GO_REST_EXAMPLE_MONITORING_ENABLED"`
-	AppName string `envconfig:"GO_REST_EXAMPLE_MONITORING_APP_NAME"`
-	Secret  string `envconfig:"GO_REST_EXAMPLE_MONITORING_SECRET"`
+	NewRelicEnabled    bool   `envconfig:"GO_REST_EXAMPLE_MONITORING_NEW_RELIC_ENABLED"`
+	NewRelicAppName    string `envconfig:"GO_REST_EXAMPLE_MONITORING_NEW_RELIC_APP_NAME"`
+	NewRelicLicenseKey string `envconfig:"GO_REST_EXAMPLE_MONITORING_NEW_RELIC_LICENSE_KEY"`
+
+	PrometheusEnabled bool   `envconfig:"GO_REST_EXAMPLE_MONITORING_PROMETHEUS_ENABLED"`
+	PrometheusAppName string `envconfig:"GO_REST_EXAMPLE_MONITORING_PROMETHEUS_APP_NAME"`
 }

@@ -45,17 +45,25 @@ func (r *repository) GetUser(user models.User, opts ...options.QueryOption) (mod
 // UpdateUser updates the fields that are not empty on the model
 func (r *repository) UpdateUser(user models.User) (models.User, error) {
 	db := r.database.db
+	tx := db.Begin()
 
 	// Update user
-	if err := db.Omit("Details").Save(&user).Error; err != nil {
+	if err := tx.Omit("Details").Save(&user).Error; err != nil {
+		tx.Rollback()
 		return models.User{}, common.Wrap(err.Error(), common.ErrUpdatingUser)
 	}
 
 	// Update user details
 	if user.Details.ID != 0 {
-		if err := db.Save(&user.Details).Error; err != nil {
+		if err := tx.Save(&user.Details).Error; err != nil {
+			tx.Rollback()
 			return models.User{}, common.Wrap(err.Error(), common.ErrUpdatingUserDetail)
 		}
+	}
+
+	// Commit transaction
+	if err := tx.Commit().Error; err != nil {
+		return models.User{}, common.Wrap(err.Error(), common.ErrInDBTransaction)
 	}
 
 	return user, nil

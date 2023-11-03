@@ -14,30 +14,35 @@ func NewNewRelicMiddleware(app *newrelic.Application) gin.HandlerFunc {
 	return nrgin.Middleware(app)
 }
 
-func NewNewRelic(config config.Monitoring) *newrelic.Application {
+func NewNewRelic(config config.Monitoring, logger *Logger) *newrelic.Application {
 
-	// If monitoring is not enabled, return empty app
-	if !config.Enabled {
+	// If New Relic is not enabled, return empty app
+	if !config.NewRelicEnabled {
+		log.Println("New Relic Disabled")
 		return nil
 	}
 
 	// If monitoring is enabled, use license to create New Relic app
-	license := config.Secret
+	license := config.NewRelicLicenseKey
 	if license == "" {
 		log.Fatalf("New Relic license not found")
 	}
 
 	// Create app
 	newRelicApp, err := newrelic.NewApplication(
-		newrelic.ConfigAppName(config.AppName),
+		newrelic.ConfigAppName(config.NewRelicAppName),
 		newrelic.ConfigLicense(license),
 		newrelic.ConfigAppLogForwardingEnabled(true),
+		newrelic.ConfigDistributedTracerEnabled(true),
+		newrelic.ConfigLogger(logger),
 	)
 
 	// Panic on failure
 	if err != nil {
 		log.Fatalf("Failed to start New Relic: %v", err)
 	}
+
+	log.Println("New Relic OK")
 
 	return newRelicApp
 }

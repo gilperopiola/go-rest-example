@@ -12,13 +12,14 @@ import (
 type Config struct {
 	General    General
 	Database   Database
-	JWT        JWT
+	Auth       Auth
 	Monitoring Monitoring
 }
 
 func New() *Config {
 	config := Config{}
 	config.setup()
+	log.Println("Config OK")
 	return &config
 }
 

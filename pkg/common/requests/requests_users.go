@@ -9,28 +9,29 @@ import (
 	"github.com/gilperopiola/go-rest-example/pkg/common/models"
 )
 
-const (
+var (
+	contextUserIDKey = "UserID"
+	pathUserIDKey    = "user_id"
+
 	usernameMinLength = 4
 	usernameMaxLength = 32
 	passwordMinLength = 8
 	passwordMaxLength = 64
-)
 
-var (
 	validEmailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`)
 )
 
 // bindRequestBody just binds the request body to the request struct
 func bindRequestBody(c common.GinI, request interface{}) error {
 	if err := c.ShouldBindJSON(&request); err != nil {
-		return common.ErrBindingRequest
+		return common.Wrap(err.Error(), common.ErrBindingRequest)
 	}
 	return nil
 }
 
-//--------------------
+/*---------------------
 //    CREATE USER
-//--------------------
+--------------------*/
 
 type CreateUserRequest struct {
 	Username string `json:"username"`
@@ -67,9 +68,9 @@ func (r *CreateUserRequest) ToUserModel() models.User {
 	}
 }
 
-//--------------------
+/*--------------------
 //     GET USER
-//--------------------
+//------------------*/
 
 type GetUserRequest struct {
 	UserID int `json:"user_id"`
@@ -91,9 +92,9 @@ func (r *GetUserRequest) ToUserModel() models.User {
 	return models.User{ID: r.UserID}
 }
 
-//--------------------
+/*--------------------
 //    UPDATE USER
-//--------------------
+//------------------*/
 
 type UpdateUserRequest struct {
 	UserID   int    `json:"user_id"`
@@ -153,9 +154,9 @@ func (r *UpdateUserRequest) ToUserModel() models.User {
 	}
 }
 
-//--------------------
+/*--------------------
 //    DELETE USER
-//--------------------
+//------------------*/
 
 type DeleteUserRequest struct {
 	UserID int `json:"user_id"`
@@ -178,9 +179,9 @@ func (r *DeleteUserRequest) ToUserModel() models.User {
 	return models.User{ID: r.UserID}
 }
 
-//--------------------
+/*--------------------
 //    SEARCH USERS
-//--------------------
+//------------------*/
 
 type SearchUsersRequest struct {
 	Username string `json:"username"`
@@ -222,9 +223,9 @@ func (r *SearchUsersRequest) ToUserModel() models.User {
 	return models.User{Username: r.Username}
 }
 
-//-----------------------
+/*-----------------------
 //    CHANGE PASSWORD
-//-----------------------
+//---------------------*/
 
 type ChangePasswordRequest struct {
 	UserID         int    `json:"user_id"`
@@ -271,9 +272,9 @@ func (r *ChangePasswordRequest) ToUserModel() models.User {
 	}
 }
 
-//------------------------
+/*------------------------
 //    CREATE USER POST
-//------------------------
+//----------------------*/
 
 type CreateUserPostRequest struct {
 	UserID int    `json:"user_id"`
@@ -307,9 +308,9 @@ func (r *CreateUserPostRequest) ToUserPostModel() models.UserPost {
 	}
 }
 
-//-----------------------
+/*-----------------------
 //       HELPERS
-//-----------------------
+//---------------------*/
 
 func validateUsernameEmailAndPassword(username, email, password string) error {
 	if email == "" || username == "" || password == "" {

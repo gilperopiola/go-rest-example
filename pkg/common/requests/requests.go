@@ -2,18 +2,6 @@ package requests
 
 import "github.com/gilperopiola/go-rest-example/pkg/common"
 
-var (
-	contextUserIDKey = "UserID"
-	pathUserIDKey    = "user_id"
-)
-
-func MakeRequest[req All](c common.GinI, request req) (req, error) {
-	if err := makeRequest(c, request); err != nil {
-		return req(nil), err
-	}
-	return request, nil
-}
-
 type All interface {
 	Build(c common.GinI) error
 	Validate() error
@@ -27,6 +15,18 @@ type All interface {
 		*SearchUsersRequest |
 		*ChangePasswordRequest |
 		*CreateUserPostRequest
+}
+
+/*---------------------------------------------------------------------------
+// The MakeRequest function is very important, it uses generics to orchestrate
+// the generation and validation of the different types of requests.
+------------------------*/
+
+func MakeRequest[req All](c common.GinI, request req) (req, error) {
+	if err := makeRequest(c, request); err != nil {
+		return req(nil), err
+	}
+	return request, nil
 }
 
 func makeRequest[req All](c common.GinI, request req) error {

@@ -2,26 +2,43 @@ package middleware
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/gilperopiola/go-rest-example/pkg/common"
+	"github.com/gilperopiola/go-rest-example/pkg/common/config"
 
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
 func NewPrometheusMiddleware(p *Prometheus) gin.HandlerFunc {
+	if p == nil {
+		return func(c *gin.Context) {
+			c.Next()
+		}
+	}
 	return p.HandlerFunc()
 }
 
-func NewPrometheus() *Prometheus {
-	p := &Prometheus{metricsList: standardMetrics, replaceURLKeys: replaceURLKeys}
+func NewPrometheus(cfg config.Monitoring, logger *Logger) *Prometheus {
+	if !cfg.PrometheusEnabled {
+		log.Println("Prometheus Disabled")
+		return nil
+	}
+
+	p := &Prometheus{
+		metricsList:    standardMetrics,
+		replaceURLKeys: replaceURLKeys,
+		logger:         logger,
+	}
 
 	// Register metrics with prefix
-	p.registerMetrics("go_rest_example") // TODO this to config
+	p.registerMetrics(cfg.PrometheusAppName) // TODO this to config
+
+	log.Println("Prometheus OK")
 
 	return p
 }
@@ -68,7 +85,7 @@ type Prometheus struct {
 
 	replaceURLKeys func(c *gin.Context) string
 
-	logger common.LoggerI
+	logger *Logger
 }
 
 // prometheus.Collector type (i.e. CounterVec, Summary, etc) of each metric
@@ -205,7 +222,7 @@ func (p *Prometheus) registerMetrics(subsystem string) {
 	for _, metricDefinition := range p.metricsList {
 		metric := NewMetric(metricDefinition, subsystem)
 		if err := prometheus.Register(metric); err != nil {
-			p.logger.Error(err, fmt.Errorf("%s could not be registered in Prometheus", metricDefinition.Name))
+			p.logger.Error(err.Error(), map[string]interface{}{"error": fmt.Errorf("%s could not be registered in Prometheus", metricDefinition.Name)})
 		}
 		switch metricDefinition {
 		case metricTotalRequests:

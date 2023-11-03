@@ -7,9 +7,9 @@ import (
 	"github.com/gilperopiola/go-rest-example/pkg/repository/options"
 )
 
-//-------------------------
+/*-------------------------
 //       CREATE USER
-//-------------------------
+//-----------------------*/
 
 // CreateUser is an admins only endpoint
 func (s *service) CreateUser(request *requests.CreateUserRequest) (responses.CreateUserResponse, error) {
@@ -19,7 +19,7 @@ func (s *service) CreateUser(request *requests.CreateUserRequest) (responses.Cre
 		return responses.CreateUserResponse{}, common.Wrap("CreateUser: user.Exists", common.ErrUsernameOrEmailAlreadyInUse)
 	}
 
-	user.HashPassword(s.config.JWT.HashSalt)
+	user.HashPassword(s.config.Auth.HashSalt)
 
 	if err := user.Create(s.repository); err != nil {
 		return responses.CreateUserResponse{}, common.Wrap("CreateUser: user.Create", err)
@@ -28,9 +28,9 @@ func (s *service) CreateUser(request *requests.CreateUserRequest) (responses.Cre
 	return responses.CreateUserResponse{User: user.ToResponseModel()}, nil
 }
 
-//-----------------------
+/*-----------------------
 //       GET USER
-//-----------------------
+//---------------------*/
 
 func (s *service) GetUser(request *requests.GetUserRequest) (responses.GetUserResponse, error) {
 	user := request.ToUserModel()
@@ -46,9 +46,9 @@ func (s *service) GetUser(request *requests.GetUserRequest) (responses.GetUserRe
 	return responses.GetUserResponse{User: user.ToResponseModel()}, nil
 }
 
-//--------------------------
+/*--------------------------
 //       UPDATE USER
-//--------------------------
+//------------------------*/
 
 func (s *service) UpdateUser(request *requests.UpdateUserRequest) (responses.UpdateUserResponse, error) {
 	user := request.ToUserModel()
@@ -75,9 +75,9 @@ func (s *service) UpdateUser(request *requests.UpdateUserRequest) (responses.Upd
 	return responses.UpdateUserResponse{User: user.ToResponseModel()}, nil
 }
 
-//--------------------------
+/*--------------------------
 //       DELETE USER
-//--------------------------
+//------------------------*/
 
 func (s *service) DeleteUser(request *requests.DeleteUserRequest) (responses.DeleteUserResponse, error) {
 	user := request.ToUserModel()
@@ -90,9 +90,9 @@ func (s *service) DeleteUser(request *requests.DeleteUserRequest) (responses.Del
 	return responses.DeleteUserResponse{User: user.ToResponseModel()}, nil
 }
 
-//--------------------------
+/*--------------------------
 //      SEARCH USERS
-//--------------------------
+//------------------------*/
 
 // SearchUsers is an admins only endpoint
 func (s *service) SearchUsers(request *requests.SearchUsersRequest) (responses.SearchUsersResponse, error) {
@@ -114,9 +114,9 @@ func (s *service) SearchUsers(request *requests.SearchUsersRequest) (responses.S
 	}, nil
 }
 
-//--------------------------
+/*--------------------------
 //     CHANGE PASSWORD
-//--------------------------
+//------------------------*/
 
 func (s *service) ChangePassword(request *requests.ChangePasswordRequest) (responses.ChangePasswordResponse, error) {
 	user := request.ToUserModel()
@@ -126,7 +126,7 @@ func (s *service) ChangePassword(request *requests.ChangePasswordRequest) (respo
 	}
 
 	// Check if old password matches
-	if !user.PasswordMatches(request.OldPassword, s.config.JWT.HashSalt) {
+	if !user.PasswordMatches(request.OldPassword, s.config.Auth.HashSalt) {
 		return responses.ChangePasswordResponse{}, common.Wrap("ChangePassword: !user.PasswordMatches", common.ErrWrongPassword)
 	}
 
@@ -134,7 +134,7 @@ func (s *service) ChangePassword(request *requests.ChangePasswordRequest) (respo
 	user.Password = request.NewPassword
 
 	// Hash new password
-	user.HashPassword(s.config.JWT.HashSalt)
+	user.HashPassword(s.config.Auth.HashSalt)
 
 	if err := user.Update(s.repository); err != nil {
 		return responses.ChangePasswordResponse{}, common.Wrap("ChangePassword: user.Update", err)
@@ -145,9 +145,9 @@ func (s *service) ChangePassword(request *requests.ChangePasswordRequest) (respo
 	}, nil
 }
 
-//------------------------------
+/*------------------------------
 //      CREATE USER POST
-//------------------------------
+//----------------------------*/
 
 func (s *service) CreateUserPost(request *requests.CreateUserPostRequest) (responses.CreateUserPostResponse, error) {
 	userPost := request.ToUserPostModel()

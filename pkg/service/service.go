@@ -1,6 +1,8 @@
 package service
 
 import (
+	"log"
+
 	"github.com/gilperopiola/go-rest-example/pkg/common/auth"
 	"github.com/gilperopiola/go-rest-example/pkg/common/config"
 	"github.com/gilperopiola/go-rest-example/pkg/common/requests"
@@ -31,6 +33,7 @@ type service struct {
 }
 
 func New(repository repository.RepositoryLayer, auth auth.AuthI, config *config.Config) *service {
+	log.Println("Service OK")
 	return &service{
 		repository: repository,
 		config:     config,

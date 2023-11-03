@@ -21,6 +21,7 @@ type database struct {
 func NewDatabase(config *config.Config, logger *DBLogger) database {
 	var database database
 	database.setup(config, logger)
+	log.Println("Database OK")
 	return database
 }
 
@@ -86,7 +87,7 @@ func (database *database) configure(config *config.Config) {
 		for _, model := range models.AllModels {
 			database.db.Migrator().DropTable(model)
 		}
-	} else if dbConfig.Purge {
+	} else if dbConfig.Clean {
 		for _, model := range models.AllModels {
 			database.db.Delete(model)
 		}
@@ -97,7 +98,7 @@ func (database *database) configure(config *config.Config) {
 
 	// Insert admin user
 	if dbConfig.AdminInsert {
-		admin := makeAdminModel("ferra.main@gmail.com", common.Hash(dbConfig.AdminPassword, config.JWT.HashSalt))
+		admin := makeAdminModel("ferra.main@gmail.com", common.Hash(dbConfig.AdminPassword, config.Auth.HashSalt))
 		if err := database.DB().Create(admin).Error; err != nil {
 			fmt.Println(err.Error())
 		}

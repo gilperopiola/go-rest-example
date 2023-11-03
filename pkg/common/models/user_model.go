@@ -6,7 +6,12 @@ import (
 	"github.com/gilperopiola/go-rest-example/pkg/repository/options"
 )
 
-// We have a RepositoryI here to avoid circular dependencies, our models talk to the repository layer
+/*---------------------------------------------------------------------------
+// Particular Models are a key part of the application, as they work as business
+// objects and contain some of the logic of the app.
+------------------------*/
+
+// We have a RepositoryI here to avoid circular dependencies, our models talk to the repository layer.
 type RepositoryI interface {
 	CreateUser(user User) (User, error)
 	UpdateUser(user User) (User, error)
@@ -18,17 +23,17 @@ type RepositoryI interface {
 	CreateUserPost(post UserPost) (UserPost, error)
 }
 
-//-------------------
+/*-------------------
 //       AUTH
-//-------------------
+//-----------------*/
 
 func (u *User) GenerateTokenString(a auth.AuthI) (string, error) {
 	return a.GenerateToken(u.ID, u.Username, u.Email, u.GetRole())
 }
 
-//----------------
+/*----------------
 //     USERS
-//----------------
+//--------------*/
 
 func (u *User) Create(r RepositoryI) (err error) {
 	*u, err = r.CreateUser(*u)
@@ -110,9 +115,9 @@ func (u *User) OverwriteDetails(firstName, lastName *string) {
 	}
 }
 
-//-----------------------
+/*-----------------------
 //      USER POSTS
-//-----------------------
+//---------------------*/
 
 func (up *UserPost) Create(r RepositoryI) error {
 	userPost, err := r.CreateUserPost(*up)

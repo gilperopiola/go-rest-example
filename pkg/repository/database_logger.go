@@ -18,8 +18,7 @@ type DBLogger struct {
 
 func NewDBLogger(out io.Writer) *DBLogger {
 	prefix := c.WhiteBold + "\r\n"
-	logger := log.New(out, prefix, log.LstdFlags)
-	return &DBLogger{logger}
+	return &DBLogger{log.New(out, prefix, log.LstdFlags)}
 }
 
 // Trace is a callback that can be registered with GORM to track every SQL query

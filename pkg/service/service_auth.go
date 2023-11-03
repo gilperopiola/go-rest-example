@@ -7,9 +7,9 @@ import (
 	"github.com/gilperopiola/go-rest-example/pkg/repository/options"
 )
 
-//-----------------------
+/*-----------------------
 //       SIGNUP
-//-----------------------
+//---------------------*/
 
 func (s *service) Signup(request *requests.SignupRequest) (responses.SignupResponse, error) {
 	user := request.ToUserModel()
@@ -20,7 +20,7 @@ func (s *service) Signup(request *requests.SignupRequest) (responses.SignupRespo
 	}
 
 	// Hash password
-	user.HashPassword(s.config.JWT.HashSalt)
+	user.HashPassword(s.config.Auth.HashSalt)
 
 	// Create
 	if err := user.Create(s.repository); err != nil {
@@ -30,9 +30,9 @@ func (s *service) Signup(request *requests.SignupRequest) (responses.SignupRespo
 	return responses.SignupResponse{User: user.ToResponseModel()}, nil
 }
 
-//---------------------
+/*---------------------
 //       LOGIN
-//---------------------
+//-------------------*/
 
 func (s *service) Login(request *requests.LoginRequest) (responses.LoginResponse, error) {
 	user := request.ToUserModel()
@@ -43,7 +43,7 @@ func (s *service) Login(request *requests.LoginRequest) (responses.LoginResponse
 	}
 
 	// Check password
-	if !user.PasswordMatches(request.Password, s.config.JWT.HashSalt) {
+	if !user.PasswordMatches(request.Password, s.config.Auth.HashSalt) {
 		return responses.LoginResponse{}, common.Wrap("Login: !user.PasswordMatches", common.ErrWrongPassword)
 	}
 

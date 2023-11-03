@@ -4,8 +4,10 @@ import (
 	"time"
 )
 
+/*---------------------------------------------------------------------------
 // Models are the representation of the database schema. They are used in the Service & Repository Layers.
 // They are probably the most important part of the app.
+------------------------*/
 
 var AllModels = []interface{}{
 	&User{},

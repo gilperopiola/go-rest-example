@@ -44,6 +44,8 @@ var (
 	}
 
 	// - Service & Repository errors
+	ErrInDBTransaction = NewError(fmt.Errorf("error in database transaction"), 500)
+
 	// --- Users
 	ErrCreatingUser                = NewError(fmt.Errorf("error creating user"), 500)
 	ErrGettingUser                 = NewError(fmt.Errorf("error getting user"), 500)
