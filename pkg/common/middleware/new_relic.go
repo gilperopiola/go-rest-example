@@ -1,8 +1,10 @@
 package middleware
 
 import (
-	"log"
+	"fmt"
+	"os"
 
+	"github.com/gilperopiola/go-rest-example/pkg/common"
 	"github.com/gilperopiola/go-rest-example/pkg/common/config"
 
 	"github.com/gin-gonic/gin"
@@ -14,32 +16,34 @@ func NewNewRelicMiddleware(app *newrelic.Application) gin.HandlerFunc {
 	return nrgin.Middleware(app)
 }
 
-func NewNewRelic(config config.Monitoring, logger *Logger) *newrelic.Application {
+func NewNewRelic(config config.Monitoring, logger *LoggerAdapter) *newrelic.Application {
 
 	// If New Relic is not enabled, return empty app
 	if !config.NewRelicEnabled {
-		log.Println("New Relic Disabled")
+		logger.Logger.Info("New Relic Disabled", map[string]interface{}{"from": common.NewRelic.String()})
 		return nil
 	}
 
 	// If monitoring is enabled, use license to create New Relic app
 	license := config.NewRelicLicenseKey
 	if license == "" {
-		log.Fatalf("New Relic license not found")
+		logger.Logger.Error("New Relic license not found", map[string]interface{}{"from": common.NewRelic.String()})
+		os.Exit(1)
 	}
 
 	// Create app
 	newRelicApp, err := newrelic.NewApplication(
 		newrelic.ConfigAppName(config.NewRelicAppName),
 		newrelic.ConfigLicense(license),
-		newrelic.ConfigLogger(logger),
+		newrelic.ConfigLogger(&logger.Logger),
 		newrelic.ConfigAppLogForwardingEnabled(true),
 		newrelic.ConfigDistributedTracerEnabled(true),
 	)
 
 	// Panic on failure
 	if err != nil {
-		log.Fatalf("Failed to start New Relic: %v", err)
+		logger.Logger.Info(fmt.Sprintf("Failed to start New Relic: %v", err), map[string]interface{}{"from": common.NewRelic.String()})
+		os.Exit(1)
 	}
 
 	return newRelicApp

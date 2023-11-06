@@ -2,6 +2,7 @@ package transport
 
 import (
 	"fmt"
+	"io"
 	"net/http/pprof"
 
 	"github.com/gilperopiola/go-rest-example/pkg/common/auth"
@@ -16,13 +17,13 @@ type router struct {
 	*gin.Engine
 }
 
-func NewRouter(t TransportLayer, cfg *config.Config, auth auth.AuthI, logger *middleware.Logger, middlewares ...gin.HandlerFunc) router {
+func NewRouter(t TransportLayer, cfg *config.Config, auth auth.AuthI, logger *middleware.LoggerAdapter, middlewares ...gin.HandlerFunc) router {
 	var router router
 	router.setup(t, cfg, auth, logger, middlewares...)
 	return router
 }
 
-func (router *router) setup(t TransportLayer, cfg *config.Config, auth auth.AuthI, logger *middleware.Logger, middlewares ...gin.HandlerFunc) {
+func (router *router) setup(t TransportLayer, cfg *config.Config, auth auth.AuthI, logger *middleware.LoggerAdapter, middlewares ...gin.HandlerFunc) {
 
 	// Create router. Set debug/release mode
 	router.prepare(!cfg.General.Debug, logger)
@@ -36,12 +37,14 @@ func (router *router) setup(t TransportLayer, cfg *config.Config, auth auth.Auth
 	router.setEndpoints(t, cfg, auth)
 }
 
-func (router *router) prepare(isProd bool, logger *middleware.Logger) {
+func (router *router) prepare(isProd bool, logger *middleware.LoggerAdapter) {
 	if isProd {
 		gin.SetMode(gin.ReleaseMode)
 	}
-	gin.DefaultWriter = logger.Writer()
-	gin.DefaultErrorWriter = logger.Writer()
+
+	gin.DefaultWriter = io.MultiWriter(logger)      // Logger
+	gin.DefaultErrorWriter = io.MultiWriter(logger) // Logger
+
 	router.Engine = gin.New()
 	router.Engine.SetTrustedProxies(nil)
 }

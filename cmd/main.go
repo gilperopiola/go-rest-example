@@ -14,7 +14,7 @@ import (
 )
 
 // Note: This is the entrypoint of the application.
-// The HTTP Requests entrypoint is the Prometheus HandlerFunc in prometheus.go
+// The HTTP Requests entrypoint is the Prometheus HandlerFunc in pkg/common/middleware/prometheus.go
 
 func main() {
 
@@ -22,13 +22,13 @@ func main() {
 
 	/*-------------------------
 	//      DEPENDENCIES
-	//-----------------------*/
+	//------------------------*/
 
 	config := config.New()
 	log.Println("Config OK")
 
-	logger := middleware.NewLogger()
-	logger.Info("Logger OK", nil)
+	logger := middleware.NewLogger(config.General.LogInfo)
+	logger.Logger.Info("Logger OK", nil)
 
 	middlewares := []gin.HandlerFunc{
 		gin.Recovery(), // Panic recovery
@@ -39,32 +39,32 @@ func main() {
 		middleware.NewTimeoutMiddleware(config.General.Timeout),                                 // Timeout
 		middleware.NewErrorHandlerMiddleware(logger),                                            // Error Handler
 	}
-	logger.Info("Middlewares OK", nil)
+	logger.Logger.Info("Middlewares OK", nil)
 
 	auth := auth.New(config.Auth.JWTSecret, config.Auth.SessionDurationDays)
-	logger.Info("Auth OK", nil)
+	logger.Logger.Info("Auth OK", nil)
 
-	database := repository.NewDatabase(config, repository.NewDBLogger(logger.Out))
-	logger.Info("Database OK", nil)
+	database := repository.NewDatabase(config, logger)
+	logger.Logger.Info("Database OK", nil)
 
 	repositoryLayer := repository.New(database)
-	logger.Info("Repository Layer OK", nil)
+	logger.Logger.Info("Repository Layer OK", nil)
 
 	serviceLayer := service.New(repositoryLayer, auth, config)
-	logger.Info("Service Layer OK", nil)
+	logger.Logger.Info("Service Layer OK", nil)
 
 	transportLayer := transport.New(serviceLayer)
-	logger.Info("Transport Layer OK", nil)
+	logger.Logger.Info("Transport Layer OK", nil)
 
 	router := transport.NewRouter(transportLayer, config, auth, logger, middlewares...)
-	logger.Info("Router & Endpoints OK", nil)
+	logger.Logger.Info("Router & Endpoints OK", nil)
 
-	/*-------------------------
-	//      START SERVER
-	//------------------------*/
+	/*---------------------------
+	//       START SERVER
+	//--------------------------*/
 
 	port := config.General.Port
-	logger.Info("Running server on port "+port, nil)
+	logger.Logger.Info("Running server on port "+port, nil)
 
 	err := router.Run(":" + port)
 	if err != nil {
@@ -80,10 +80,8 @@ func main() {
 // - Batch insert
 // - Reset password
 // - Roles to DB
-// - Prometheus enable flag
 // - Request IDs
 // - Logic from DeleteUser to service layer
 // - Search & Fix TODOs
 // - Replace user.Exists when you can
-// - Change in config JWT -> Auth
 // - OpenAPI (Swagger)

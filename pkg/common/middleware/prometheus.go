@@ -2,12 +2,12 @@ package middleware
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/gilperopiola/go-rest-example/pkg/common"
 	"github.com/gilperopiola/go-rest-example/pkg/common/config"
 
 	"github.com/gin-gonic/gin"
@@ -15,17 +15,18 @@ import (
 )
 
 func NewPrometheusMiddleware(p *Prometheus) gin.HandlerFunc {
-	if p == nil {
-		return func(c *gin.Context) {
-			c.Next()
-		}
+	if p != nil {
+		return p.HandlerFunc()
 	}
-	return p.HandlerFunc()
+
+	return func(c *gin.Context) {
+		c.Next()
+	}
 }
 
-func NewPrometheus(cfg config.Monitoring, logger *Logger) *Prometheus {
+func NewPrometheus(cfg config.Monitoring, logger *LoggerAdapter) *Prometheus {
 	if !cfg.PrometheusEnabled {
-		log.Println("Prometheus Disabled")
+		logger.Logger.Info("Prometheus disabled", map[string]interface{}{"from": common.Prometheus.String()})
 		return nil
 	}
 
@@ -83,7 +84,7 @@ type Prometheus struct {
 
 	replaceURLKeys func(c *gin.Context) string
 
-	logger *Logger
+	logger *LoggerAdapter
 }
 
 // prometheus.Collector type (i.e. CounterVec, Summary, etc) of each metric
@@ -220,7 +221,12 @@ func (p *Prometheus) registerMetrics(subsystem string) {
 	for _, metricDefinition := range p.metricsList {
 		metric := NewMetric(metricDefinition, subsystem)
 		if err := prometheus.Register(metric); err != nil {
-			p.logger.Error(err.Error(), map[string]interface{}{"error": fmt.Errorf("%s could not be registered in Prometheus", metricDefinition.Name)})
+			p.logger.Logger.Error(
+				err.Error(),
+				map[string]interface{}{
+					"error": fmt.Errorf("%s could not be registered in Prometheus", metricDefinition.Name),
+					"from":  common.Prometheus.String(),
+				})
 		}
 		switch metricDefinition {
 		case metricTotalRequests:
@@ -235,7 +241,7 @@ func (p *Prometheus) registerMetrics(subsystem string) {
 		metricDefinition.MetricCollector = metric
 	}
 
-	p.logger.Info("Prometheus metrics registered", map[string]interface{}{"from": "Prometheus"})
+	p.logger.Logger.Info("Prometheus metrics registered", map[string]interface{}{"from": common.Prometheus.String()})
 }
 
 // From https://github.com/DanielHeckrath/gin-prometheus/blob/master/gin_prometheus.go

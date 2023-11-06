@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func NewErrorHandlerMiddleware(logger *Logger) gin.HandlerFunc {
+func NewErrorHandlerMiddleware(logger *LoggerAdapter) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		// Wait until the request is finished
@@ -63,7 +63,7 @@ func getErrorInfo(err error) (int, string, string) {
 	return customErr.Status(), messages[len(messages)-1], stackTrace
 }
 
-func logStackTrace(logger *Logger, status int, stackTrace, path, method string) {
+func logStackTrace(logger *LoggerAdapter, status int, stackTrace, path, method string) {
 	logContext := logger.WithField("status", status).WithField("path", path).WithField("method", method)
 	logContext.Error(stackTrace)
 }

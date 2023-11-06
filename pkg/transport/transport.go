@@ -31,15 +31,13 @@ type TransportLayer interface {
 }
 
 type transport struct {
-	service service.ServiceLayer
+	service.ServiceLayer
 }
 
 func New(service service.ServiceLayer) *transport {
-	return &transport{
-		service: service,
-	}
+	return &transport{service}
 }
 
 func (t transport) Service() service.ServiceLayer {
-	return t.service
+	return t.ServiceLayer
 }

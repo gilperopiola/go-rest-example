@@ -7,6 +7,7 @@ import "fmt"
 type General struct {
 	AppName        string `envconfig:"GO_REST_EXAMPLE_APP_NAME"`
 	Debug          bool   `envconfig:"GO_REST_EXAMPLE_DEBUG"`
+	LogInfo        bool   `envconfig:"GO_REST_EXAMPLE_LOG_INFO"`
 	Port           string `envconfig:"GO_REST_EXAMPLE_PORT"`
 	Profiling      bool   `envconfig:"GO_REST_EXAMPLE_PROFILING"`
 	Timeout        int    `envconfig:"GO_REST_EXAMPLE_TIMEOUT_SECONDS"`
@@ -21,10 +22,8 @@ type Database struct {
 	Port     string `envconfig:"GO_REST_EXAMPLE_DATABASE_PORT"`
 	Schema   string `envconfig:"GO_REST_EXAMPLE_DATABASE_SCHEMA"`
 
-	Clean   bool `envconfig:"GO_REST_EXAMPLE_DATABASE_CLEAN"`
-	Debug   bool `envconfig:"GO_REST_EXAMPLE_DATABASE_DEBUG"`
-	Destroy bool `envconfig:"GO_REST_EXAMPLE_DATABASE_DESTROY"`
-
+	Clean         bool   `envconfig:"GO_REST_EXAMPLE_DATABASE_CLEAN"`
+	Destroy       bool   `envconfig:"GO_REST_EXAMPLE_DATABASE_DESTROY"`
 	AdminInsert   bool   `envconfig:"GO_REST_EXAMPLE_DATABASE_ADMIN_INSERT"`
 	AdminPassword string `envconfig:"GO_REST_EXAMPLE_DATABASE_ADMIN_PASSWORD"`
 
