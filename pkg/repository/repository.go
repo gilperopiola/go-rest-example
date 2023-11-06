@@ -10,9 +10,10 @@ var _ RepositoryLayer = (*repository)(nil)
 
 type RepositoryLayer interface {
 	CreateUser(user models.User) (models.User, error)
-	UpdateUser(user models.User) (models.User, error)
 	GetUser(user models.User, opts ...options.QueryOption) (models.User, error)
-	DeleteUser(id int) (models.User, error)
+	UpdateUser(user models.User) (models.User, error)
+	UpdatePassword(userID int, password string) error
+	DeleteUser(user models.User) (models.User, error)
 	SearchUsers(page, perPage int, opts ...options.QueryOption) (models.Users, error)
 	UserExists(username, email string, opts ...options.QueryOption) bool
 
@@ -24,5 +25,5 @@ func New(database *database) *repository {
 }
 
 type repository struct {
-	database *database
+	*database
 }

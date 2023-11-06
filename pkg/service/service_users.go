@@ -15,10 +15,6 @@ import (
 func (s *service) CreateUser(request *requests.CreateUserRequest) (responses.CreateUserResponse, error) {
 	user := request.ToUserModel()
 
-	if user.Exists(s.repository) {
-		return responses.CreateUserResponse{}, common.Wrap("CreateUser: user.Exists", common.ErrUsernameOrEmailAlreadyInUse)
-	}
-
 	user.HashPassword(s.config.Auth.HashSalt)
 
 	if err := user.Create(s.repository); err != nil {
@@ -53,12 +49,6 @@ func (s *service) GetUser(request *requests.GetUserRequest) (responses.GetUserRe
 func (s *service) UpdateUser(request *requests.UpdateUserRequest) (responses.UpdateUserResponse, error) {
 	user := request.ToUserModel()
 
-	// Check Username/Email availability
-	if user.Exists(s.repository) {
-		return responses.UpdateUserResponse{}, common.Wrap("UpdateUser: user.Exists", common.ErrUsernameOrEmailAlreadyInUse)
-	}
-
-	// Get User
 	if err := user.Get(s.repository, options.WithoutDeleted(), options.WithDetails()); err != nil {
 		return responses.UpdateUserResponse{}, common.Wrap("UpdateUser: user.Get", err)
 	}
@@ -67,7 +57,6 @@ func (s *service) UpdateUser(request *requests.UpdateUserRequest) (responses.Upd
 	user.OverwriteFields(request.Username, request.Email, "")
 	user.OverwriteDetails(request.FirstName, request.LastName)
 
-	// Update
 	if err := user.Update(s.repository); err != nil {
 		return responses.UpdateUserResponse{}, common.Wrap("UpdateUser: user.Update", err)
 	}
@@ -82,7 +71,14 @@ func (s *service) UpdateUser(request *requests.UpdateUserRequest) (responses.Upd
 func (s *service) DeleteUser(request *requests.DeleteUserRequest) (responses.DeleteUserResponse, error) {
 	user := request.ToUserModel()
 
-	// This returns an error if the user is already deleted
+	if err := user.Get(s.repository); err != nil {
+		return responses.DeleteUserResponse{}, common.Wrap("DeleteUser: user.Get", err)
+	}
+
+	if user.Deleted {
+		return responses.DeleteUserResponse{}, common.Wrap("DeleteUser: user.Deleted", common.ErrUserAlreadyDeleted)
+	}
+
 	if err := user.Delete(s.repository); err != nil {
 		return responses.DeleteUserResponse{}, common.Wrap("DeleteUser: user.Delete", err)
 	}
@@ -130,19 +126,15 @@ func (s *service) ChangePassword(request *requests.ChangePasswordRequest) (respo
 		return responses.ChangePasswordResponse{}, common.Wrap("ChangePassword: !user.PasswordMatches", common.ErrWrongPassword)
 	}
 
-	// Swap passwords
+	// Swap passwords, hash new password
 	user.Password = request.NewPassword
-
-	// Hash new password
 	user.HashPassword(s.config.Auth.HashSalt)
 
-	if err := user.Update(s.repository); err != nil {
-		return responses.ChangePasswordResponse{}, common.Wrap("ChangePassword: user.Update", err)
+	if err := user.UpdatePassword(s.repository); err != nil {
+		return responses.ChangePasswordResponse{}, common.Wrap("ChangePassword: user.UpdatePassword", err)
 	}
 
-	return responses.ChangePasswordResponse{
-		User: user.ToResponseModel(),
-	}, nil
+	return responses.ChangePasswordResponse{User: user.ToResponseModel()}, nil
 }
 
 /*------------------------------

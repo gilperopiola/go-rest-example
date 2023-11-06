@@ -30,8 +30,13 @@ func (m *RepositoryMock) UpdateUser(user models.User) (models.User, error) {
 	return args.Get(0).(models.User), args.Error(1)
 }
 
-func (m *RepositoryMock) DeleteUser(id int) (models.User, error) {
-	args := m.Called(id)
+func (m *RepositoryMock) UpdatePassword(userID int, password string) error {
+	args := m.Called(userID, password)
+	return args.Error(0)
+}
+
+func (m *RepositoryMock) DeleteUser(user models.User) (models.User, error) {
+	args := m.Called(user)
 	return args.Get(0).(models.User), args.Error(1)
 }
 

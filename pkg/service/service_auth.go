@@ -14,15 +14,8 @@ import (
 func (s *service) Signup(request *requests.SignupRequest) (responses.SignupResponse, error) {
 	user := request.ToUserModel()
 
-	// Check availability
-	if user.Exists(s.repository) {
-		return responses.SignupResponse{}, common.Wrap("Signup: user.Exists", common.ErrUsernameOrEmailAlreadyInUse)
-	}
-
-	// Hash password
 	user.HashPassword(s.config.Auth.HashSalt)
 
-	// Create
 	if err := user.Create(s.repository); err != nil {
 		return responses.SignupResponse{}, common.Wrap("Signup: user.Create", err)
 	}

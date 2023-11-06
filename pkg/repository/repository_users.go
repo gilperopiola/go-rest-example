@@ -2,6 +2,7 @@ package repository
 
 import (
 	"errors"
+	"strings"
 
 	"github.com/gilperopiola/go-rest-example/pkg/common"
 	"github.com/gilperopiola/go-rest-example/pkg/common/models"
@@ -10,16 +11,29 @@ import (
 	"gorm.io/gorm"
 )
 
-// CreateUser inserts a user. Table structure can be found on the models package
+/*-------------------------
+//      CREATE USER
+//-----------------------*/
+
 func (r *repository) CreateUser(user models.User) (models.User, error) {
 	db := r.database.DB()
 	if err := db.Create(&user).Error; err != nil {
-		return models.User{}, common.Wrap(err.Error(), common.ErrCreatingUser)
+		return models.User{}, handleCreateUserError(err)
 	}
 	return user, nil
 }
 
-// GetUser retrieves a user, if it exists
+func handleCreateUserError(err error) error {
+	if strings.Contains(err.Error(), "Error 1062") { // Duplicate entry for key
+		return common.Wrap(err.Error(), common.ErrUsernameOrEmailAlreadyInUse)
+	}
+	return common.Wrap(err.Error(), common.ErrCreatingUser)
+}
+
+/*-------------------------
+//       GET USER
+//-----------------------*/
+
 func (r *repository) GetUser(user models.User, opts ...options.QueryOption) (models.User, error) {
 	db := r.database.DB()
 
@@ -33,16 +47,23 @@ func (r *repository) GetUser(user models.User, opts ...options.QueryOption) (mod
 
 	// Get user
 	if err := db.Where(query, user.ID, user.Username, user.Email).First(&user).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return models.User{}, common.Wrap(err.Error(), common.ErrUserNotFound)
-		}
-		return models.User{}, common.Wrap(err.Error(), common.ErrUnknown)
+		return models.User{}, handleGetUserError(err)
 	}
 
 	return user, nil
 }
 
-// UpdateUser updates the fields that are not empty on the model
+func handleGetUserError(err error) error {
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return common.Wrap(err.Error(), common.ErrUserNotFound)
+	}
+	return common.Wrap(err.Error(), common.ErrGettingUser)
+}
+
+/*-------------------------
+//      UPDATE USER         -> (non-empty fields)
+//-----------------------*/
+
 func (r *repository) UpdateUser(user models.User) (models.User, error) {
 	db := r.database.DB()
 	tx := db.Begin()
@@ -50,7 +71,7 @@ func (r *repository) UpdateUser(user models.User) (models.User, error) {
 	// Update user
 	if err := tx.Omit("Details").Save(&user).Error; err != nil {
 		tx.Rollback()
-		return models.User{}, common.Wrap(err.Error(), common.ErrUpdatingUser)
+		return models.User{}, handleUpdateUserError(err)
 	}
 
 	// Update user details
@@ -69,29 +90,44 @@ func (r *repository) UpdateUser(user models.User) (models.User, error) {
 	return user, nil
 }
 
-// DeleteUser soft-deletes a user. if it is already deleted it throws an error
-func (r *repository) DeleteUser(id int) (models.User, error) {
-	var err error
-	user := models.User{ID: id}
+func handleUpdateUserError(err error) error {
+	if strings.Contains(err.Error(), "Error 1062") { // Duplicate entry for key
+		return common.Wrap(err.Error(), common.ErrUsernameOrEmailAlreadyInUse)
+	}
+	return common.Wrap(err.Error(), common.ErrUpdatingUser)
+}
 
-	// First, retrieve the user
-	if user, err = r.GetUser(user); err != nil {
-		return models.User{}, common.Wrap(err.Error(), common.ErrGettingUser)
+/*-------------------------
+//    UPDATE PASSWORD
+//-----------------------*/
+
+func (r *repository) UpdatePassword(userID int, newPassword string) error {
+	db := r.database.DB()
+
+	if err := db.Model(&models.User{}).Where("id = ?", userID).Update("password", newPassword).Error; err != nil {
+		return common.Wrap(err.Error(), common.ErrUpdatingUser)
 	}
 
-	// If it's already deleted, return an error
-	if user.Deleted {
-		return models.User{}, common.ErrUserAlreadyDeleted
-	}
+	return nil
+}
 
-	// Then, mark the user as deleted and save it
-	user.Deleted = true
-	if _, err := r.UpdateUser(user); err != nil {
-		return models.User{}, common.Wrap(err.Error(), common.ErrUpdatingUser)
+/*-------------------------
+//      DELETE USER         -> (soft-delete)
+//-----------------------*/
+
+func (r *repository) DeleteUser(user models.User) (models.User, error) {
+	var db = r.database.DB()
+
+	if err := db.Model(&user).Update("deleted", true).Error; err != nil {
+		return models.User{}, common.Wrap(err.Error(), common.ErrDeletingUser)
 	}
 
 	return user, nil
 }
+
+/*-------------------------
+//     SEARCH USERS
+//-----------------------*/
 
 func (r *repository) SearchUsers(page, perPage int, opts ...options.QueryOption) (models.Users, error) {
 	db := r.database.DB()
@@ -109,6 +145,10 @@ func (r *repository) SearchUsers(page, perPage int, opts ...options.QueryOption)
 	return users, nil
 }
 
+/*-------------------------
+//      USER EXISTS
+//-----------------------*/
+
 // UserExists checks if a user with username or email exists
 func (r *repository) UserExists(username, email string, opts ...options.QueryOption) bool {
 	db := r.database.DB()
@@ -123,6 +163,10 @@ func (r *repository) UserExists(username, email string, opts ...options.QueryOpt
 	db.Model(&models.User{}).Where(query, username, email).Count(&count)
 	return count > 0
 }
+
+/*-------------------------
+//    CREATE USER POST
+//-----------------------*/
 
 // CreateUserPost inserts a new post on the database. Title is required, body is optional
 func (r *repository) CreateUserPost(post models.UserPost) (models.UserPost, error) {

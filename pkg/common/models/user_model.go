@@ -7,16 +7,17 @@ import (
 )
 
 /*---------------------------------------------------------------------------
-// Particular Models are a key part of the application, as they work as business
+// Particular Models are a key part of the application, they work as business
 // objects and contain some of the logic of the app.
-------------------------*/
+//----------------------*/
 
 // We have a RepositoryI here to avoid circular dependencies, our models talk to the repository layer.
 type RepositoryI interface {
 	CreateUser(user User) (User, error)
-	UpdateUser(user User) (User, error)
 	GetUser(user User, opts ...options.QueryOption) (User, error)
-	DeleteUser(id int) (User, error)
+	UpdateUser(user User) (User, error)
+	UpdatePassword(userID int, password string) error
+	DeleteUser(user User) (User, error)
 	SearchUsers(page, perPage int, opts ...options.QueryOption) (Users, error)
 	UserExists(username, email string, opts ...options.QueryOption) bool
 
@@ -59,8 +60,15 @@ func (u *User) Update(r RepositoryI) (err error) {
 	return nil
 }
 
+func (u *User) UpdatePassword(r RepositoryI) (err error) {
+	if err = r.UpdatePassword(u.ID, u.Password); err != nil {
+		return common.Wrap("r.UpdatePassword", err)
+	}
+	return nil
+}
+
 func (u *User) Delete(r RepositoryI) (err error) {
-	*u, err = r.DeleteUser(u.ID)
+	*u, err = r.DeleteUser(*u)
 	if err != nil {
 		return common.Wrap("r.DeleteUser", err)
 	}
