@@ -66,7 +66,8 @@ func (l *Logger) prepareLogger(msg *string, context map[string]interface{}) *log
 	}
 
 	// New Relic
-	if *msg == "application created" || *msg == "application connected" || *msg == "final configuration" || *msg == "collector message" {
+	if *msg == "application created" || *msg == "application connected" || *msg == "final configuration" ||
+		*msg == "collector message" || *msg == "harvest failure" || *msg == "application connect failure" {
 		log = log.WithField("from", common.NewRelic.String())
 	}
 

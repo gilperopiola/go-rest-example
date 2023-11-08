@@ -11,7 +11,7 @@ Here you have **`Easy To Follow Code`** without having to learn an entire framew
 |**Gin Routing**|**Unit Tests**|**Logrus Logging**|**24/7 Support 🤥**|
 |**Clean Architecture**|**SOLID**|**Design Patterns**|**Prometheus Metrics**|
 |**Best Practices**|**Great Error Handling**|**Dependency Injection**|**Profiling**|
-|**NewRelic Monitoring**|**Fully Dockerized**|**Modular Interfaces**|**E2E Testing**|
+|**New Relic Monitoring**|**Fully Dockerized**|**Modular Interfaces**|**E2E Testing**|
 |**Inversion of Control**|**Postman Collection**|**Abstracted DB Models**|**Free Forever**|
 |**Performance Optimized**|**Custom Log Formatter**|**Easy to Pick Up**|**Easy to Master**|
 

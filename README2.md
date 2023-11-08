@@ -1,6 +1,7 @@
 # Go REST Example 😛
 
 Now that we aren't on the frontpage, I can finally be myself and use dumb emojis everywhere!!!
+(This is kinda outdated, TODO update)
 
 ## So, understanding the Requests Lifecycle ↩️
 
@@ -54,7 +55,7 @@ Now that we aren't on the frontpage, I can finally be myself and use dumb emojis
 - If the endpoint is private, it goes through `token_validation.go`.
 - Goes then through the Endpoint, on `endpoints.go`
 - The `handler.go` is called which controls the request's lifecycle.
-- Our Custom Request is build and validated on `requests_builders.go` and `requests_validations.go`.
+- Our Custom Request is built and validated on `requests_builders.go` and `requests_validations.go`.
 - The handler then calls the `service_xxx.go` file.
 
 ### Service
