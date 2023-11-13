@@ -2,9 +2,17 @@ package requests
 
 import "github.com/gilperopiola/go-rest-example/pkg/common"
 
-type All interface {
+type Request interface {
 	Build(c common.GinI) error
 	Validate() error
+}
+
+/*---------------------------------------------------------------------------
+// All Requests must be here. All Requests must have Build and Validate methods.
+------------------------*/
+
+type All interface {
+	Request
 
 	*SignupRequest |
 		*LoginRequest |

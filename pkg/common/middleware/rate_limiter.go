@@ -11,15 +11,14 @@ import (
 
 func NewRateLimiterMiddleware(limiter *rate.Limiter) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if !limiter.Allow() {
-			c.Error(common.ErrTooManyRequests)
-			c.Abort()
-			return
+		if limiter.Allow() {
+			c.Next()
 		}
-		c.Next()
+		c.Error(common.ErrTooManyRequests)
+		c.Abort()
 	}
 }
 
-func NewRateLimiter(requestsPerSecond int) *rate.Limiter { // TODO RPS to Config var
+func NewRateLimiter(requestsPerSecond int) *rate.Limiter {
 	return rate.NewLimiter(rate.Every(time.Second/time.Duration(requestsPerSecond)), requestsPerSecond)
 }

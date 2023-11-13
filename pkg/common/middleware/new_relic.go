@@ -20,14 +20,14 @@ func NewNewRelic(config config.Monitoring, logger *LoggerAdapter) *newrelic.Appl
 
 	// If New Relic is not enabled, return empty app
 	if !config.NewRelicEnabled {
-		logger.Logger.Info("New Relic Disabled", map[string]interface{}{"from": common.NewRelic.String()})
+		logger.Logger.Info("New Relic Disabled", map[string]interface{}{"from": common.NewRelic.Str()})
 		return nil
 	}
 
 	// If monitoring is enabled, use license to create New Relic app
 	license := config.NewRelicLicenseKey
 	if license == "" {
-		logger.Logger.Error("New Relic license not found", map[string]interface{}{"from": common.NewRelic.String()})
+		logger.Logger.Error("New Relic license not found", map[string]interface{}{"from": common.NewRelic.Str()})
 		os.Exit(1)
 	}
 
@@ -42,7 +42,7 @@ func NewNewRelic(config config.Monitoring, logger *LoggerAdapter) *newrelic.Appl
 
 	// Panic on failure
 	if err != nil {
-		logger.Logger.Info(fmt.Sprintf("Failed to start New Relic: %v", err), map[string]interface{}{"from": common.NewRelic.String()})
+		logger.Logger.Info(fmt.Sprintf("Failed to start New Relic: %v", err), map[string]interface{}{"from": common.NewRelic.Str()})
 		os.Exit(1)
 	}
 

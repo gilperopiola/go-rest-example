@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/gilperopiola/go-rest-example/pkg/common"
-	"github.com/gilperopiola/go-rest-example/pkg/common/auth"
 	"github.com/gilperopiola/go-rest-example/pkg/common/config"
 	"github.com/gilperopiola/go-rest-example/pkg/common/mocks"
 	"github.com/gilperopiola/go-rest-example/pkg/common/models"
@@ -16,7 +15,7 @@ import (
 )
 
 func newTestService(mockRepository *mocks.RepositoryMock) *service {
-	return New(mockRepository, &auth.Auth{}, &config.Config{})
+	return New(mockRepository)
 }
 
 const (
@@ -28,7 +27,15 @@ const (
 )
 
 var (
-	modelUser    = models.User{ID: VALID_ID, Email: VALID_EMAIL, Posts: []models.UserPost{}}
+	modelUser = models.User{
+		ID:    VALID_ID,
+		Email: VALID_EMAIL,
+		Posts: []models.UserPost{},
+		ModelDependencies: &models.ModelDependencies{
+			Config:     &config.Config{},
+			Repository: &mocks.RepositoryMock{},
+		},
+	}
 	responseUser = responses.User{ID: VALID_ID, Email: VALID_EMAIL, Posts: []responses.UserPost{}}
 )
 
@@ -60,6 +67,7 @@ func TestSignup(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
+			common.SetConfig(&config.Config{})
 			got, err := newTestService(tc.mockRepository).Signup(&requests.SignupRequest{})
 			assertTC(t, tc.want, tc.wantErr, got, err, tc.mockRepository)
 		})
@@ -100,6 +108,7 @@ func TestLogin(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
+			common.SetConfig(&config.Config{})
 			got, err := newTestService(tc.mockRepository).Login(&tc.request)
 			assertTC(t, tc.wantTokenLength, tc.wantErr, len(got.Token), err, tc.mockRepository)
 		})
@@ -135,6 +144,7 @@ func TestCreateUser(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
+			common.SetConfig(&config.Config{})
 			got, err := newTestService(tc.mockRepository).CreateUser(&requests.CreateUserRequest{})
 			assertTC(t, tc.want, tc.wantErr, got, err, tc.mockRepository)
 		})
@@ -165,6 +175,7 @@ func TestGetUser(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
+			common.SetConfig(&config.Config{})
 			got, err := newTestService(tc.mockRepository).GetUser(&tc.request)
 			assertTC(t, tc.want, tc.wantErr, got, err, tc.mockRepository)
 		})
@@ -175,12 +186,13 @@ func TestUpdateUser(t *testing.T) {
 
 	makeMockRepositoryWithGetUser := func(returnUser models.User, returnErr error) *mocks.RepositoryMock {
 		mockRepository := makeMockRepository()
+		returnUser.Repository = mockRepository
 		mockRepository.On("GetUser", mock.Anything, mock.Anything).Return(returnUser, returnErr).Once()
 		return mockRepository
 	}
 
 	makeMockRepositoryWithUpdateUser := func(returnUser models.User, returnErr error) *mocks.RepositoryMock {
-		mockRepository := makeMockRepositoryWithGetUser(returnUser, nil)
+		mockRepository := makeMockRepositoryWithGetUser(returnUser, returnErr)
 		mockRepository.On("UpdateUser", mock.Anything).Return(returnUser, returnErr).Once()
 		return mockRepository
 	}
@@ -211,8 +223,9 @@ func TestUpdateUser(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
+			common.SetConfig(&config.Config{})
 			got, err := newTestService(tc.mockRepository).UpdateUser(&requests.UpdateUserRequest{})
-			assertTC(t, tc.want, tc.wantErr, got, err, tc.mockRepository)
+			assertTC(t, tc.want, tc.wantErr, got, err, nil)
 		})
 	}
 }
@@ -243,6 +256,7 @@ func TestDeleteUser(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
+			common.SetConfig(&config.Config{})
 			got, err := newTestService(tc.mockRepository).DeleteUser(&requests.DeleteUserRequest{UserID: VALID_ID})
 			assertTC(t, tc.want, tc.wantErr, got, err, tc.mockRepository)
 		})
@@ -281,6 +295,7 @@ func TestSearchUsers(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
+			common.SetConfig(&config.Config{})
 			got, err := newTestService(tc.mockRepository).SearchUsers(&tc.request)
 			assertTC(t, tc.want, tc.wantErr, got, err, tc.mockRepository)
 		})
@@ -290,7 +305,9 @@ func TestSearchUsers(t *testing.T) {
 func assertTC(t *testing.T, want interface{}, wantErr error, got interface{}, err error, mockRepository *mocks.RepositoryMock) {
 	assert.Equal(t, want, got)
 	assert.ErrorIs(t, err, wantErr)
-	mockRepository.AssertExpectations(t)
+	if mockRepository != nil {
+		mockRepository.AssertExpectations(t)
+	}
 }
 
 func makeMockRepository() *mocks.RepositoryMock {
@@ -299,6 +316,10 @@ func makeMockRepository() *mocks.RepositoryMock {
 
 func makeMockRepositoryWithGetUser(returnUser models.User, returnErr error) *mocks.RepositoryMock {
 	mockRepository := mocks.NewRepositoryMock()
+	if returnUser.ModelDependencies == nil {
+		returnUser.ModelDependencies = &models.ModelDependencies{}
+	}
+	returnUser.Repository = mockRepository
 	mockRepository.On("GetUser", mock.Anything).Return(returnUser, returnErr).Once()
 	return mockRepository
 }

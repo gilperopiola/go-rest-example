@@ -10,9 +10,9 @@ import (
 // to the Transport layer.
 ------------------------*/
 
-/*-------------------
-//      USERS
-//-----------------*/
+/*------------------
+//      Users
+//----------------*/
 
 func (u User) ToResponseModel() responses.User {
 	return responses.User{
@@ -44,7 +44,7 @@ func (u UserDetail) ToResponseModel() responses.UserDetail {
 }
 
 /*-------------------
-//      POSTS
+//      Posts
 //-----------------*/
 
 func (p UserPost) ToResponseModel() responses.UserPost {

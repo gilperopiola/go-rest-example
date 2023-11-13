@@ -5,28 +5,22 @@ import (
 	"io"
 	"net/http/pprof"
 
+	"github.com/gilperopiola/go-rest-example/pkg/common"
 	"github.com/gilperopiola/go-rest-example/pkg/common/auth"
-	"github.com/gilperopiola/go-rest-example/pkg/common/config"
-	"github.com/gilperopiola/go-rest-example/pkg/common/middleware"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 type router struct {
 	*gin.Engine
 }
 
-func NewRouter(t TransportLayer, cfg *config.Config, auth auth.AuthI, logger *middleware.LoggerAdapter, middlewares ...gin.HandlerFunc) router {
-	var router router
-	router.setup(t, cfg, auth, logger, middlewares...)
-	return router
-}
-
-func (router *router) setup(t TransportLayer, cfg *config.Config, auth auth.AuthI, logger *middleware.LoggerAdapter, middlewares ...gin.HandlerFunc) {
+func NewRouter(t TransportLayer, middlewares ...gin.HandlerFunc) router {
 
 	// Create router. Set debug/release mode
-	router.prepare(!cfg.General.Debug, logger)
+	var router router
+	router.prepare(!common.Cfg.Debug)
 
 	// Add middlewares
 	for _, middleware := range middlewares {
@@ -34,26 +28,28 @@ func (router *router) setup(t TransportLayer, cfg *config.Config, auth auth.Auth
 	}
 
 	// Set endpoints
-	router.setEndpoints(t, cfg, auth)
+	router.setEndpoints(t)
+
+	return router
 }
 
-func (router *router) prepare(isProd bool, logger *middleware.LoggerAdapter) {
+func (router *router) prepare(isProd bool) {
 	if isProd {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	gin.DefaultWriter = io.MultiWriter(logger)      // Logger
-	gin.DefaultErrorWriter = io.MultiWriter(logger) // Logger
+	gin.DefaultWriter = io.MultiWriter(common.Logger)      // Logger
+	gin.DefaultErrorWriter = io.MultiWriter(common.Logger) // Logger
 
 	router.Engine = gin.New()
 	router.Engine.SetTrustedProxies(nil)
 }
 
 /*-----------------------------
-//     ROUTES / ENDPOINTS
+//     Routes / Endpoints
 //---------------------------*/
 
-func (router *router) setEndpoints(transport TransportLayer, cfg *config.Config, authI auth.AuthI) {
+func (router *router) setEndpoints(transport TransportLayer) {
 
 	// Standard endpoints
 	router.GET("/health", transport.healthCheck)
@@ -61,30 +57,30 @@ func (router *router) setEndpoints(transport TransportLayer, cfg *config.Config,
 	// V1
 	v1 := router.Group("/v1")
 	{
-		router.setV1Endpoints(v1, transport, authI)
+		router.setV1Endpoints(v1, transport)
 	}
 
 	// Monitoring
-	if cfg.Monitoring.PrometheusEnabled {
+	if common.Cfg.Monitoring.PrometheusEnabled {
 		router.GET("/metrics", gin.WrapH(promhttp.Handler()))
 	}
 
 	// Profiling
-	if cfg.General.Profiling {
+	if common.Cfg.General.Profiling {
 		router.profiling()
 	}
 
 	fmt.Println("")
 }
 
-func (router *router) setV1Endpoints(v1 *gin.RouterGroup, transport TransportLayer, authI auth.AuthI) {
+func (router *router) setV1Endpoints(v1 *gin.RouterGroup, transport TransportLayer) {
 
 	// Auth
 	v1.POST("/signup", transport.signup)
 	v1.POST("/login", transport.login)
 
 	// Users
-	users := v1.Group("/users", authI.ValidateToken(auth.AnyRole, true))
+	users := v1.Group("/users", auth.ValidateToken(auth.AnyRole, true, common.Cfg.Auth.JWTSecret))
 	{
 		users.GET("/:user_id", transport.getUser)
 		users.PATCH("/:user_id", transport.updateUser)
@@ -99,7 +95,7 @@ func (router *router) setV1Endpoints(v1 *gin.RouterGroup, transport TransportLay
 	}
 
 	// Admins
-	admin := v1.Group("/admin", authI.ValidateToken(auth.AdminRole, false))
+	admin := v1.Group("/admin", auth.ValidateToken(auth.AdminRole, false, common.Cfg.Auth.JWTSecret))
 	{
 		admin.POST("/user", transport.createUser)
 		admin.GET("/users", transport.searchUsers)

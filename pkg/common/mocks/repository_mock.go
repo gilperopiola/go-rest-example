@@ -45,11 +45,6 @@ func (m *RepositoryMock) SearchUsers(page, perPage int, opts ...options.QueryOpt
 	return args.Get(0).(models.Users), args.Error(1)
 }
 
-func (m *RepositoryMock) UserExists(username, email string, opts ...options.QueryOption) bool {
-	args := m.Called(username, email)
-	return args.Bool(0)
-}
-
 func (m *RepositoryMock) CreateUserPost(post models.UserPost) (models.UserPost, error) {
 	args := m.Called(post)
 	return args.Get(0).(models.UserPost), args.Error(1)

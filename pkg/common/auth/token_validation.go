@@ -16,11 +16,11 @@ var (
 )
 
 // ValidateToken validates a token for a specific role and sets ID and Email in context
-func (auth *Auth) ValidateToken(role Role, shouldMatchUserID bool) gin.HandlerFunc {
+func ValidateToken(role Role, shouldMatchUserID bool, secret string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		// Get token string and then convert it to a *jwt.Token
-		token, err := auth.getTokenStructFromContext(c)
+		token, err := getTokenStructFromContext(c, secret)
 		if err != nil {
 			c.Error(common.Wrap("auth.getTokenStructFromContext", common.ErrUnauthorized))
 			c.Abort()
@@ -59,13 +59,13 @@ func addUserInfoToContext(c *gin.Context, id int, username, email string) {
 	c.Set("Email", email)
 }
 
-func (auth *Auth) getTokenStructFromContext(c *gin.Context) (*jwt.Token, error) {
+func getTokenStructFromContext(c *gin.Context, secret string) (*jwt.Token, error) {
 
 	// Get token string from headers
 	tokenString := strings.TrimPrefix(c.Request.Header.Get("Authorization"), "Bearer ")
 
 	// Decode string into actual *jwt.Token
-	token, err := auth.decodeTokenString(tokenString)
+	token, err := decodeTokenString(tokenString, secret)
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +75,7 @@ func (auth *Auth) getTokenStructFromContext(c *gin.Context) (*jwt.Token, error) 
 }
 
 // decodeTokenString decodes a JWT token string into a *jwt.Token
-func (auth *Auth) decodeTokenString(tokenString string) (*jwt.Token, error) {
+func decodeTokenString(tokenString, secret string) (*jwt.Token, error) {
 
 	// Check length
 	if len(tokenString) < 40 {
@@ -83,7 +83,7 @@ func (auth *Auth) decodeTokenString(tokenString string) (*jwt.Token, error) {
 	}
 
 	// Make key function
-	keyFunc := func(token *jwt.Token) (interface{}, error) { return []byte(auth.secret), nil }
+	keyFunc := func(token *jwt.Token) (interface{}, error) { return []byte(secret), nil }
 
 	// Parse
 	return jwt.ParseWithClaims(tokenString, &CustomClaims{}, keyFunc)

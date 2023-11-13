@@ -1,6 +1,11 @@
 package common
 
-import "github.com/sirupsen/logrus"
+import (
+	"context"
+	"time"
+
+	gormLogger "gorm.io/gorm/logger"
+)
 
 type GinI interface {
 	ShouldBindJSON(obj interface{}) error
@@ -10,12 +15,10 @@ type GinI interface {
 }
 
 type LoggerI interface {
-	Print(args ...interface{})
-	Info(args ...interface{})
-	Warn(args ...interface{})
-	Error(args ...interface{})
-
-	WithField(key string, value interface{}) *logrus.Entry
-
-	Fatalf(format string, args ...interface{})
+	Error(ctx context.Context, msg string, data ...interface{})
+	Info(ctx context.Context, msg string, data ...interface{})
+	LogMode(level gormLogger.LogLevel) gormLogger.Interface
+	Trace(ctx context.Context, begin time.Time, fc func() (string, int64), err error)
+	Warn(ctx context.Context, msg string, data ...interface{})
+	Write(p []byte) (n int, err error)
 }

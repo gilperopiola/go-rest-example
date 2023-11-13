@@ -1,13 +1,13 @@
 package repository
 
 import (
+	"context"
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"github.com/gilperopiola/go-rest-example/pkg/common"
-	"github.com/gilperopiola/go-rest-example/pkg/common/config"
-	"github.com/gilperopiola/go-rest-example/pkg/common/middleware"
 	"github.com/gilperopiola/go-rest-example/pkg/common/models"
 
 	"gorm.io/driver/mysql"
@@ -18,21 +18,12 @@ type database struct {
 	db *gorm.DB
 }
 
-func NewDatabase(config *config.Config, logger *middleware.LoggerAdapter) *database {
+func NewDatabase() *database {
 	var database database
-	database.setup(config, logger)
-	return &database
-}
-
-func (database *database) DB() *gorm.DB {
-	return database.db
-}
-
-func (database *database) setup(config *config.Config, logger *middleware.LoggerAdapter) {
 
 	// Create connection. It's deferred closed in main.go.
 	// Retry connection if it fails due to Docker's orchestration.
-	if err := database.connectToDB(config, logger); err != nil {
+	if err := database.connectToDB(); err != nil {
 		log.Fatalf("error connecting to database: %v", err)
 	}
 
@@ -41,35 +32,45 @@ func (database *database) setup(config *config.Config, logger *middleware.Logger
 	// Destroy or clean tables
 	// AutoMigrate fields
 	// Create admin
-	database.configure(config)
+	database.configure()
+
+	return &database
 }
 
-func (database *database) connectToDB(config *config.Config, logger *middleware.LoggerAdapter) error {
-	dbConfig := config.Database
+func (database *database) DB() *gorm.DB {
+	return database.db
+}
+
+func (database *database) connectToDB() error {
+	dbConfig := common.Cfg.Database
 	retries := 0
 	var err error
 
 	// Retry connection if it fails due to Docker's orchestration
 	for retries < dbConfig.MaxRetries {
-		if database.db, err = gorm.Open(mysql.Open(dbConfig.GetConnectionString()), &gorm.Config{Logger: logger}); err == nil {
+		if database.db, err = gorm.Open(mysql.Open(dbConfig.GetConnectionString()), &gorm.Config{Logger: common.Logger}); err == nil {
 			break
 		}
 
 		retries++
 		if retries >= dbConfig.MaxRetries {
-			logger.Logger.Error(fmt.Sprintf("error connecting to database after %d retries: %v", dbConfig.MaxRetries, err), nil)
+			common.Logger.Error(context.Background(), fmt.Sprintf("error connecting to database after %d retries: %v", dbConfig.MaxRetries, err), nil)
 			return err
 		}
 
-		logger.Logger.Info("error connecting to database, retrying... ", map[string]interface{}{})
+		common.Logger.Info(context.Background(), "error connecting to database, retrying... ", nil)
 		time.Sleep(time.Duration(dbConfig.RetryDelay) * time.Second)
 	}
 	return nil
 }
 
-func (database *database) configure(config *config.Config) {
-	mySQLDB, _ := database.db.DB()
-	dbConfig := config.Database
+func (database *database) configure() {
+	dbConfig := common.Cfg.Database
+	mySQLDB, err := database.db.DB()
+	if err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
 
 	// Set connection pool limits
 	mySQLDB.SetMaxIdleConns(dbConfig.MaxIdleConns)
@@ -92,14 +93,14 @@ func (database *database) configure(config *config.Config) {
 
 	// Insert admin user
 	if dbConfig.AdminInsert {
-		admin := makeAdminModel("ferra.main@gmail.com", common.Hash(dbConfig.AdminPassword, config.Auth.HashSalt))
+		admin := makeAdminModel("ferra.main@gmail.com", common.Hash(dbConfig.AdminPassword, common.Cfg.Auth.HashSalt))
 		if err := database.db.Create(admin).Error; err != nil {
 			fmt.Println(err.Error())
 		}
 	}
 
 	// Just for formatting the logs :)
-	if config.General.LogInfo {
+	if common.Cfg.LogInfo {
 		fmt.Println("")
 	}
 }

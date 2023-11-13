@@ -12,12 +12,11 @@ import (
 )
 
 /*-------------------------
-//      CREATE USER
+//      Create User
 //-----------------------*/
 
 func (r *repository) CreateUser(user models.User) (models.User, error) {
-	db := r.database.DB()
-	if err := db.Create(&user).Error; err != nil {
+	if err := r.database.DB().Create(&user).Error; err != nil {
 		return models.User{}, handleCreateUserError(err)
 	}
 	return user, nil
@@ -31,7 +30,7 @@ func handleCreateUserError(err error) error {
 }
 
 /*-------------------------
-//       GET USER
+//       Get User
 //-----------------------*/
 
 func (r *repository) GetUser(user models.User, opts ...options.QueryOption) (models.User, error) {
@@ -61,7 +60,7 @@ func handleGetUserError(err error) error {
 }
 
 /*-------------------------
-//      UPDATE USER         -> (non-empty fields)
+//      Update User         -> (non-empty fields)
 //-----------------------*/
 
 func (r *repository) UpdateUser(user models.User) (models.User, error) {
@@ -98,7 +97,7 @@ func handleUpdateUserError(err error) error {
 }
 
 /*-------------------------
-//    UPDATE PASSWORD
+//    Update Password
 //-----------------------*/
 
 func (r *repository) UpdatePassword(userID int, newPassword string) error {
@@ -112,7 +111,7 @@ func (r *repository) UpdatePassword(userID int, newPassword string) error {
 }
 
 /*-------------------------
-//      DELETE USER         -> (soft-delete)
+//      Delete User         -> (soft-delete)
 //-----------------------*/
 
 func (r *repository) DeleteUser(user models.User) (models.User, error) {
@@ -126,11 +125,11 @@ func (r *repository) DeleteUser(user models.User) (models.User, error) {
 }
 
 /*-------------------------
-//     SEARCH USERS
+//     Search Users
 //-----------------------*/
 
 func (r *repository) SearchUsers(page, perPage int, opts ...options.QueryOption) (models.Users, error) {
-	db := r.database.DB()
+	var db = r.database.DB()
 	var users models.Users
 
 	// WithUsername, WithDetails, WithPosts, WithoutDeleted
@@ -146,29 +145,10 @@ func (r *repository) SearchUsers(page, perPage int, opts ...options.QueryOption)
 }
 
 /*-------------------------
-//      USER EXISTS
+//    Create User Post
 //-----------------------*/
 
-// UserExists checks if a user with username or email exists
-func (r *repository) UserExists(username, email string, opts ...options.QueryOption) bool {
-	db := r.database.DB()
-	query := "(username = ? OR email = ?)"
-
-	// WithoutDeleted
-	for _, opt := range opts {
-		db = opt(db, &query)
-	}
-
-	var count int64
-	db.Model(&models.User{}).Where(query, username, email).Count(&count)
-	return count > 0
-}
-
-/*-------------------------
-//    CREATE USER POST
-//-----------------------*/
-
-// CreateUserPost inserts a new post on the database. Title is required, body is optional
+// Title is required, body is optional
 func (r *repository) CreateUserPost(post models.UserPost) (models.UserPost, error) {
 	db := r.database.DB()
 	if err := db.Create(&post).Error; err != nil {

@@ -8,10 +8,9 @@ import (
 )
 
 func NewTimeoutMiddleware(timeoutSeconds int) gin.HandlerFunc {
-	return timeout.New(
-		timeout.WithTimeout(time.Duration(timeoutSeconds)*time.Second),
-		timeout.WithHandler(func(c *gin.Context) {
-			c.Next()
-		}),
-	)
+	return func() gin.HandlerFunc {
+		return timeout.New(
+			timeout.WithTimeout(time.Duration(timeoutSeconds) * time.Second),
+		)
+	}()
 }

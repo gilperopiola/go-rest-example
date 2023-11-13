@@ -27,7 +27,7 @@ func NewErrorHandlerMiddleware(logger *LoggerAdapter) gin.HandlerFunc {
 		method := c.Request.Method
 
 		// Log the error depending on severity
-		logStackTrace(logger, statusCode, stackTrace, c.Request.URL.Path, method)
+		go logStackTrace(logger, statusCode, stackTrace, c.Request.URL.Path, method)
 
 		c.JSON(statusCode, common.HTTPResponse{
 			Success: false,

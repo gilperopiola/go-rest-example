@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+/*----------------------
 // HandleRequest takes:
 //
 //   - a transport and a gin context
@@ -19,20 +20,21 @@ import (
 //
 // It writes an HTTP response with the result of the service call.
 // It also adds errors to the context so they can be retrieved by the middleware.
+//--------------------------------------------------------------------------------*/
 
-func HandleRequest[req requests.All, resp responses.All](c *gin.Context, emptyReq req, makeRequestFn func(common.GinI, req) (req, error), serviceCallFn func(req) (resp, error)) {
+func HandleRequest[req requests.All, resp responses.All](c *gin.Context, emptyReq req, makeRequestFn func(common.GinI, req) (req, error), serviceFn func(req) (resp, error)) {
 
 	// Build, validate and get request
 	request, err := makeRequestFn(c, emptyReq)
 	if err != nil {
-		c.Error(err)
+		c.Error(err) // Transport error
 		return
 	}
 
 	// Call service with that request
-	response, err := serviceCallFn(request)
+	response, err := serviceFn(request)
 	if err != nil {
-		c.Error(err)
+		c.Error(err) // Service / Repository error
 		return
 	}
 
@@ -44,8 +46,8 @@ func HandleRequest[req requests.All, resp responses.All](c *gin.Context, emptyRe
 }
 
 /*-------------------
-//      AUTH
-//-----------------*/
+//      Users
+//----------------*/
 
 func (t transport) signup(c *gin.Context) {
 	HandleRequest(c, &requests.SignupRequest{}, requests.MakeRequest[*requests.SignupRequest], t.Signup)
@@ -54,10 +56,6 @@ func (t transport) signup(c *gin.Context) {
 func (t transport) login(c *gin.Context) {
 	HandleRequest(c, &requests.LoginRequest{}, requests.MakeRequest[*requests.LoginRequest], t.Login)
 }
-
-/*-------------------
-//      USERS
-//----------------*/
 
 func (t transport) createUser(c *gin.Context) {
 	HandleRequest(c, &requests.CreateUserRequest{}, requests.MakeRequest[*requests.CreateUserRequest], t.CreateUser)
@@ -84,7 +82,7 @@ func (t transport) changePassword(c *gin.Context) {
 }
 
 /*--------------------
-/       POSTS
+/       Posts
 //-----------------*/
 
 func (t transport) createUserPost(c *gin.Context) {
@@ -92,8 +90,8 @@ func (t transport) createUserPost(c *gin.Context) {
 }
 
 /*--------------------
-//       MISC
-//-----------------*/
+//       Misc
+//------------------*/
 
 func (t transport) healthCheck(c *gin.Context) {
 	c.JSON(http.StatusOK, common.HTTPResponse{

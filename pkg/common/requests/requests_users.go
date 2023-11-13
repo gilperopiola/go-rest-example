@@ -3,10 +3,8 @@ package requests
 import (
 	"regexp"
 	"strconv"
-	"time"
 
 	"github.com/gilperopiola/go-rest-example/pkg/common"
-	"github.com/gilperopiola/go-rest-example/pkg/common/models"
 )
 
 var (
@@ -21,16 +19,60 @@ var (
 	validEmailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`)
 )
 
-// bindRequestBody just binds the request body to the request struct
-func bindRequestBody(c common.GinI, request interface{}) error {
-	if err := c.ShouldBindJSON(&request); err != nil {
-		return common.Wrap(err.Error(), common.ErrBindingRequest)
+/*---------------
+//    Signup
+//-------------*/
+
+type SignupRequest struct {
+	Username       string `json:"username"`
+	Email          string `json:"email"`
+	Password       string `json:"password"`
+	RepeatPassword string `json:"repeat_password"`
+
+	// User Detail
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+}
+
+func (req *SignupRequest) Build(c common.GinI) error {
+	return bindRequestBody(c, req)
+}
+
+func (req SignupRequest) Validate() error {
+	if err := validateUsernameEmailAndPassword(req.Username, req.Email, req.Password); err != nil {
+		return err
 	}
+
+	if req.Password != req.RepeatPassword {
+		return common.ErrPasswordsDontMatch
+	}
+
+	return nil
+}
+
+/*--------------
+//    Login
+//------------*/
+
+type LoginRequest struct {
+	UsernameOrEmail string `json:"username_or_email"`
+	Password        string `json:"password"`
+}
+
+func (req *LoginRequest) Build(c common.GinI) error {
+	return bindRequestBody(c, req)
+}
+
+func (req LoginRequest) Validate() error {
+	if req.UsernameOrEmail == "" || req.Password == "" {
+		return common.ErrAllFieldsRequired
+	}
+
 	return nil
 }
 
 /*---------------------
-//    CREATE USER
+//    Create User
 --------------------*/
 
 type CreateUserRequest struct {
@@ -44,36 +86,25 @@ type CreateUserRequest struct {
 	LastName  string `json:"last_name"`
 }
 
-func (req CreateUserRequest) Validate() error {
-	return validateUsernameEmailAndPassword(req.Username, req.Email, req.Password)
-}
-
 func (req *CreateUserRequest) Build(c common.GinI) error {
 	return bindRequestBody(c, req)
 }
 
-func (r *CreateUserRequest) ToUserModel() models.User {
-	return models.User{
-		Email:    r.Email,
-		Username: r.Username,
-		Password: r.Password,
-		Deleted:  false,
-		Details: models.UserDetail{
-			FirstName: r.FirstName,
-			LastName:  r.LastName,
-		},
-		IsAdmin:   r.IsAdmin,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-	}
+func (req CreateUserRequest) Validate() error {
+	return validateUsernameEmailAndPassword(req.Username, req.Email, req.Password)
 }
 
 /*--------------------
-//     GET USER
+//     Get User
 //------------------*/
 
 type GetUserRequest struct {
 	UserID int `json:"user_id"`
+}
+
+func (req *GetUserRequest) Build(c common.GinI) error {
+	req.UserID = c.GetInt(contextUserIDKey)
+	return nil
 }
 
 func (req GetUserRequest) Validate() error {
@@ -83,17 +114,8 @@ func (req GetUserRequest) Validate() error {
 	return nil
 }
 
-func (req *GetUserRequest) Build(c common.GinI) error {
-	req.UserID = c.GetInt(contextUserIDKey)
-	return nil
-}
-
-func (r *GetUserRequest) ToUserModel() models.User {
-	return models.User{ID: r.UserID}
-}
-
 /*--------------------
-//    UPDATE USER
+//    Update User
 //------------------*/
 
 type UpdateUserRequest struct {
@@ -104,6 +126,16 @@ type UpdateUserRequest struct {
 	// User Detail
 	FirstName *string `json:"first_name"`
 	LastName  *string `json:"last_name"`
+}
+
+func (req *UpdateUserRequest) Build(c common.GinI) error {
+	if err := bindRequestBody(c, req); err != nil {
+		return err
+	}
+
+	req.UserID = c.GetInt(contextUserIDKey)
+
+	return nil
 }
 
 func (req UpdateUserRequest) Validate() error {
@@ -124,50 +156,12 @@ func (req UpdateUserRequest) Validate() error {
 	return nil
 }
 
-func (req *UpdateUserRequest) Build(c common.GinI) error {
-	if err := bindRequestBody(c, req); err != nil {
-		return err
-	}
-
-	req.UserID = c.GetInt(contextUserIDKey)
-
-	return nil
-}
-
-func (r *UpdateUserRequest) ToUserModel() models.User {
-	firstName, lastName := "", ""
-	if r.FirstName != nil {
-		firstName = *r.FirstName
-	}
-	if r.LastName != nil {
-		lastName = *r.LastName
-	}
-
-	return models.User{
-		ID:       r.UserID,
-		Username: r.Username,
-		Email:    r.Email,
-		Details: models.UserDetail{
-			FirstName: firstName,
-			LastName:  lastName,
-		},
-	}
-}
-
 /*--------------------
-//    DELETE USER
+//    Delete User
 //------------------*/
 
 type DeleteUserRequest struct {
 	UserID int `json:"user_id"`
-}
-
-func (req DeleteUserRequest) Validate() error {
-	if req.UserID == 0 {
-		return common.ErrAllFieldsRequired
-	}
-
-	return nil
 }
 
 func (req *DeleteUserRequest) Build(c common.GinI) error {
@@ -175,26 +169,21 @@ func (req *DeleteUserRequest) Build(c common.GinI) error {
 	return nil
 }
 
-func (r *DeleteUserRequest) ToUserModel() models.User {
-	return models.User{ID: r.UserID}
+func (req DeleteUserRequest) Validate() error {
+	if req.UserID == 0 {
+		return common.ErrAllFieldsRequired
+	}
+	return nil
 }
 
 /*--------------------
-//    SEARCH USERS
+//    Search Users
 //------------------*/
 
 type SearchUsersRequest struct {
 	Username string `json:"username"`
 	Page     int    `json:"page"`
 	PerPage  int    `json:"per_page"`
-}
-
-func (req SearchUsersRequest) Validate() error {
-	if req.Page < 0 || req.PerPage <= 0 {
-		return common.ErrAllFieldsRequired
-	}
-
-	return nil
 }
 
 func (req *SearchUsersRequest) Build(c common.GinI) error {
@@ -219,12 +208,16 @@ func (req *SearchUsersRequest) Build(c common.GinI) error {
 	return nil
 }
 
-func (r *SearchUsersRequest) ToUserModel() models.User {
-	return models.User{Username: r.Username}
+func (req SearchUsersRequest) Validate() error {
+	if req.Page < 0 || req.PerPage <= 0 {
+		return common.ErrAllFieldsRequired
+	}
+
+	return nil
 }
 
 /*-----------------------
-//    CHANGE PASSWORD
+//    Change Password
 //---------------------*/
 
 type ChangePasswordRequest struct {
@@ -234,12 +227,18 @@ type ChangePasswordRequest struct {
 	RepeatPassword string `json:"repeat_password"`
 }
 
-func (req ChangePasswordRequest) Validate() error {
-	if req.UserID == 0 {
-		return common.ErrAllFieldsRequired
+func (req *ChangePasswordRequest) Build(c common.GinI) error {
+	if err := bindRequestBody(c, req); err != nil {
+		return err
 	}
 
-	if req.OldPassword == "" || req.NewPassword == "" || req.RepeatPassword == "" {
+	req.UserID = c.GetInt(contextUserIDKey)
+
+	return nil
+}
+
+func (req ChangePasswordRequest) Validate() error {
+	if req.UserID == 0 || req.OldPassword == "" || req.NewPassword == "" || req.RepeatPassword == "" {
 		return common.ErrAllFieldsRequired
 	}
 
@@ -254,39 +253,14 @@ func (req ChangePasswordRequest) Validate() error {
 	return nil
 }
 
-func (req *ChangePasswordRequest) Build(c common.GinI) error {
-	err := bindRequestBody(c, req)
-	if err != nil {
-		return err
-	}
-
-	req.UserID = c.GetInt(contextUserIDKey)
-
-	return nil
-}
-
-func (r *ChangePasswordRequest) ToUserModel() models.User {
-	return models.User{
-		ID:       r.UserID,
-		Password: r.OldPassword,
-	}
-}
-
 /*------------------------
-//    CREATE USER POST
+//   Create User Post
 //----------------------*/
 
 type CreateUserPostRequest struct {
 	UserID int    `json:"user_id"`
 	Title  string `json:"title"`
 	Body   string `json:"body"`
-}
-
-func (req CreateUserPostRequest) Validate() error {
-	if req.UserID == 0 || req.Title == "" {
-		return common.ErrAllFieldsRequired
-	}
-	return nil
 }
 
 func (req *CreateUserPostRequest) Build(c common.GinI) error {
@@ -300,17 +274,23 @@ func (req *CreateUserPostRequest) Build(c common.GinI) error {
 	return nil
 }
 
-func (r *CreateUserPostRequest) ToUserPostModel() models.UserPost {
-	return models.UserPost{
-		UserID: r.UserID,
-		Title:  r.Title,
-		Body:   r.Body,
+func (req CreateUserPostRequest) Validate() error {
+	if req.UserID == 0 || req.Title == "" {
+		return common.ErrAllFieldsRequired
 	}
+	return nil
 }
 
-/*-----------------------
-//       HELPERS
-//---------------------*/
+/*--------------
+//   Helpers
+/-------------*/
+
+func bindRequestBody(c common.GinI, request Request) error {
+	if err := c.ShouldBindJSON(&request); err != nil {
+		return common.Wrap(err.Error(), common.ErrBindingRequest)
+	}
+	return nil
+}
 
 func validateUsernameEmailAndPassword(username, email, password string) error {
 	if email == "" || username == "" || password == "" {

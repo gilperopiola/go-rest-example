@@ -10,6 +10,6 @@ const (
 	Gorm                        // 4
 )
 
-func (ls LogSource) String() string {
+func (ls LogSource) Str() string {
 	return [...]string{"unknown", "new_relic", "prometheus", "gin", "gorm"}[ls]
 }

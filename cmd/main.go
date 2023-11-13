@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/gilperopiola/go-rest-example/pkg/common/auth"
+	"github.com/gilperopiola/go-rest-example/pkg/common"
 	"github.com/gilperopiola/go-rest-example/pkg/common/config"
 	"github.com/gilperopiola/go-rest-example/pkg/common/middleware"
 	"github.com/gilperopiola/go-rest-example/pkg/repository"
@@ -13,67 +13,70 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Note: This is the entrypoint of the application.
-// The HTTP Requests entrypoint is the Prometheus HandlerFunc in pkg/common/middleware/prometheus.go
+/*---------------------------------------------
+// This is the entrypoint of the application.
+//
+// The HTTP Requests entrypoint is the RateLimiter middleware in /middleware/rate_limiter.go
+/-------------------------------------------------------------------------------------------*/
 
 func main() {
 
 	log.Println("Server starting ;)")
 
 	/*-------------------------
-	//      DEPENDENCIES
-	//------------------------*/
+	//      Dependencies
+	//-----------------------*/
 
 	config := config.New()
-	log.Println("Config OK")
+	common.SetConfig(config)
+	log.Println("Config OK!")
 
-	logger := middleware.NewLogger(config.General.LogInfo)
-	logger.Logger.Info("Logger OK", nil)
+	logger := middleware.NewLogger(config.LogInfo)
+	common.SetLogger(logger)
+	logger.Logger.Info("Logger OK!", nil)
 
 	middlewares := []gin.HandlerFunc{
 		gin.Recovery(), // Panic recovery
+		//middleware.NewTimeoutMiddleware(config.General.Timeout),                                 // Timeout TODO Fix 500
 		middleware.NewRateLimiterMiddleware(middleware.NewRateLimiter(200)),                     // Rate Limiter
 		middleware.NewCORSConfigMiddleware(),                                                    // CORS
 		middleware.NewNewRelicMiddleware(middleware.NewNewRelic(config.Monitoring, logger)),     // New Relic (monitoring)
 		middleware.NewPrometheusMiddleware(middleware.NewPrometheus(config.Monitoring, logger)), // Prometheus (metrics)
-		middleware.NewTimeoutMiddleware(config.General.Timeout),                                 // Timeout
 		middleware.NewErrorHandlerMiddleware(logger),                                            // Error Handler
 	}
-	logger.Logger.Info("Middlewares OK", nil)
+	logger.Logger.Info("Middlewares OK!", nil)
 
-	auth := auth.New(config.Auth.JWTSecret, config.Auth.SessionDurationDays)
-	logger.Logger.Info("Auth OK", nil)
-
-	database := repository.NewDatabase(config, logger)
-	logger.Logger.Info("Database OK", nil)
+	database := repository.NewDatabase()
+	logger.Logger.Info("Database OK!", nil)
 
 	repositoryLayer := repository.New(database)
-	logger.Logger.Info("Repository Layer OK", nil)
+	logger.Logger.Info("Repository Layer OK!", nil)
 
-	serviceLayer := service.New(repositoryLayer, auth, config)
-	logger.Logger.Info("Service Layer OK", nil)
+	serviceLayer := service.New(repositoryLayer)
+	logger.Logger.Info("Service Layer OK!", nil)
 
 	transportLayer := transport.New(serviceLayer)
-	logger.Logger.Info("Transport Layer OK", nil)
+	logger.Logger.Info("Transport Layer OK!", nil)
 
-	router := transport.NewRouter(transportLayer, config, auth, logger, middlewares...)
-	logger.Logger.Info("Router & Endpoints OK", nil)
+	router := transport.NewRouter(transportLayer, middlewares...)
+	logger.Logger.Info("Router & Endpoints OK!", nil)
 
 	/*---------------------------
-	//       START SERVER
-	//--------------------------*/
+	//       Server Start
+	//-------------------------*/
 
-	port := config.General.Port
-	logger.Logger.Info("Running server on port "+port, nil)
+	port := config.Port
+	logger.Logger.Infof("Running Server on port %s!\n", port)
 
 	err := router.Run(":" + port)
 	if err != nil {
-		log.Fatalf("Failed to start server: %v", err)
+		log.Fatalf("Failed to start Server: %v :(", err)
 	}
 
-	/* Have a great day! :) */
+	// Have a great day! :)
 }
 
+/*------
 // TODO
 // - Redis
 // - More tests
@@ -81,7 +84,5 @@ func main() {
 // - Reset password
 // - Roles to DB
 // - Request IDs
-// - Logic from DeleteUser to service layer
 // - Search & Fix TODOs
-// - Replace user.Exists when you can
-// - OpenAPI (Swagger)
+// - OpenAPI (Swagger) */

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/gilperopiola/go-rest-example/pkg/common"
+
 	"github.com/sirupsen/logrus"
 	gormLogger "gorm.io/gorm/logger"
 )
@@ -61,6 +62,7 @@ func (l *Logger) prepareLogger(msg *string, context map[string]interface{}) *log
 
 	// Add fields to log
 	log := l.Logger.WithField("msg", *msg)
+
 	for k, v := range context {
 		log = log.WithField(k, v)
 	}
@@ -68,12 +70,12 @@ func (l *Logger) prepareLogger(msg *string, context map[string]interface{}) *log
 	// New Relic
 	if *msg == "application created" || *msg == "application connected" || *msg == "final configuration" ||
 		*msg == "collector message" || *msg == "harvest failure" || *msg == "application connect failure" {
-		log = log.WithField("from", common.NewRelic.String())
+		log = log.WithField("from", common.NewRelic.Str())
 	}
 
 	// Gin
 	if strings.Contains(*msg, "[GIN-debug]") || strings.Contains(*msg, "GIN_MODE") || strings.Contains(*msg, "gin.SetMode") {
-		log = log.WithField("from", common.Gin.String())
+		log = log.WithField("from", common.Gin.Str())
 	}
 
 	// Add new line if it's not there
@@ -85,9 +87,9 @@ func (l *Logger) prepareLogger(msg *string, context map[string]interface{}) *log
 }
 
 /*----------------------------
-//    GORM LOGGER ADAPTER
+//    Gorm Logger Adapter
 //
-//	This adapter is used to unify our Logger with GORM's Logger
+//	This adapter is used to unify our Logger with GORM's Logger.
 //--------------------------------------------------------------*/
 
 func (l *LoggerAdapter) Trace(ctx context.Context, begin time.Time, fc func() (string, int64), err error) {
@@ -95,41 +97,24 @@ func (l *LoggerAdapter) Trace(ctx context.Context, begin time.Time, fc func() (s
 	sql, rows := fc()
 
 	if err != nil {
-		l.Logger.Error(
-			sql,
-			map[string]interface{}{
-				"from":    common.Gorm.String(),
-				"rows":    rows,
-				"elapsed": float64(elapsed.Nanoseconds()) / 1e6,
-				"err":     err,
-			},
-		)
+		data := map[string]interface{}{
+			"from":    common.Gorm.Str(),
+			"rows":    rows,
+			"elapsed": float64(elapsed.Nanoseconds()) / 1e6,
+			"err":     err,
+		}
+		l.Logger.Error(sql, data)
 	} else {
-		l.Logger.Info(
-			sql,
-			map[string]interface{}{
-				"from":    common.Gorm.String(),
-				"rows":    rows,
-				"elapsed": float64(elapsed.Nanoseconds()) / 1e6,
-			},
-		)
+		data := map[string]interface{}{
+			"from":    common.Gorm.Str(),
+			"rows":    rows,
+			"elapsed": float64(elapsed.Nanoseconds()) / 1e6,
+		}
+		l.Logger.Info(sql, data)
 	}
 }
 
-func (l *LoggerAdapter) LogMode(level gormLogger.LogLevel) gormLogger.Interface {
-	switch level {
-	case gormLogger.Info:
-		l.Logger.SetLevel(logrus.InfoLevel)
-	case gormLogger.Warn:
-		l.Logger.SetLevel(logrus.WarnLevel)
-	case gormLogger.Error:
-		l.Logger.SetLevel(logrus.ErrorLevel)
-	case gormLogger.Silent:
-		l.Logger.SetLevel(logrus.PanicLevel)
-	}
-	return l
-}
-
+// TODO Add Context and Data to params?
 func (l *LoggerAdapter) Info(ctx context.Context, msg string, data ...interface{}) {
 	l.Logger.Info(msg, map[string]interface{}{})
 }
@@ -145,4 +130,18 @@ func (l *LoggerAdapter) Error(ctx context.Context, msg string, data ...interface
 func (l *LoggerAdapter) Write(p []byte) (n int, err error) {
 	l.Logger.Info(string(p), map[string]interface{}{})
 	return len(p), nil
+}
+
+func (l *LoggerAdapter) LogMode(level gormLogger.LogLevel) gormLogger.Interface {
+	switch level {
+	case gormLogger.Info:
+		l.Logger.SetLevel(logrus.InfoLevel)
+	case gormLogger.Warn:
+		l.Logger.SetLevel(logrus.WarnLevel)
+	case gormLogger.Error:
+		l.Logger.SetLevel(logrus.ErrorLevel)
+	case gormLogger.Silent:
+		l.Logger.SetLevel(logrus.PanicLevel)
+	}
+	return l
 }

@@ -56,7 +56,7 @@ func (f *CustomFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 
 func isFromSource(data logrus.Fields, source common.LogSource) bool {
 	val, ok := data["from"]
-	return ok && val == source.String()
+	return ok && val == source.Str()
 }
 
 func getLogFromSources(entry *logrus.Entry, time string) (bool, []byte) {

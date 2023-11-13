@@ -26,15 +26,11 @@ func NewPrometheusMiddleware(p *Prometheus) gin.HandlerFunc {
 
 func NewPrometheus(cfg config.Monitoring, logger *LoggerAdapter) *Prometheus {
 	if !cfg.PrometheusEnabled {
-		logger.Logger.Info("Prometheus disabled", map[string]interface{}{"from": common.Prometheus.String()})
+		logger.Logger.Info("Prometheus disabled", map[string]interface{}{"from": common.Prometheus.Str()})
 		return nil
 	}
 
-	p := &Prometheus{
-		metricsList:    standardMetrics,
-		replaceURLKeys: replaceURLKeys,
-		logger:         logger,
-	}
+	p := &Prometheus{metricsList: standardMetrics, replaceURLKeys: replaceURLKeys, logger: logger}
 
 	// Register metrics with prefix
 	p.registerMetrics(cfg.PrometheusAppName)
@@ -225,7 +221,7 @@ func (p *Prometheus) registerMetrics(subsystem string) {
 				err.Error(),
 				map[string]interface{}{
 					"error": fmt.Errorf("%s could not be registered in Prometheus", metricDefinition.Name),
-					"from":  common.Prometheus.String(),
+					"from":  common.Prometheus.Str(),
 				})
 		}
 		switch metricDefinition {
@@ -241,7 +237,7 @@ func (p *Prometheus) registerMetrics(subsystem string) {
 		metricDefinition.MetricCollector = metric
 	}
 
-	p.logger.Logger.Info("Prometheus metrics registered", map[string]interface{}{"from": common.Prometheus.String()})
+	p.logger.Logger.Info("Prometheus metrics registered", map[string]interface{}{"from": common.Prometheus.Str()})
 }
 
 // From https://github.com/DanielHeckrath/gin-prometheus/blob/master/gin_prometheus.go

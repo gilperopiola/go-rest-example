@@ -10,7 +10,7 @@ import (
 )
 
 type Config struct {
-	General    General
+	General
 	Database   Database
 	Auth       Auth
 	Monitoring Monitoring

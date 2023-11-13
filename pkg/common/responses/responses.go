@@ -16,7 +16,7 @@ type All interface {
 }
 
 /*-------------------
-//      AUTH
+//      Auth
 //-----------------*/
 
 type SignupResponse struct {
@@ -28,7 +28,7 @@ type LoginResponse struct {
 }
 
 /*--------------------
-//      USERS
+//      Users
 //------------------*/
 
 type CreateUserResponse struct {
@@ -58,7 +58,7 @@ type ChangePasswordResponse struct {
 }
 
 /*-----------------------
-//      USER POSTS
+//      User Posts
 //---------------------*/
 
 type CreateUserPostResponse struct {
