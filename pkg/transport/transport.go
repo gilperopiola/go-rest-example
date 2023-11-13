@@ -4,6 +4,7 @@ import (
 	"github.com/gilperopiola/go-rest-example/pkg/service"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 )
 
 // Compile time check to validate that the transport struct implements the TransportLayer interface
@@ -25,8 +26,9 @@ type TransportLayer interface {
 
 type transport struct {
 	service.ServiceLayer
+	validate *validator.Validate
 }
 
-func New(service service.ServiceLayer) *transport {
-	return &transport{service}
+func New(service service.ServiceLayer, validate *validator.Validate) *transport {
+	return &transport{service, validate}
 }

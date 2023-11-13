@@ -9,6 +9,7 @@ import (
 	"github.com/gilperopiola/go-rest-example/pkg/repository"
 	"github.com/gilperopiola/go-rest-example/pkg/service"
 	"github.com/gilperopiola/go-rest-example/pkg/transport"
+	"github.com/go-playground/validator/v10"
 
 	"github.com/gin-gonic/gin"
 )
@@ -55,7 +56,7 @@ func main() {
 	serviceLayer := service.New(repositoryLayer)
 	logger.Logger.Info("Service Layer OK!", nil)
 
-	transportLayer := transport.New(serviceLayer)
+	transportLayer := transport.New(serviceLayer, validator.New())
 	logger.Logger.Info("Transport Layer OK!", nil)
 
 	router := transport.NewRouter(transportLayer, middlewares...)

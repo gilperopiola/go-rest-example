@@ -6,9 +6,8 @@ import (
 	"github.com/gilperopiola/go-rest-example/pkg/repository/options"
 )
 
-/*---------------------------------------------------------------------------
-// Particular Models are a key part of the application, they work as Business
-// Objects and contain some of the logic of the app.
+/*------------------------------------------------------------------------
+// Here we have the business-object part of the models, their behaviour.
 //----------------------*/
 
 func (u *User) GenerateTokenString() (string, error) {
@@ -16,24 +15,21 @@ func (u *User) GenerateTokenString() (string, error) {
 }
 
 func (u *User) Create() (err error) {
-	*u, err = u.Repository.CreateUser(*u)
-	if err != nil {
+	if *u, err = u.Repository.CreateUser(*u); err != nil {
 		return common.Wrap("u.Repository.CreateUser", err)
 	}
 	return nil
 }
 
 func (u *User) Get(opts ...options.QueryOption) (err error) {
-	*u, err = u.Repository.GetUser(*u, opts...)
-	if err != nil {
+	if *u, err = u.Repository.GetUser(*u, opts...); err != nil {
 		return common.Wrap("u.Repository.GetUser", err)
 	}
 	return nil
 }
 
 func (u *User) Update() (err error) {
-	*u, err = u.Repository.UpdateUser(*u)
-	if err != nil {
+	if *u, err = u.Repository.UpdateUser(*u); err != nil {
 		return common.Wrap("u.Repository.UpdateUser", err)
 	}
 	return nil
@@ -47,8 +43,7 @@ func (u *User) UpdatePassword() (err error) {
 }
 
 func (u *User) Delete() (err error) {
-	*u, err = u.Repository.DeleteUser(*u)
-	if err != nil {
+	if *u, err = u.Repository.DeleteUser(*u); err != nil {
 		return common.Wrap("u.Repository.DeleteUser", err)
 	}
 	return nil

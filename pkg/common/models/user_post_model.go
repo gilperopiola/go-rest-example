@@ -4,16 +4,14 @@ import (
 	"github.com/gilperopiola/go-rest-example/pkg/common"
 )
 
-/*---------------------------------------------------------------------------
-// Particular Models are a key part of the application, they work as Business
-// Objects and contain some of the logic of the app.
+/*------------------------------------------------------------------------
+// Here we have the business-object part of the models, their behaviour.
 //----------------------*/
 
-func (up *UserPost) Create() error {
-	userPost, err := up.Repository.CreateUserPost(*up)
+func (up *UserPost) Create() (err error) {
+	*up, err = up.Repository.CreateUserPost(*up)
 	if err != nil {
 		return common.Wrap("up.Repository.CreateUserPost", err)
 	}
-	*up = userPost
 	return nil
 }

@@ -39,6 +39,11 @@ func (r *repository) GetUser(user models.User, opts ...options.QueryOption) (mod
 	// Query by ID, username or email
 	query := "(id = ? OR username = ? OR email = ?)"
 
+	// If we have the ID, discard the other fields
+	if user.ID != 0 {
+		user.Username, user.Email = "", ""
+	}
+
 	// WithoutDeleted, WithDetails, WithPosts
 	for _, opt := range opts {
 		db = opt(db, &query)
@@ -59,8 +64,8 @@ func handleGetUserError(err error) error {
 	return common.Wrap(err.Error(), common.ErrGettingUser)
 }
 
-/*-------------------------
-//      Update User         -> (non-empty fields)
+/*--------------------------------------------
+//      Update User -> (non-empty fields)
 //-----------------------*/
 
 func (r *repository) UpdateUser(user models.User) (models.User, error) {
@@ -110,8 +115,8 @@ func (r *repository) UpdatePassword(userID int, newPassword string) error {
 	return nil
 }
 
-/*-------------------------
-//      Delete User         -> (soft-delete)
+/*--------------------------------------
+//      Delete User -> (soft-delete)
 //-----------------------*/
 
 func (r *repository) DeleteUser(user models.User) (models.User, error) {

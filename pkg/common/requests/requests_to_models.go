@@ -1,6 +1,7 @@
 package requests
 
 import (
+	"regexp"
 	"time"
 
 	"github.com/gilperopiola/go-rest-example/pkg/common"
@@ -45,6 +46,8 @@ func (r *SignupRequest) ToUserModel(config *config.Config, repository models.Rep
 //------------*/
 
 func (r *LoginRequest) ToUserModel(config *config.Config, repository models.RepositoryI) models.User {
+	validEmailRegex := regexp.MustCompile(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`)
+
 	if validEmailRegex.MatchString(r.UsernameOrEmail) {
 		return models.User{
 			Email:             r.UsernameOrEmail,

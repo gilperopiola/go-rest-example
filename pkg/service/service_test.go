@@ -68,7 +68,7 @@ func TestSignup(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			common.SetConfig(&config.Config{})
-			got, err := newTestService(tc.mockRepository).Signup(&requests.SignupRequest{})
+			got, err := newTestService(tc.mockRepository).Signup(nil, &requests.SignupRequest{})
 			assertTC(t, tc.want, tc.wantErr, got, err, tc.mockRepository)
 		})
 	}
@@ -109,7 +109,7 @@ func TestLogin(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			common.SetConfig(&config.Config{})
-			got, err := newTestService(tc.mockRepository).Login(&tc.request)
+			got, err := newTestService(tc.mockRepository).Login(nil, &tc.request)
 			assertTC(t, tc.wantTokenLength, tc.wantErr, len(got.Token), err, tc.mockRepository)
 		})
 	}
@@ -145,7 +145,7 @@ func TestCreateUser(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			common.SetConfig(&config.Config{})
-			got, err := newTestService(tc.mockRepository).CreateUser(&requests.CreateUserRequest{})
+			got, err := newTestService(tc.mockRepository).CreateUser(nil, &requests.CreateUserRequest{})
 			assertTC(t, tc.want, tc.wantErr, got, err, tc.mockRepository)
 		})
 	}
@@ -176,7 +176,7 @@ func TestGetUser(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			common.SetConfig(&config.Config{})
-			got, err := newTestService(tc.mockRepository).GetUser(&tc.request)
+			got, err := newTestService(tc.mockRepository).GetUser(nil, &tc.request)
 			assertTC(t, tc.want, tc.wantErr, got, err, tc.mockRepository)
 		})
 	}
@@ -224,7 +224,7 @@ func TestUpdateUser(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			common.SetConfig(&config.Config{})
-			got, err := newTestService(tc.mockRepository).UpdateUser(&requests.UpdateUserRequest{})
+			got, err := newTestService(tc.mockRepository).UpdateUser(nil, &requests.UpdateUserRequest{})
 			assertTC(t, tc.want, tc.wantErr, got, err, nil)
 		})
 	}
@@ -257,7 +257,7 @@ func TestDeleteUser(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			common.SetConfig(&config.Config{})
-			got, err := newTestService(tc.mockRepository).DeleteUser(&requests.DeleteUserRequest{UserID: VALID_ID})
+			got, err := newTestService(tc.mockRepository).DeleteUser(nil, &requests.DeleteUserRequest{UserID: VALID_ID})
 			assertTC(t, tc.want, tc.wantErr, got, err, tc.mockRepository)
 		})
 	}
@@ -296,7 +296,7 @@ func TestSearchUsers(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			common.SetConfig(&config.Config{})
-			got, err := newTestService(tc.mockRepository).SearchUsers(&tc.request)
+			got, err := newTestService(tc.mockRepository).SearchUsers(nil, &tc.request)
 			assertTC(t, tc.want, tc.wantErr, got, err, tc.mockRepository)
 		})
 	}

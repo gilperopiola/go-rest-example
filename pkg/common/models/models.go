@@ -26,26 +26,26 @@ type UserPosts []UserPost
 ------------------------*/
 
 type RepositoryI interface {
-	// Users
 	CreateUser(user User) (User, error)
 	GetUser(user User, opts ...options.QueryOption) (User, error)
 	UpdateUser(user User) (User, error)
 	UpdatePassword(userID int, password string) error
 	DeleteUser(user User) (User, error)
 	SearchUsers(page, perPage int, opts ...options.QueryOption) (Users, error)
-
-	// Posts
 	CreateUserPost(post UserPost) (UserPost, error)
 }
 
+/*-----------------------------------------
 // When the Service creates a Model, it passes the Config & Repository to it.
+//----------------------------------------------------------------------------*/
+
 type ModelDependencies struct {
 	Config     *config.Config `gorm:"-"`
 	Repository RepositoryI    `gorm:"-"`
 }
 
 /*-----------------------
-//       MODELS
+//       Models
 //---------------------*/
 
 type User struct {

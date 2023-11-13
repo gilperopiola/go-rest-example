@@ -32,6 +32,7 @@ var (
 	ErrAllFieldsRequired  = NewError(fmt.Errorf("error, all fields required"), 400)
 	ErrPasswordsDontMatch = NewError(fmt.Errorf("error, passwords don't match"), 400)
 	ErrBindingRequest     = NewError(fmt.Errorf("error binding request"), 400)
+	ErrValidatingRequest  = NewError(fmt.Errorf("error validating request"), 400)
 	ErrInvalidEmailFormat = NewError(fmt.Errorf("error, invalid email format"), 400)
 	ErrInvalidValue       = func(field string) error {
 		return NewError(fmt.Errorf("error, invalid value for field %s", field), 400)

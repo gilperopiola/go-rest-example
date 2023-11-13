@@ -5,13 +5,15 @@ import (
 	"github.com/gilperopiola/go-rest-example/pkg/common/requests"
 	"github.com/gilperopiola/go-rest-example/pkg/common/responses"
 	"github.com/gilperopiola/go-rest-example/pkg/repository/options"
+
+	"github.com/gin-gonic/gin"
 )
 
 /*-----------------------
 //       Signup
 //---------------------*/
 
-func (s *service) Signup(request *requests.SignupRequest) (responses.SignupResponse, error) {
+func (s *service) Signup(c *gin.Context, request *requests.SignupRequest) (responses.SignupResponse, error) {
 	user := request.ToUserModel(common.Cfg, s.repository)
 
 	if err := user.Create(); err != nil {
@@ -25,7 +27,7 @@ func (s *service) Signup(request *requests.SignupRequest) (responses.SignupRespo
 //       Login
 //-------------------*/
 
-func (s *service) Login(request *requests.LoginRequest) (responses.LoginResponse, error) {
+func (s *service) Login(c *gin.Context, request *requests.LoginRequest) (responses.LoginResponse, error) {
 	user := request.ToUserModel(common.Cfg, s.repository)
 
 	// Get user
@@ -52,7 +54,7 @@ func (s *service) Login(request *requests.LoginRequest) (responses.LoginResponse
 //-----------------------*/
 
 // CreateUser is an admins only endpoint
-func (s *service) CreateUser(request *requests.CreateUserRequest) (responses.CreateUserResponse, error) {
+func (s *service) CreateUser(c *gin.Context, request *requests.CreateUserRequest) (responses.CreateUserResponse, error) {
 	user := request.ToUserModel(common.Cfg, s.repository)
 
 	if err := user.Create(); err != nil {
@@ -66,7 +68,7 @@ func (s *service) CreateUser(request *requests.CreateUserRequest) (responses.Cre
 //       Get User
 //---------------------*/
 
-func (s *service) GetUser(request *requests.GetUserRequest) (responses.GetUserResponse, error) {
+func (s *service) GetUser(c *gin.Context, request *requests.GetUserRequest) (responses.GetUserResponse, error) {
 	user := request.ToUserModel(s.repository)
 
 	// Get user (with details & posts)
@@ -86,7 +88,7 @@ func (s *service) GetUser(request *requests.GetUserRequest) (responses.GetUserRe
 //      Update User
 //------------------------*/
 
-func (s *service) UpdateUser(request *requests.UpdateUserRequest) (responses.UpdateUserResponse, error) {
+func (s *service) UpdateUser(c *gin.Context, request *requests.UpdateUserRequest) (responses.UpdateUserResponse, error) {
 	user := request.ToUserModel(s.repository)
 
 	// Get user (with details)
@@ -111,7 +113,7 @@ func (s *service) UpdateUser(request *requests.UpdateUserRequest) (responses.Upd
 //       Delete User
 //------------------------*/
 
-func (s *service) DeleteUser(request *requests.DeleteUserRequest) (responses.DeleteUserResponse, error) {
+func (s *service) DeleteUser(c *gin.Context, request *requests.DeleteUserRequest) (responses.DeleteUserResponse, error) {
 	user := request.ToUserModel(s.repository)
 
 	// Get user
@@ -137,7 +139,7 @@ func (s *service) DeleteUser(request *requests.DeleteUserRequest) (responses.Del
 //------------------------*/
 
 // SearchUsers is an admins only endpoint
-func (s *service) SearchUsers(request *requests.SearchUsersRequest) (responses.SearchUsersResponse, error) {
+func (s *service) SearchUsers(c *gin.Context, request *requests.SearchUsersRequest) (responses.SearchUsersResponse, error) {
 	var (
 		user    = request.ToUserModel(s.repository)
 		page    = request.Page
@@ -158,7 +160,7 @@ func (s *service) SearchUsers(request *requests.SearchUsersRequest) (responses.S
 //     Change Password
 //------------------------*/
 
-func (s *service) ChangePassword(request *requests.ChangePasswordRequest) (responses.ChangePasswordResponse, error) {
+func (s *service) ChangePassword(c *gin.Context, request *requests.ChangePasswordRequest) (responses.ChangePasswordResponse, error) {
 	user := request.ToUserModel(common.Cfg, s.repository)
 
 	// Get user
@@ -187,7 +189,7 @@ func (s *service) ChangePassword(request *requests.ChangePasswordRequest) (respo
 //      Create User Post
 //----------------------------*/
 
-func (s *service) CreateUserPost(request *requests.CreateUserPostRequest) (responses.CreateUserPostResponse, error) {
+func (s *service) CreateUserPost(c *gin.Context, request *requests.CreateUserPostRequest) (responses.CreateUserPostResponse, error) {
 	userPost := request.ToUserPostModel(s.repository)
 
 	if err := userPost.Create(); err != nil {

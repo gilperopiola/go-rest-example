@@ -10,6 +10,22 @@ import (
 // to the Transport layer.
 ------------------------*/
 
+func (u Users) ToResponseModel() []responses.User {
+	users := []responses.User{}
+	for _, user := range u {
+		users = append(users, user.ToResponseModel())
+	}
+	return users
+}
+
+func (p UserPosts) ToResponseModel() []responses.UserPost {
+	posts := []responses.UserPost{}
+	for _, post := range p {
+		posts = append(posts, post.ToResponseModel())
+	}
+	return posts
+}
+
 /*------------------
 //      Users
 //----------------*/
@@ -26,14 +42,6 @@ func (u User) ToResponseModel() responses.User {
 		CreatedAt: u.CreatedAt,
 		UpdatedAt: u.UpdatedAt,
 	}
-}
-
-func (u Users) ToResponseModel() []responses.User {
-	users := []responses.User{}
-	for _, user := range u {
-		users = append(users, user.ToResponseModel())
-	}
-	return users
 }
 
 func (u UserDetail) ToResponseModel() responses.UserDetail {
@@ -53,12 +61,4 @@ func (p UserPost) ToResponseModel() responses.UserPost {
 		Title: p.Title,
 		Body:  p.Body,
 	}
-}
-
-func (p UserPosts) ToResponseModel() []responses.UserPost {
-	posts := []responses.UserPost{}
-	for _, post := range p {
-		posts = append(posts, post.ToResponseModel())
-	}
-	return posts
 }

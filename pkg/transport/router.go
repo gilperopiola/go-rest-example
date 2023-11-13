@@ -4,11 +4,14 @@ import (
 	"fmt"
 	"io"
 	"net/http/pprof"
+	"os"
 
 	"github.com/gilperopiola/go-rest-example/pkg/common"
 	"github.com/gilperopiola/go-rest-example/pkg/common/auth"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
@@ -43,6 +46,10 @@ func (router *router) prepare(isProd bool) {
 
 	router.Engine = gin.New()
 	router.Engine.SetTrustedProxies(nil)
+	if ok := binding.Validator.Engine().(*validator.Validate); ok == nil {
+		fmt.Printf("error setting router validator")
+		os.Exit(1)
+	}
 }
 
 /*-----------------------------

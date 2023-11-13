@@ -1,22 +1,15 @@
 package requests
 
 import (
-	"regexp"
 	"strconv"
 
 	"github.com/gilperopiola/go-rest-example/pkg/common"
+	"github.com/go-playground/validator/v10"
 )
 
-var (
+const (
 	contextUserIDKey = "UserID"
 	pathUserIDKey    = "user_id"
-
-	usernameMinLength = 4
-	usernameMaxLength = 32
-	passwordMinLength = 8
-	passwordMaxLength = 64
-
-	validEmailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`)
 )
 
 /*---------------
@@ -24,10 +17,10 @@ var (
 //-------------*/
 
 type SignupRequest struct {
-	Username       string `json:"username"`
-	Email          string `json:"email"`
-	Password       string `json:"password"`
-	RepeatPassword string `json:"repeat_password"`
+	Username       string `json:"username" validate:"required,min=4,max=32"`
+	Email          string `json:"email" validate:"required,email"`
+	Password       string `json:"password" validate:"required,min=8,max=64"`
+	RepeatPassword string `json:"repeat_password" validate:"required,eqfield=Password"`
 
 	// User Detail
 	FirstName string `json:"first_name"`
@@ -38,16 +31,8 @@ func (req *SignupRequest) Build(c common.GinI) error {
 	return bindRequestBody(c, req)
 }
 
-func (req SignupRequest) Validate() error {
-	if err := validateUsernameEmailAndPassword(req.Username, req.Email, req.Password); err != nil {
-		return err
-	}
-
-	if req.Password != req.RepeatPassword {
-		return common.ErrPasswordsDontMatch
-	}
-
-	return nil
+func (req SignupRequest) Validate(validate *validator.Validate) error {
+	return validateRequest(validate, &req)
 }
 
 /*--------------
@@ -55,20 +40,16 @@ func (req SignupRequest) Validate() error {
 //------------*/
 
 type LoginRequest struct {
-	UsernameOrEmail string `json:"username_or_email"`
-	Password        string `json:"password"`
+	UsernameOrEmail string `json:"username_or_email" validate:"required"`
+	Password        string `json:"password" validate:"required,min=8,max=64"`
 }
 
 func (req *LoginRequest) Build(c common.GinI) error {
 	return bindRequestBody(c, req)
 }
 
-func (req LoginRequest) Validate() error {
-	if req.UsernameOrEmail == "" || req.Password == "" {
-		return common.ErrAllFieldsRequired
-	}
-
-	return nil
+func (req LoginRequest) Validate(validate *validator.Validate) error {
+	return validateRequest(validate, &req)
 }
 
 /*---------------------
@@ -76,9 +57,9 @@ func (req LoginRequest) Validate() error {
 --------------------*/
 
 type CreateUserRequest struct {
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Username string `json:"username" validate:"required,min=4,max=32"`
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required,min=8,max=64"`
 	IsAdmin  bool   `json:"is_admin"`
 
 	// User Detail
@@ -90,8 +71,8 @@ func (req *CreateUserRequest) Build(c common.GinI) error {
 	return bindRequestBody(c, req)
 }
 
-func (req CreateUserRequest) Validate() error {
-	return validateUsernameEmailAndPassword(req.Username, req.Email, req.Password)
+func (req CreateUserRequest) Validate(validate *validator.Validate) error {
+	return validateRequest(validate, &req)
 }
 
 /*--------------------
@@ -99,7 +80,7 @@ func (req CreateUserRequest) Validate() error {
 //------------------*/
 
 type GetUserRequest struct {
-	UserID int `json:"user_id"`
+	UserID int `json:"user_id" validate:"required,min=1"`
 }
 
 func (req *GetUserRequest) Build(c common.GinI) error {
@@ -107,11 +88,8 @@ func (req *GetUserRequest) Build(c common.GinI) error {
 	return nil
 }
 
-func (req GetUserRequest) Validate() error {
-	if req.UserID == 0 {
-		return common.ErrAllFieldsRequired
-	}
-	return nil
+func (req GetUserRequest) Validate(validate *validator.Validate) error {
+	return validateRequest(validate, &req)
 }
 
 /*--------------------
@@ -119,9 +97,9 @@ func (req GetUserRequest) Validate() error {
 //------------------*/
 
 type UpdateUserRequest struct {
-	UserID   int    `json:"user_id"`
-	Username string `json:"username"`
-	Email    string `json:"email"`
+	UserID   int    `json:"user_id" validate:"required,min=1"`
+	Username string `json:"username" validate:"omitempty,min=4,max=32"`
+	Email    string `json:"email" validate:"omitempty,email"`
 
 	// User Detail
 	FirstName *string `json:"first_name"`
@@ -138,21 +116,13 @@ func (req *UpdateUserRequest) Build(c common.GinI) error {
 	return nil
 }
 
-func (req UpdateUserRequest) Validate() error {
-	if req.UserID == 0 || (req.Email == "" && req.Username == "" && req.FirstName == nil && req.LastName == nil) {
+func (req UpdateUserRequest) Validate(validate *validator.Validate) error {
+	if err := validateRequest(validate, &req); err != nil {
+		return err
+	}
+	if req.Email == "" && req.Username == "" && req.FirstName == nil && req.LastName == nil {
 		return common.ErrAllFieldsRequired
 	}
-
-	if req.Email != "" && !validEmailRegex.MatchString(req.Email) {
-		return common.ErrInvalidEmailFormat
-	}
-
-	if req.Username != "" {
-		if len(req.Username) < usernameMinLength || len(req.Username) > usernameMaxLength {
-			return common.ErrInvalidUsernameLength(usernameMinLength, usernameMaxLength)
-		}
-	}
-
 	return nil
 }
 
@@ -161,7 +131,7 @@ func (req UpdateUserRequest) Validate() error {
 //------------------*/
 
 type DeleteUserRequest struct {
-	UserID int `json:"user_id"`
+	UserID int `json:"user_id" validate:"required,min=1"`
 }
 
 func (req *DeleteUserRequest) Build(c common.GinI) error {
@@ -169,11 +139,8 @@ func (req *DeleteUserRequest) Build(c common.GinI) error {
 	return nil
 }
 
-func (req DeleteUserRequest) Validate() error {
-	if req.UserID == 0 {
-		return common.ErrAllFieldsRequired
-	}
-	return nil
+func (req DeleteUserRequest) Validate(validate *validator.Validate) error {
+	return validateRequest(validate, &req)
 }
 
 /*--------------------
@@ -182,8 +149,8 @@ func (req DeleteUserRequest) Validate() error {
 
 type SearchUsersRequest struct {
 	Username string `json:"username"`
-	Page     int    `json:"page"`
-	PerPage  int    `json:"per_page"`
+	Page     int    `json:"page" validate:"omitempty,min=0"`
+	PerPage  int    `json:"per_page" validate:"omitempty,min=1,max=100"`
 }
 
 func (req *SearchUsersRequest) Build(c common.GinI) error {
@@ -208,12 +175,8 @@ func (req *SearchUsersRequest) Build(c common.GinI) error {
 	return nil
 }
 
-func (req SearchUsersRequest) Validate() error {
-	if req.Page < 0 || req.PerPage <= 0 {
-		return common.ErrAllFieldsRequired
-	}
-
-	return nil
+func (req SearchUsersRequest) Validate(validate *validator.Validate) error {
+	return validateRequest(validate, &req)
 }
 
 /*-----------------------
@@ -221,10 +184,10 @@ func (req SearchUsersRequest) Validate() error {
 //---------------------*/
 
 type ChangePasswordRequest struct {
-	UserID         int    `json:"user_id"`
-	OldPassword    string `json:"old_password"`
-	NewPassword    string `json:"new_password"`
-	RepeatPassword string `json:"repeat_password"`
+	UserID         int    `json:"user_id" validate:"required,min=1"`
+	OldPassword    string `json:"old_password" validate:"required"`
+	NewPassword    string `json:"new_password" validate:"required,min=8,max=64"`
+	RepeatPassword string `json:"repeat_password" validate:"required,eqfield=NewPassword"`
 }
 
 func (req *ChangePasswordRequest) Build(c common.GinI) error {
@@ -237,20 +200,8 @@ func (req *ChangePasswordRequest) Build(c common.GinI) error {
 	return nil
 }
 
-func (req ChangePasswordRequest) Validate() error {
-	if req.UserID == 0 || req.OldPassword == "" || req.NewPassword == "" || req.RepeatPassword == "" {
-		return common.ErrAllFieldsRequired
-	}
-
-	if len(req.NewPassword) < passwordMinLength || len(req.NewPassword) > passwordMaxLength {
-		return common.ErrInvalidPasswordLength(passwordMinLength, passwordMaxLength)
-	}
-
-	if req.NewPassword != req.RepeatPassword {
-		return common.ErrPasswordsDontMatch
-	}
-
-	return nil
+func (req ChangePasswordRequest) Validate(validate *validator.Validate) error {
+	return validateRequest(validate, &req)
 }
 
 /*------------------------
@@ -258,8 +209,8 @@ func (req ChangePasswordRequest) Validate() error {
 //----------------------*/
 
 type CreateUserPostRequest struct {
-	UserID int    `json:"user_id"`
-	Title  string `json:"title"`
+	UserID int    `json:"user_id" validate:"required,min=1"`
+	Title  string `json:"title" validate:"required"`
 	Body   string `json:"body"`
 }
 
@@ -274,11 +225,8 @@ func (req *CreateUserPostRequest) Build(c common.GinI) error {
 	return nil
 }
 
-func (req CreateUserPostRequest) Validate() error {
-	if req.UserID == 0 || req.Title == "" {
-		return common.ErrAllFieldsRequired
-	}
-	return nil
+func (req CreateUserPostRequest) Validate(validate *validator.Validate) error {
+	return validateRequest(validate, &req)
 }
 
 /*--------------
@@ -292,22 +240,13 @@ func bindRequestBody(c common.GinI, request Request) error {
 	return nil
 }
 
-func validateUsernameEmailAndPassword(username, email, password string) error {
-	if email == "" || username == "" || password == "" {
-		return common.ErrAllFieldsRequired
+func validateRequest(validate *validator.Validate, request Request) error {
+	if err := validate.Struct(request); err != nil {
+		if validationErrs, ok := err.(validator.ValidationErrors); ok { // TODO Fully fledge error messages
+			firstErr := validationErrs[0]
+			return common.Wrap(err.Error(), common.ErrInvalidValue(firstErr.StructField()))
+		}
+		return common.Wrap(err.Error(), common.ErrValidatingRequest)
 	}
-
-	if !validEmailRegex.MatchString(email) {
-		return common.ErrInvalidEmailFormat
-	}
-
-	if len(username) < usernameMinLength || len(username) > usernameMaxLength {
-		return common.ErrInvalidUsernameLength(usernameMinLength, usernameMaxLength)
-	}
-
-	if len(password) < passwordMinLength || len(password) > passwordMaxLength {
-		return common.ErrInvalidPasswordLength(passwordMinLength, passwordMaxLength)
-	}
-
 	return nil
 }
