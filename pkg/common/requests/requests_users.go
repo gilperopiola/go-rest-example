@@ -4,7 +4,6 @@ import (
 	"strconv"
 
 	"github.com/gilperopiola/go-rest-example/pkg/common"
-	"github.com/go-playground/validator/v10"
 )
 
 const (
@@ -31,10 +30,6 @@ func (req *SignupRequest) Build(c common.GinI) error {
 	return bindRequestBody(c, req)
 }
 
-func (req SignupRequest) Validate(validate *validator.Validate) error {
-	return validateRequest(validate, &req)
-}
-
 /*--------------
 //    Login
 //------------*/
@@ -46,10 +41,6 @@ type LoginRequest struct {
 
 func (req *LoginRequest) Build(c common.GinI) error {
 	return bindRequestBody(c, req)
-}
-
-func (req LoginRequest) Validate(validate *validator.Validate) error {
-	return validateRequest(validate, &req)
 }
 
 /*---------------------
@@ -71,10 +62,6 @@ func (req *CreateUserRequest) Build(c common.GinI) error {
 	return bindRequestBody(c, req)
 }
 
-func (req CreateUserRequest) Validate(validate *validator.Validate) error {
-	return validateRequest(validate, &req)
-}
-
 /*--------------------
 //     Get User
 //------------------*/
@@ -88,18 +75,14 @@ func (req *GetUserRequest) Build(c common.GinI) error {
 	return nil
 }
 
-func (req GetUserRequest) Validate(validate *validator.Validate) error {
-	return validateRequest(validate, &req)
-}
-
 /*--------------------
 //    Update User
 //------------------*/
 
 type UpdateUserRequest struct {
 	UserID   int    `json:"user_id" validate:"required,min=1"`
-	Username string `json:"username" validate:"omitempty,min=4,max=32"`
-	Email    string `json:"email" validate:"omitempty,email"`
+	Username string `json:"username" validate:"required_without_all=Email FirstName LastName,omitempty,min=4,max=32"`
+	Email    string `json:"email" validate:"required_without_all=Username FirstName LastName,omitempty,email"`
 
 	// User Detail
 	FirstName *string `json:"first_name"`
@@ -116,16 +99,6 @@ func (req *UpdateUserRequest) Build(c common.GinI) error {
 	return nil
 }
 
-func (req UpdateUserRequest) Validate(validate *validator.Validate) error {
-	if err := validateRequest(validate, &req); err != nil {
-		return err
-	}
-	if req.Email == "" && req.Username == "" && req.FirstName == nil && req.LastName == nil {
-		return common.ErrAllFieldsRequired
-	}
-	return nil
-}
-
 /*--------------------
 //    Delete User
 //------------------*/
@@ -137,10 +110,6 @@ type DeleteUserRequest struct {
 func (req *DeleteUserRequest) Build(c common.GinI) error {
 	req.UserID = c.GetInt(contextUserIDKey)
 	return nil
-}
-
-func (req DeleteUserRequest) Validate(validate *validator.Validate) error {
-	return validateRequest(validate, &req)
 }
 
 /*--------------------
@@ -175,10 +144,6 @@ func (req *SearchUsersRequest) Build(c common.GinI) error {
 	return nil
 }
 
-func (req SearchUsersRequest) Validate(validate *validator.Validate) error {
-	return validateRequest(validate, &req)
-}
-
 /*-----------------------
 //    Change Password
 //---------------------*/
@@ -200,10 +165,6 @@ func (req *ChangePasswordRequest) Build(c common.GinI) error {
 	return nil
 }
 
-func (req ChangePasswordRequest) Validate(validate *validator.Validate) error {
-	return validateRequest(validate, &req)
-}
-
 /*------------------------
 //   Create User Post
 //----------------------*/
@@ -222,31 +183,5 @@ func (req *CreateUserPostRequest) Build(c common.GinI) error {
 
 	req.UserID = c.GetInt(contextUserIDKey)
 
-	return nil
-}
-
-func (req CreateUserPostRequest) Validate(validate *validator.Validate) error {
-	return validateRequest(validate, &req)
-}
-
-/*--------------
-//   Helpers
-/-------------*/
-
-func bindRequestBody(c common.GinI, request Request) error {
-	if err := c.ShouldBindJSON(&request); err != nil {
-		return common.Wrap(err.Error(), common.ErrBindingRequest)
-	}
-	return nil
-}
-
-func validateRequest(validate *validator.Validate, request Request) error {
-	if err := validate.Struct(request); err != nil {
-		if validationErrs, ok := err.(validator.ValidationErrors); ok { // TODO Fully fledge error messages
-			firstErr := validationErrs[0]
-			return common.Wrap(err.Error(), common.ErrInvalidValue(firstErr.StructField()))
-		}
-		return common.Wrap(err.Error(), common.ErrValidatingRequest)
-	}
 	return nil
 }

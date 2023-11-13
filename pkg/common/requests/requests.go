@@ -9,11 +9,10 @@ import (
 
 type Request interface {
 	Build(c common.GinI) error
-	Validate(validate *validator.Validate) error
 }
 
 /*---------------------------------------------------------------------------
-// All Requests must be here. All Requests must have Build and Validate methods.
+// All Requests must be here. All Requests must have a Build method.
 ------------------------*/
 
 type All interface {
@@ -46,8 +45,30 @@ func makeRequest[req All](c *gin.Context, request req, validate *validator.Valid
 	if err := request.Build(c); err != nil {
 		return common.Wrap("request.Build", err)
 	}
-	if err := request.Validate(validate); err != nil {
-		return common.Wrap("request.Validate", err)
+	if err := validateRequest(validate, request); err != nil {
+		return common.Wrap("validateRequest", err)
+	}
+	return nil
+}
+
+/*--------------
+//   Helpers
+/-------------*/
+
+func bindRequestBody(c common.GinI, request Request) error {
+	if err := c.ShouldBindJSON(&request); err != nil {
+		return common.Wrap(err.Error(), common.ErrBindingRequest)
+	}
+	return nil
+}
+
+func validateRequest(validate *validator.Validate, request Request) error {
+	if err := validate.Struct(request); err != nil {
+		if validationErrs, ok := err.(validator.ValidationErrors); ok { // TODO Fully fledge error messages
+			firstErr := validationErrs[0]
+			return common.Wrap(err.Error(), common.ErrInvalidValue(firstErr.StructField()))
+		}
+		return common.Wrap(err.Error(), common.ErrValidatingRequest)
 	}
 	return nil
 }
