@@ -21,4 +21,5 @@ type LoggerI interface {
 	Trace(ctx context.Context, begin time.Time, fc func() (string, int64), err error)
 	Warn(ctx context.Context, msg string, data ...interface{})
 	Write(p []byte) (n int, err error)
+	Print(v ...interface{})
 }

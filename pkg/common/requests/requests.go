@@ -2,8 +2,10 @@ package requests
 
 import (
 	"github.com/gilperopiola/go-rest-example/pkg/common"
-	"github.com/gin-gonic/gin"
+	"github.com/gilperopiola/go-rest-example/pkg/common/config"
+	"github.com/gilperopiola/go-rest-example/pkg/common/models"
 
+	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 )
 
@@ -71,4 +73,11 @@ func validateRequest(validate *validator.Validate, request Request) error {
 		return common.Wrap(err.Error(), common.ErrValidatingRequest)
 	}
 	return nil
+}
+
+func modelDeps(config *config.Config, repository models.RepositoryI) *models.ModelDependencies {
+	return &models.ModelDependencies{
+		Config:     config,
+		Repository: repository,
+	}
 }

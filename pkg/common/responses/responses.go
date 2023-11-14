@@ -1,7 +1,9 @@
 package responses
 
+/*-----------------------------------------------------------------------------------------------------
 // These aren't the HTTP Responses that the API will return, but the responses that the Service Layer
-// returns to the Transport Layer.
+// returns to the Transport Layer. See handlers.go for context.
+//-----------------------------------*/
 
 type All interface {
 	SignupResponse |
@@ -15,9 +17,9 @@ type All interface {
 		CreateUserPostResponse
 }
 
-/*-------------------
-//      Auth
-//-----------------*/
+/*--------------------
+//      Users
+//------------------*/
 
 type SignupResponse struct {
 	User User `json:"user"`
@@ -26,10 +28,6 @@ type SignupResponse struct {
 type LoginResponse struct {
 	Token string `json:"token"`
 }
-
-/*--------------------
-//      Users
-//------------------*/
 
 type CreateUserResponse struct {
 	User User `json:"user"`

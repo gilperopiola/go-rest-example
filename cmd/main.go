@@ -9,9 +9,9 @@ import (
 	"github.com/gilperopiola/go-rest-example/pkg/repository"
 	"github.com/gilperopiola/go-rest-example/pkg/service"
 	"github.com/gilperopiola/go-rest-example/pkg/transport"
-	"github.com/go-playground/validator/v10"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 )
 
 /*---------------------------------------------
@@ -38,7 +38,7 @@ func main() {
 
 	middlewares := []gin.HandlerFunc{
 		gin.Recovery(), // Panic recovery
-		//middleware.NewTimeoutMiddleware(config.General.Timeout),                                 // Timeout TODO Fix 500
+		//middleware.NewTimeoutMiddleware(config.Timeout),                               		 // Timeout TODO Fix 500
 		middleware.NewRateLimiterMiddleware(middleware.NewRateLimiter(200)),                     // Rate Limiter
 		middleware.NewCORSConfigMiddleware(),                                                    // CORS
 		middleware.NewNewRelicMiddleware(middleware.NewNewRelic(config.Monitoring, logger)),     // New Relic (monitoring)
@@ -48,6 +48,7 @@ func main() {
 	logger.Logger.Info("Middlewares OK!", nil)
 
 	database := repository.NewDatabase()
+	sqlDatabase := database.SQLDB()
 	logger.Logger.Info("Database OK!", nil)
 
 	repositoryLayer := repository.New(database)
@@ -56,7 +57,7 @@ func main() {
 	serviceLayer := service.New(repositoryLayer)
 	logger.Logger.Info("Service Layer OK!", nil)
 
-	transportLayer := transport.New(serviceLayer, validator.New())
+	transportLayer := transport.New(serviceLayer, validator.New(), sqlDatabase)
 	logger.Logger.Info("Transport Layer OK!", nil)
 
 	router := transport.NewRouter(transportLayer, middlewares...)

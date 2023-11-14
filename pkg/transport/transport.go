@@ -1,6 +1,8 @@
 package transport
 
 import (
+	"database/sql"
+
 	"github.com/gilperopiola/go-rest-example/pkg/service"
 
 	"github.com/gin-gonic/gin"
@@ -26,9 +28,10 @@ type TransportLayer interface {
 
 type transport struct {
 	service.ServiceLayer
-	validate *validator.Validate
+	validate *validator.Validate // Used to validate requests
+	sqlDB    *sql.DB             // This is only used for the health check
 }
 
-func New(service service.ServiceLayer, validate *validator.Validate) *transport {
-	return &transport{service, validate}
+func New(service service.ServiceLayer, validate *validator.Validate, sqlDB *sql.DB) *transport {
+	return &transport{service, validate, sqlDB}
 }

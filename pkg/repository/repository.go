@@ -9,15 +9,12 @@ import (
 var _ RepositoryLayer = (*repository)(nil)
 
 type RepositoryLayer interface {
-	// Users
 	CreateUser(user models.User) (models.User, error)
 	GetUser(user models.User, opts ...options.QueryOption) (models.User, error)
 	UpdateUser(user models.User) (models.User, error)
 	UpdatePassword(userID int, password string) error
 	DeleteUser(user models.User) (models.User, error)
 	SearchUsers(page, perPage int, opts ...options.QueryOption) (models.Users, error)
-
-	// Posts
 	CreateUserPost(post models.UserPost) (models.UserPost, error)
 }
 

@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"log"
 	"os"
@@ -10,6 +11,7 @@ import (
 	"github.com/gilperopiola/go-rest-example/pkg/common"
 	"github.com/gilperopiola/go-rest-example/pkg/common/models"
 
+	mysqlLogger "github.com/go-sql-driver/mysql"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -41,6 +43,15 @@ func (database *database) DB() *gorm.DB {
 	return database.db
 }
 
+func (database *database) SQLDB() *sql.DB {
+	sqlDB, _ := database.db.DB()
+	return sqlDB
+}
+
+/*---------------------------
+//  Connect to DB & Ping it
+//-------------------------*/
+
 func (database *database) connectToDB() error {
 	dbConfig := common.Cfg.Database
 	retries := 0
@@ -54,15 +65,31 @@ func (database *database) connectToDB() error {
 
 		retries++
 		if retries >= dbConfig.MaxRetries {
-			common.Logger.Error(context.Background(), fmt.Sprintf("error connecting to database after %d retries: %v", dbConfig.MaxRetries, err), nil)
 			return err
 		}
 
 		common.Logger.Info(context.Background(), "error connecting to database, retrying... ", nil)
 		time.Sleep(time.Duration(dbConfig.RetryDelay) * time.Second)
 	}
+
+	// Ping database to check if it's alive
+	sqlDB, err := database.db.DB()
+	if err != nil {
+		return err
+	}
+
+	if err := sqlDB.Ping(); err != nil {
+		return err
+	}
+
+	mysqlLogger.SetLogger(common.Logger)
+
 	return nil
 }
+
+/*---------------------------
+//    DB Configuration
+//-------------------------*/
 
 func (database *database) configure() {
 	dbConfig := common.Cfg.Database

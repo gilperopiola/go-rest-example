@@ -116,7 +116,13 @@ func (l *LoggerAdapter) Trace(ctx context.Context, begin time.Time, fc func() (s
 
 // TODO Add Context and Data to params?
 func (l *LoggerAdapter) Info(ctx context.Context, msg string, data ...interface{}) {
-	l.Logger.Info(msg, map[string]interface{}{})
+	from := ""
+
+	if msg == "error connecting to database, retrying... " { // SQL
+		from = common.Gorm.Str()
+	}
+
+	l.Logger.Error(msg, map[string]interface{}{"data": data, "from": from})
 }
 
 func (l *LoggerAdapter) Warn(ctx context.Context, msg string, data ...interface{}) {
@@ -124,12 +130,37 @@ func (l *LoggerAdapter) Warn(ctx context.Context, msg string, data ...interface{
 }
 
 func (l *LoggerAdapter) Error(ctx context.Context, msg string, data ...interface{}) {
-	l.Logger.Error(msg, map[string]interface{}{})
+	from := ""
+
+	if msg == "failed to initialize database, got error %v" { // SQL
+		msg = "failed to initialize database"
+		from = common.Gorm.Str()
+	}
+
+	l.Logger.Error(msg, map[string]interface{}{"data": data, "from": from})
 }
 
 func (l *LoggerAdapter) Write(p []byte) (n int, err error) {
 	l.Logger.Info(string(p), map[string]interface{}{})
 	return len(p), nil
+}
+
+func (l *LoggerAdapter) Print(v ...interface{}) {
+
+	msg := ""
+	from := ""
+
+	if len(v) > 0 {
+		var ok bool
+		if msg, ok = v[0].(string); ok {
+			if msg == "closing bad idle connection: " { // SQL
+				msg += v[1].(error).Error()
+				from = common.Gorm.Str()
+			}
+		}
+	}
+
+	l.Logger.Info(msg, map[string]interface{}{"data": v, "from": from})
 }
 
 func (l *LoggerAdapter) LogMode(level gormLogger.LogLevel) gormLogger.Interface {

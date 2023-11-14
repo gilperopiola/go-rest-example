@@ -73,7 +73,7 @@ func (router *router) setEndpoints(transport TransportLayer) {
 	}
 
 	// Profiling
-	if common.Cfg.General.Profiling {
+	if common.Cfg.Profiling {
 		router.profiling()
 	}
 
