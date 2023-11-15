@@ -1,13 +1,16 @@
 package main
 
 import (
+	"context"
 	"log"
 
 	"github.com/gilperopiola/go-rest-example/pkg/common"
 	"github.com/gilperopiola/go-rest-example/pkg/common/config"
 	"github.com/gilperopiola/go-rest-example/pkg/common/middleware"
-	"github.com/gilperopiola/go-rest-example/pkg/repository"
 	"github.com/gilperopiola/go-rest-example/pkg/service"
+
+	//repository "github.com/gilperopiola/go-rest-example/pkg/sql_repository"
+	mongoRepository "github.com/gilperopiola/go-rest-example/pkg/mongo_repository"
 	"github.com/gilperopiola/go-rest-example/pkg/transport"
 
 	"github.com/gin-gonic/gin"
@@ -47,17 +50,27 @@ func main() {
 	}
 	logger.Logger.Info("Middlewares OK!", nil)
 
-	database := repository.NewDatabase()
-	sqlDatabase := database.SQLDB()
+	//database := repository.NewDatabase()
+	//sqlDatabase := database.SQLDB()
+	mongoDatabase := mongoRepository.NewDatabase()
+	defer func() {
+		if err := mongoDatabase.DB().Disconnect(context.TODO()); err != nil {
+			log.Fatal(err)
+		}
+	}()
+
 	logger.Logger.Info("Database OK!", nil)
 
-	repositoryLayer := repository.New(database)
+	//repositoryLayer := repository.New(database)
 	logger.Logger.Info("Repository Layer OK!", nil)
 
-	serviceLayer := service.New(repositoryLayer)
+	mongoRepositoryLayer := mongoRepository.New(mongoDatabase)
+	logger.Logger.Info("Mongo Repository Layer OK!", nil)
+
+	serviceLayer := service.New(mongoRepositoryLayer)
 	logger.Logger.Info("Service Layer OK!", nil)
 
-	transportLayer := transport.New(serviceLayer, validator.New(), sqlDatabase)
+	transportLayer := transport.New(serviceLayer, validator.New(), nil, mongoDatabase.DB())
 	logger.Logger.Info("Transport Layer OK!", nil)
 
 	router := transport.NewRouter(transportLayer, middlewares...)

@@ -100,8 +100,12 @@ func (t transport) healthCheck(c *gin.Context) {
 
 	success, content := true, "service is up and running :)"
 
-	if err := t.sqlDB.Ping(); err != nil {
-		success, content = false, "error pinging database :("
+	/*if err := t.sqlDB.Ping(); err != nil {
+		success, content = false, "error pinging sql database :("
+	}*/
+
+	if err := t.mongoClient.Ping(c.Request.Context(), nil); err != nil {
+		success, content = false, "error pinging mongo database :("
 	}
 
 	c.JSON(http.StatusOK, common.HTTPResponse{Success: success, Content: content})

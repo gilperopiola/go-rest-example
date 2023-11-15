@@ -4,7 +4,8 @@ import (
 	"github.com/gilperopiola/go-rest-example/pkg/common"
 	"github.com/gilperopiola/go-rest-example/pkg/common/requests"
 	"github.com/gilperopiola/go-rest-example/pkg/common/responses"
-	"github.com/gilperopiola/go-rest-example/pkg/repository/options"
+	mongoOptions "github.com/gilperopiola/go-rest-example/pkg/mongo_repository/options"
+	"github.com/gilperopiola/go-rest-example/pkg/sql_repository/options"
 
 	"github.com/gin-gonic/gin"
 )
@@ -92,7 +93,7 @@ func (s *service) UpdateUser(c *gin.Context, request *requests.UpdateUserRequest
 	user := request.ToUserModel(s.repository)
 
 	// Get user (with details)
-	opts := []options.QueryOption{options.WithoutDeleted(), options.WithDetails()}
+	opts := []any{options.WithoutDeleted(), options.WithDetails()}
 	if err := user.Get(opts...); err != nil {
 		return responses.UpdateUserResponse{}, common.Wrap("UpdateUser: user.Get", err)
 	}
@@ -147,7 +148,7 @@ func (s *service) SearchUsers(c *gin.Context, request *requests.SearchUsersReque
 	)
 
 	// Search (with details, filter by username)
-	opts := []options.QueryOption{options.WithDetails(), options.WithUsername(user.Username)}
+	opts := []any{options.WithDetails(), options.WithUsername(user.Username), mongoOptions.WithUsername(user.Username)}
 	users, err := user.Search(page, perPage, opts...)
 	if err != nil {
 		return responses.SearchUsersResponse{}, common.Wrap("SearchUsers: user.Search", err)

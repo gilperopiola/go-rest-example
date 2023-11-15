@@ -3,7 +3,6 @@ package models
 import (
 	"github.com/gilperopiola/go-rest-example/pkg/common"
 	"github.com/gilperopiola/go-rest-example/pkg/common/auth"
-	"github.com/gilperopiola/go-rest-example/pkg/repository/options"
 )
 
 /*------------------------------------------------------------------------
@@ -21,7 +20,7 @@ func (u *User) Create() (err error) {
 	return nil
 }
 
-func (u *User) Get(opts ...options.QueryOption) (err error) {
+func (u *User) Get(opts ...any) (err error) {
 	if *u, err = u.Repository.GetUser(*u, opts...); err != nil {
 		return common.Wrap("u.Repository.GetUser", err)
 	}
@@ -49,7 +48,7 @@ func (u *User) Delete() (err error) {
 	return nil
 }
 
-func (u *User) Search(page, perPage int, opts ...options.QueryOption) (Users, error) {
+func (u *User) Search(page, perPage int, opts ...any) (Users, error) {
 	users, err := u.Repository.SearchUsers(page, perPage, opts...)
 	if err != nil {
 		return []User{}, common.Wrap("u.Repository.SearchUsers", err)

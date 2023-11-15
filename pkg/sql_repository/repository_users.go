@@ -1,4 +1,4 @@
-package repository
+package sql_repository
 
 import (
 	"errors"
@@ -6,7 +6,7 @@ import (
 
 	"github.com/gilperopiola/go-rest-example/pkg/common"
 	"github.com/gilperopiola/go-rest-example/pkg/common/models"
-	"github.com/gilperopiola/go-rest-example/pkg/repository/options"
+	"github.com/gilperopiola/go-rest-example/pkg/sql_repository/options"
 
 	"gorm.io/gorm"
 )
@@ -33,7 +33,7 @@ func handleCreateUserError(err error) error {
 //       Get User
 //-----------------------*/
 
-func (r *repository) GetUser(user models.User, opts ...options.QueryOption) (models.User, error) {
+func (r *repository) GetUser(user models.User, opts ...any) (models.User, error) {
 	db := r.database.DB()
 
 	// Query by ID, username or email
@@ -44,9 +44,11 @@ func (r *repository) GetUser(user models.User, opts ...options.QueryOption) (mod
 		user.Username, user.Email = "", ""
 	}
 
+	// TODO Discard email if username is set & viceversa?
+
 	// WithoutDeleted, WithDetails, WithPosts
 	for _, opt := range opts {
-		db = opt(db, &query)
+		db = opt.(options.QueryOption)(db, &query)
 	}
 
 	// Get user
@@ -133,13 +135,13 @@ func (r *repository) DeleteUser(user models.User) (models.User, error) {
 //     Search Users
 //-----------------------*/
 
-func (r *repository) SearchUsers(page, perPage int, opts ...options.QueryOption) (models.Users, error) {
+func (r *repository) SearchUsers(page, perPage int, opts ...any) (models.Users, error) {
 	var db = r.database.DB()
 	var users models.Users
 
 	// WithUsername, WithDetails, WithPosts, WithoutDeleted
 	for _, opt := range opts {
-		db = opt(db, nil)
+		db = opt.(options.QueryOption)(db, nil)
 	}
 
 	if err := db.Offset(page * perPage).Limit(perPage).Find(&users).Error; err != nil {

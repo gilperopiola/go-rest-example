@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/gilperopiola/go-rest-example/pkg/common/config"
-	"github.com/gilperopiola/go-rest-example/pkg/repository/options"
 )
 
 /*----------------------------------------------------------------------------------------
@@ -27,11 +26,11 @@ type UserPosts []UserPost
 
 type RepositoryI interface {
 	CreateUser(user User) (User, error)
-	GetUser(user User, opts ...options.QueryOption) (User, error)
+	GetUser(user User, opts ...any) (User, error)
 	UpdateUser(user User) (User, error)
 	UpdatePassword(userID int, password string) error
 	DeleteUser(user User) (User, error)
-	SearchUsers(page, perPage int, opts ...options.QueryOption) (Users, error)
+	SearchUsers(page, perPage int, opts ...any) (Users, error)
 	CreateUserPost(post UserPost) (UserPost, error)
 }
 
@@ -49,32 +48,32 @@ type ModelDependencies struct {
 //---------------------*/
 
 type User struct {
-	*ModelDependencies
-	ID        int    `gorm:"primaryKey"`
-	Username  string `gorm:"unique;not null"`
-	Email     string `gorm:"unique;not null"`
-	Password  string `gorm:"not null"`
-	IsAdmin   bool
-	Details   UserDetail
-	Posts     UserPosts `gorm:"foreignKey:UserID;references:ID"`
-	Deleted   bool
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	*ModelDependencies `bson:"-"`
+	ID                 int        `gorm:"primaryKey" bson:"id"`
+	Username           string     `gorm:"unique;not null" bson:"username"`
+	Email              string     `gorm:"unique;not null" bson:"email"`
+	Password           string     `gorm:"not null" bson:"password"`
+	IsAdmin            bool       `bson:"isAdmin"`
+	Details            UserDetail `bson:"details"`
+	Posts              UserPosts  `gorm:"foreignKey:UserID;references:ID" bson:"posts"`
+	Deleted            bool       `bson:"deleted"`
+	CreatedAt          time.Time  `bson:"createdAt"`
+	UpdatedAt          time.Time  `bson:"updatedAt"`
 }
 
 type UserDetail struct {
-	ID        int    `gorm:"primaryKey"`
-	UserID    int    `gorm:"unique;not null"`
-	FirstName string `gorm:"not null"`
-	LastName  string `gorm:"not null"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID        int       `gorm:"primaryKey" bson:"id"`
+	UserID    int       `gorm:"unique;not null" bson:"-"`
+	FirstName string    `gorm:"not null" bson:"firstName"`
+	LastName  string    `gorm:"not null" bson:"lastName"`
+	CreatedAt time.Time `bson:"-"`
+	UpdatedAt time.Time `bson:"-"`
 }
 
 type UserPost struct {
-	*ModelDependencies
-	ID     int    `gorm:"primaryKey"`
-	Title  string `gorm:"not null"`
-	Body   string `gorm:"type:text"`
-	UserID int    `gorm:"not null"`
+	*ModelDependencies `bson:"-"`
+	ID                 int    `gorm:"primaryKey" bson:"id"`
+	Title              string `gorm:"not null" bson:"title"`
+	Body               string `gorm:"type:text" bson:"body"`
+	UserID             int    `gorm:"not null" bson:"-"`
 }
