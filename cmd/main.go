@@ -2,34 +2,37 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"log"
 
 	"github.com/gilperopiola/go-rest-example/pkg/common"
 	"github.com/gilperopiola/go-rest-example/pkg/common/config"
 	"github.com/gilperopiola/go-rest-example/pkg/common/middleware"
-	"github.com/gilperopiola/go-rest-example/pkg/service"
-
-	//repository "github.com/gilperopiola/go-rest-example/pkg/sql_repository"
 	mongoRepository "github.com/gilperopiola/go-rest-example/pkg/mongo_repository"
+	"github.com/gilperopiola/go-rest-example/pkg/service"
+	repository "github.com/gilperopiola/go-rest-example/pkg/sql_repository"
 	"github.com/gilperopiola/go-rest-example/pkg/transport"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 )
 
-/*---------------------------------------------
-// This is the entrypoint of the application.
-//
-// The HTTP Requests entrypoint is the RateLimiter middleware in /middleware/rate_limiter.go
-/-------------------------------------------------------------------------------------------*/
+/*
+	This is the entrypoint of the application.
+
+	The HTTP Requests entrypoint is the RateLimiter middleware in /middleware/rate_limiter.go
+*/
 
 func main() {
 
 	log.Println("Server starting ;)")
 
-	/*-------------------------
-	//      Dependencies
-	//-----------------------*/
+	/*-------------------------------------------
+	||              Dependencies
+	/*------------------------------------------*/
+
+	/* Config & Logger
+	/*----------------*/
 
 	config := config.New()
 	common.SetConfig(config)
@@ -38,6 +41,9 @@ func main() {
 	logger := middleware.NewLogger(config.LogInfo)
 	common.SetLogger(logger)
 	logger.Logger.Info("Logger OK!", nil)
+
+	/* Middlewares
+	/*------------*/
 
 	middlewares := []gin.HandlerFunc{
 		gin.Recovery(), // Panic recovery
@@ -50,35 +56,49 @@ func main() {
 	}
 	logger.Logger.Info("Middlewares OK!", nil)
 
-	//database := repository.NewDatabase()
-	//sqlDatabase := database.SQLDB()
-	mongoDatabase := mongoRepository.NewDatabase()
-	defer func() {
-		if err := mongoDatabase.DB().Disconnect(context.TODO()); err != nil {
-			log.Fatal(err)
-		}
-	}()
+	/* Database & Repository
+	/*----------------------*/
 
-	logger.Logger.Info("Database OK!", nil)
+	var repositoryLayer repository.RepositoryLayer
+	var mySQLDatabase *repository.Database
+	var mySQLDatabaseObject *sql.DB
+	var mongoDatabase *mongoRepository.Database
 
-	//repositoryLayer := repository.New(database)
-	logger.Logger.Info("Repository Layer OK!", nil)
+	switch config.Database.Type {
+	case "mysql":
+		mySQLDatabase = repository.NewDatabase()
+		mySQLDatabaseObject = mySQLDatabase.GetSQLDB()
+		repositoryLayer = repository.New(mySQLDatabase)
+	case "mongodb":
+		mongoDatabase := mongoRepository.NewDatabase()
+		defer mongoDatabase.Disconnect(context.Background())
+		repositoryLayer = mongoRepository.New(mongoDatabase, config.Database.Mongo)
+	default:
+		logger.Logger.Fatalf("Invalid database type: %s", config.Database.Type)
+	}
+	logger.Logger.Info("Database & Repository Layer OK!", nil)
 
-	mongoRepositoryLayer := mongoRepository.New(mongoDatabase)
-	logger.Logger.Info("Mongo Repository Layer OK!", nil)
+	/* Service
+	/*---------*/
 
-	serviceLayer := service.New(mongoRepositoryLayer)
+	serviceLayer := service.New(repositoryLayer)
 	logger.Logger.Info("Service Layer OK!", nil)
 
-	transportLayer := transport.New(serviceLayer, validator.New(), nil, mongoDatabase.DB())
+	/* Transport
+	/*----------*/
+
+	transportLayer := transport.New(serviceLayer, validator.New(), mySQLDatabaseObject, mongoDatabase.DB())
 	logger.Logger.Info("Transport Layer OK!", nil)
+
+	/* Router
+	/*--------*/
 
 	router := transport.NewRouter(transportLayer, middlewares...)
 	logger.Logger.Info("Router & Endpoints OK!", nil)
 
-	/*---------------------------
-	//       Server Start
-	//-------------------------*/
+	/*--------------------------------
+	||          Server Start
+	/*-------------------------------*/
 
 	port := config.Port
 	logger.Logger.Infof("Running Server on port %s!\n", port)

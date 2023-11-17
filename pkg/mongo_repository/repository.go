@@ -1,6 +1,7 @@
 package mongo_repository
 
 import (
+	"github.com/gilperopiola/go-rest-example/pkg/common/config"
 	"github.com/gilperopiola/go-rest-example/pkg/common/models"
 
 	"go.mongodb.org/mongo-driver/mongo"
@@ -19,22 +20,19 @@ type MongoRepositoryLayer interface {
 	CreateUserPost(post models.UserPost) (models.UserPost, error)
 }
 
-type mongoRepository struct {
-	*mongoDatabase
-	collections mongoCollections
-}
-
-func New(database *mongoDatabase) *mongoRepository {
-	countersCollection := database.db.Database("go-rest-example").Collection("counters")
-	usersCollection := database.db.Database("go-rest-example").Collection("users")
-
+func New(database *Database, mongoCfg config.Mongo) *mongoRepository {
 	return &mongoRepository{
-		mongoDatabase: database,
+		Database: database,
 		collections: mongoCollections{
-			counters: countersCollection,
-			users:    usersCollection,
+			counters: database.Database(mongoCfg.DBName).Collection("counters"),
+			users:    database.Database(mongoCfg.DBName).Collection("users"),
 		},
 	}
+}
+
+type mongoRepository struct {
+	*Database
+	collections mongoCollections
 }
 
 type mongoCollections struct {

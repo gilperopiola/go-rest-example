@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"strings"
@@ -12,7 +13,6 @@ import (
 type Config struct {
 	General
 	Database   Database
-	Auth       Auth
 	Monitoring Monitoring
 }
 
@@ -23,33 +23,36 @@ func New() *Config {
 }
 
 func (config *Config) setup() {
-
-	// We may be on the cmd folder or not. Hacky, I know.
+	// We may be on the cmd folder or not. Hacky, I know
 	envFilePath := ".env"
 	if currentFolderIsCMD() {
 		envFilePath = "../.env"
 	}
-
 	// Load .env file into environment variables
-	err := godotenv.Load(envFilePath)
-	if err != nil {
+	if err := godotenv.Load(envFilePath); err != nil {
 		log.Fatalf("error loading .env file: %v", err)
 	}
-
 	// Parse the environment variables into the Config struct
-	err = envconfig.Process("", config)
-	if err != nil {
+	if err := envconfig.Process("", config); err != nil {
 		log.Fatalf("error parsing environment variables: %v", err)
 	}
 }
 
+func (sqlConfig *SQL) GetMySQLConnectionString() string {
+	var (
+		username = sqlConfig.Username
+		password = sqlConfig.Password
+		hostname = sqlConfig.Hostname
+		port     = sqlConfig.Port
+		schema   = sqlConfig.Schema
+		params   = "?charset=utf8&parseTime=True&loc=Local"
+	)
+	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s%s", username, password, hostname, port, schema, params)
+}
+
 func currentFolderIsCMD() bool {
 	dir, _ := os.Getwd()
-
-	// Extract the current directory name from the path
 	dirName := strings.Split(dir, string(os.PathSeparator))
 	currentDir := dirName[len(dirName)-1]
-
-	// Check if the last 3 letters are "cmd"
 	return strings.HasSuffix(currentDir, "cmd")
 }

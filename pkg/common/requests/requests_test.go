@@ -165,7 +165,7 @@ func TestMakeGetUserRequest(t *testing.T) {
 
 			// Prepare
 			context := makeTestContextWithHTTPRequest(GetUserRequest{}, "")
-			addValueAndParamToContext(context, contextUserIDKey, tt.ctxUserID, pathUserIDKey, tt.urlUserID)
+			addValueAndParamToContext(context, contextUserIDKey, tt.ctxUserID, "user_id", tt.urlUserID)
 
 			// Act
 			got, err := MakeRequest(context, &GetUserRequest{}, validator.New())
@@ -218,7 +218,7 @@ func TestMakeUpdateUserRequest(t *testing.T) {
 
 			// Prepare
 			context := makeTestContextWithHTTPRequest(tt.body, "")
-			addValueAndParamToContext(context, contextUserIDKey, 1, pathUserIDKey, "1")
+			addValueAndParamToContext(context, contextUserIDKey, 1, "user_id", "1")
 
 			// Act
 			got, err := MakeRequest(context, &UpdateUserRequest{}, validator.New())
@@ -296,7 +296,7 @@ func TestMakeDeleteUserRequest(t *testing.T) {
 
 			// Prepare
 			context := makeTestContextWithHTTPRequest(DeleteUserRequest{}, "")
-			addValueAndParamToContext(context, contextUserIDKey, tt.ctxUserID, pathUserIDKey, strconv.Itoa(tt.ctxUserID))
+			addValueAndParamToContext(context, contextUserIDKey, tt.ctxUserID, "user_id", strconv.Itoa(tt.ctxUserID))
 
 			// Act
 			got, err := MakeRequest(context, &DeleteUserRequest{}, validator.New())

@@ -34,9 +34,9 @@ type RepositoryI interface {
 	CreateUserPost(post UserPost) (UserPost, error)
 }
 
-/*-----------------------------------------
+/*-----------------------------------------------------------------------------
 // When the Service creates a Model, it passes the Config & Repository to it.
-//----------------------------------------------------------------------------*/
+//---------------------------*/
 
 type ModelDependencies struct {
 	Config     *config.Config `gorm:"-"`

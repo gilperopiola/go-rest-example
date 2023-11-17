@@ -10,7 +10,7 @@ import (
 //----------------------*/
 
 func (u *User) GenerateTokenString() (string, error) {
-	return auth.GenerateToken(u.ID, u.Username, u.Email, u.GetRole(), u.Config.Auth.JWTSecret, u.Config.Auth.SessionDurationDays)
+	return auth.GenerateToken(u.ID, u.Username, u.Email, u.GetRole(), u.Config.JWTSecret, u.Config.SessionDurationDays)
 }
 
 func (u *User) Create() (err error) {
@@ -75,11 +75,11 @@ func (u *User) OverwriteDetails(firstName, lastName *string) {
 }
 
 func (u *User) HashPassword() {
-	u.Password = common.Hash(u.Password, u.Config.Auth.HashSalt)
+	u.Password = common.Hash(u.Password, u.Config.HashSalt)
 }
 
 func (u *User) PasswordMatches(password string) bool {
-	return u.Password == common.Hash(password, u.Config.Auth.HashSalt)
+	return u.Password == common.Hash(password, u.Config.HashSalt)
 }
 
 func (u *User) GetRole() auth.Role {

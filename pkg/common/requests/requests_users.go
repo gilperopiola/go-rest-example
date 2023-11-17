@@ -12,7 +12,6 @@ import (
 
 const (
 	contextUserIDKey = "UserID"
-	pathUserIDKey    = "user_id"
 )
 
 /*---------------
@@ -38,7 +37,7 @@ func (r *SignupRequest) ToUserModel(config *config.Config, repository models.Rep
 	return models.User{
 		Username: r.Username,
 		Email:    r.Email,
-		Password: common.Hash(r.Password, config.Auth.HashSalt),
+		Password: common.Hash(r.Password, config.HashSalt),
 		Details: models.UserDetail{
 			FirstName: r.FirstName,
 			LastName:  r.LastName,
@@ -100,7 +99,7 @@ func (r *CreateUserRequest) ToUserModel(config *config.Config, repository models
 	return models.User{
 		Email:    r.Email,
 		Username: r.Username,
-		Password: common.Hash(r.Password, config.Auth.HashSalt),
+		Password: common.Hash(r.Password, config.HashSalt),
 		Details: models.UserDetail{
 			FirstName: r.FirstName,
 			LastName:  r.LastName,
@@ -167,13 +166,6 @@ func (r *UpdateUserRequest) ToUserModel(repository models.RepositoryI) models.Us
 		},
 		ModelDependencies: modelDeps(nil, repository),
 	}
-}
-
-func getPtrStrValue(s *string) string {
-	if s == nil {
-		return ""
-	}
-	return *s
 }
 
 /*--------------------
@@ -273,8 +265,7 @@ type CreateUserPostRequest struct {
 }
 
 func (req *CreateUserPostRequest) Build(c common.GinI) error {
-	err := bindRequestBody(c, req)
-	if err != nil {
+	if err := bindRequestBody(c, req); err != nil {
 		return err
 	}
 

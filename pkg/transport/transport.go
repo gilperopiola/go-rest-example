@@ -4,10 +4,10 @@ import (
 	"database/sql"
 
 	"github.com/gilperopiola/go-rest-example/pkg/service"
-	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // Compile time check to validate that the transport struct implements the TransportLayer interface
@@ -29,6 +29,7 @@ type TransportLayer interface {
 
 type transport struct {
 	service.ServiceLayer
+
 	validate    *validator.Validate // Used to validate requests
 	sqlDB       *sql.DB             // This is only used for the health check
 	mongoClient *mongo.Client       // This is only used for the health check

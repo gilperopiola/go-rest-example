@@ -65,14 +65,17 @@ func bindRequestBody(c common.GinI, request Request) error {
 }
 
 func validateRequest(validate *validator.Validate, request Request) error {
-	if err := validate.Struct(request); err != nil {
-		if validationErrs, ok := err.(validator.ValidationErrors); ok { // TODO Fully fledge error messages
-			firstErr := validationErrs[0]
-			return common.Wrap(err.Error(), common.ErrInvalidValue(firstErr.StructField()))
-		}
-		return common.Wrap(err.Error(), common.ErrValidatingRequest)
+	err := validate.Struct(request)
+	if err == nil {
+		return nil
 	}
-	return nil
+
+	if validationErrs, ok := err.(validator.ValidationErrors); ok { // TODO Fully fledge error messages
+		firstErr := validationErrs[0]
+		return common.Wrap(err.Error(), common.ErrInvalidValue(firstErr.StructField()))
+	}
+
+	return common.Wrap(err.Error(), common.ErrValidatingRequest)
 }
 
 func modelDeps(config *config.Config, repository models.RepositoryI) *models.ModelDependencies {
@@ -80,4 +83,11 @@ func modelDeps(config *config.Config, repository models.RepositoryI) *models.Mod
 		Config:     config,
 		Repository: repository,
 	}
+}
+
+func getPtrStrValue(s *string) string {
+	if s == nil {
+		return ""
+	}
+	return *s
 }

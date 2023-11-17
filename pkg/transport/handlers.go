@@ -21,18 +21,18 @@ import (
 //  - 3. Add errors to Context. If there are none, write back the OK HTTP Response to the client.
 //
 // handleRequest takes:
-//   - 1. A transport and a gin context
+//   - 1. A gin context
 //   - 2. An empty request struct (the concrete type)
 //   - 3. A go-playground validator (https://github.com/go-playground/validator/)
 //   - 4. A function that makes a XXXRequest struct from the gin context
 //   - 5. A function that calls the Service with that XXXRequest and returns a XXXResponse
 //----------------------------------------------------------------------------------*/
 
-func handleRequest[reqT requests.All, respT responses.All](c *gin.Context, emptyReq reqT, val *validator.Validate,
+func handleRequest[reqT requests.All, respT responses.All](c *gin.Context, emptyReq reqT, vldtr *validator.Validate,
 	makeRequestFn func(*gin.Context, reqT, *validator.Validate) (reqT, error), serviceFn func(*gin.Context, reqT) (respT, error)) {
 
 	// Build, validate and get request
-	request, err := makeRequestFn(c, emptyReq, val)
+	request, err := makeRequestFn(c, emptyReq, vldtr)
 	if err != nil {
 		c.Error(err)
 		return // Transport error
@@ -98,14 +98,26 @@ func (t transport) createUserPost(c *gin.Context) {
 
 func (t transport) healthCheck(c *gin.Context) {
 
+	// Default values
 	success, content := true, "service is up and running :)"
 
-	/*if err := t.sqlDB.Ping(); err != nil {
-		success, content = false, "error pinging sql database :("
-	}*/
+	// If no databases are enabled
+	if t.sqlDB == nil && t.mongoClient == nil {
+		success, content = false, "no databases enabled :("
+	}
 
-	if err := t.mongoClient.Ping(c.Request.Context(), nil); err != nil {
-		success, content = false, "error pinging mongo database :("
+	// If MySQL Ping fails
+	if t.sqlDB != nil {
+		if err := t.sqlDB.Ping(); err != nil {
+			success, content = false, "error pinging sql database :("
+		}
+	}
+
+	// If MongoClient Ping fails
+	if t.mongoClient != nil {
+		if err := t.mongoClient.Ping(c.Request.Context(), nil); err != nil {
+			success, content = false, "error pinging mongo database :("
+		}
 	}
 
 	c.JSON(http.StatusOK, common.HTTPResponse{Success: success, Content: content})

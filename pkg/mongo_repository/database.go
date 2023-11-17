@@ -2,139 +2,162 @@ package mongo_repository
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/gilperopiola/go-rest-example/pkg/common"
+	"github.com/gilperopiola/go-rest-example/pkg/common/config"
 	"github.com/gilperopiola/go-rest-example/pkg/common/models"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type mongoDatabase struct {
-	db *mongo.Client
+/*---------------------------------------------------------------
+// If you add a new collection, remember to add it here as well
+//-----------------------------------------------------*/
+
+var collectionNames = []string{
+	"counters",
+	"users",
 }
 
-func NewDatabase() *mongoDatabase {
-	var database mongoDatabase
-	var err error
+var defaultIDCounters = []interface{}{
+	bson.D{{Key: "_id", Value: "user_id"}, {Key: "seq", Value: 1}},
+	bson.D{{Key: "_id", Value: "user_post_id"}, {Key: "seq", Value: 0}},
+}
+
+/*---------------------------
+//     Mongo Database
+//-------------------------*/
+
+type Database struct {
+	*mongo.Client
+}
+
+func NewDatabase() *Database {
+	var database Database
+	var cfg = common.Cfg
 
 	// Create connection. It's deferred closed in main.go.
-	if database.db, err = database.connectToDB(); err != nil {
-		log.Fatalf("error connecting to database: %v", err)
+	var err error
+	if database.Client, err = database.connect(cfg.Database.Mongo); err != nil {
+		log.Fatalf("error connecting to mongo database: %v", err)
 	}
 
-	database.configure()
+	database.configure(cfg)
 
 	return &database
 }
 
-func (database *mongoDatabase) DB() *mongo.Client {
-	return database.db
+func (database *Database) DB() *mongo.Client {
+	if database == nil {
+		return nil
+	}
+	return database.Client
 }
 
 /*---------------------------
 //  Connect to DB & Ping it
 //-------------------------*/
 
-func (database *mongoDatabase) connectToDB() (*mongo.Client, error) {
+func (database Database) connect(mongoConfig config.Mongo) (*mongo.Client, error) {
 
-	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
-
-	client, err := mongo.Connect(context.TODO(), clientOptions)
+	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI(mongoConfig.ConnectionString))
 	if err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("error connecting: %w", err)
 	}
 
-	err = client.Ping(context.TODO(), nil)
-	if err != nil {
-		log.Fatal(err)
+	if err = client.Ping(context.Background(), nil); err != nil {
+		return nil, fmt.Errorf("error pinging: %w", err)
 	}
 
 	return client, nil
 }
 
-/*---------------------------
+/*--------------------------
 //    DB Configuration
-//-------------------------*/
+//------------------------*/
 
-func (database *mongoDatabase) configure() {
-	usersCollection := database.db.Database("go-rest-example").Collection("users")
-	countersCollection := database.db.Database("go-rest-example").Collection("counters")
+func (database Database) configure(cfg *config.Config) {
+	dbConfig := cfg.Database
+	mongoConfig := dbConfig.Mongo
+	db := database.Database(mongoConfig.DBName)
 
-	if err := usersCollection.Drop(context.TODO()); err != nil {
-		log.Print(err)
+	// If we destroy all collections we create them again, adding back the default counters
+	// and setting up the indices.
+	if dbConfig.Destroy {
+		destroyAllCollections(db)
+		createNewCollections(db)
+		insertCounters(db)
+		insertIndices(db)
+	} else if dbConfig.Clean {
+		cleanAllCollections(db)
+		insertCounters(db)
 	}
-	if err := countersCollection.Drop(context.TODO()); err != nil {
-		log.Print(err)
-	}
 
-	if false {
-		if _, err := usersCollection.DeleteMany(context.TODO(), bson.D{}); err != nil {
+	if dbConfig.AdminInsert {
+		insertAdmin(db, cfg)
+	}
+}
+
+func cleanAllCollections(db *mongo.Database) {
+	for _, collectionName := range collectionNames {
+		db.Collection(collectionName).DeleteMany(context.Background(), bson.M{})
+	}
+}
+
+func destroyAllCollections(db *mongo.Database) {
+	for _, collectionName := range collectionNames {
+		db.Collection(collectionName).Drop(context.Background())
+	}
+}
+
+func createNewCollections(db *mongo.Database) {
+	for _, collectionName := range collectionNames {
+		db.CreateCollection(context.Background(), collectionName, options.CreateCollection())
+	}
+}
+
+func insertCounters(db *mongo.Database) {
+	countersCollection := db.Collection("counters")
+	for _, counter := range defaultIDCounters {
+		if _, err := countersCollection.InsertOne(context.Background(), counter); err != nil {
 			log.Print(err)
 		}
-		if _, err := countersCollection.DeleteMany(context.TODO(), bson.D{}); err != nil {
-			log.Print(err)
-		}
+	}
+}
+
+func insertIndices(db *mongo.Database) {
+	usernameIndex := mongo.IndexModel{Keys: bson.M{"username": 1}, Options: options.Index().SetUnique(true)}
+	if _, err := db.Collection("users").Indexes().CreateOne(context.Background(), usernameIndex); err != nil {
+		log.Print(err)
 	}
 
-	if err := database.db.Database("go-rest-example").CreateCollection(context.TODO(), "users", options.CreateCollection()); err != nil {
-		log.Fatal(err)
+	emailIndex := mongo.IndexModel{Keys: bson.M{"email": 1}, Options: options.Index().SetUnique(true)}
+	if _, err := db.Collection("users").Indexes().CreateOne(context.Background(), emailIndex); err != nil {
+		log.Print(err)
 	}
-	if err := database.db.Database("go-rest-example").CreateCollection(context.TODO(), "counters", options.CreateCollection()); err != nil {
-		log.Fatal(err)
-	}
+}
 
-	usersCollection = database.db.Database("go-rest-example").Collection("users")
-	countersCollection = database.db.Database("go-rest-example").Collection("counters")
-
-	// Documents to be inserted
-	documents := []interface{}{
-		bson.D{{"_id", "user_id"}, {"seq", 1}},
-		bson.D{{"_id", "user_post_id"}, {"seq", 0}},
-	}
-
-	// Insert documents
-	for _, doc := range documents {
-		_, err := countersCollection.InsertOne(context.TODO(), doc)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
-
-	admin := makeAdminModel("ferra.main@gmail.com", common.Hash(common.Cfg.Database.AdminPassword, common.Cfg.Auth.HashSalt))
-	admin.ID = 1
-	admin.Details.ID = 1
-	if _, err := usersCollection.InsertOne(context.Background(), admin); err != nil {
-		log.Fatal(err)
-	}
-
-	indexModel := mongo.IndexModel{
-		Keys:    bson.M{"username": 1},
-		Options: options.Index().SetUnique(true),
-	}
-
-	_, err := usersCollection.Indexes().CreateOne(context.TODO(), indexModel)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	indexModel = mongo.IndexModel{
-		Keys:    bson.M{"email": 1},
-		Options: options.Index().SetUnique(true),
-	}
-
-	_, err = usersCollection.Indexes().CreateOne(context.TODO(), indexModel)
-	if err != nil {
-		log.Fatal(err)
+func insertAdmin(db *mongo.Database, cfg *config.Config) {
+	admin := makeAdminModel("ferra.main@gmail.com", common.Hash(cfg.Database.AdminPassword, cfg.HashSalt))
+	if _, err := db.Collection("users").InsertOne(context.Background(), admin); err != nil {
+		log.Print(err)
 	}
 }
 
 func makeAdminModel(email, password string) *models.User {
 	return &models.User{
+		ID:       1,
 		Username: "admin",
 		Email:    email,
 		Password: password,
 		IsAdmin:  true,
+		Details: models.UserDetail{
+			ID:     1,
+			UserID: 1,
+		},
 	}
 }
