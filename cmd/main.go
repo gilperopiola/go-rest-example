@@ -23,89 +23,96 @@ import (
 	The HTTP Requests entrypoint is the RateLimiter middleware in /middleware/rate_limiter.go
 */
 
+type dependencies struct {
+	config      *config.Config
+	logger      *middleware.LoggerAdapter
+	middlewares []gin.HandlerFunc
+
+	mySQLDatabase       *repository.Database
+	mySQLDatabaseObject *sql.DB
+	mongoDatabase       *mongoRepository.Database
+
+	repositoryLayer repository.RepositoryLayer
+	serviceLayer    service.ServiceLayer
+	transportLayer  transport.TransportLayer
+
+	router transport.Router
+}
+
 func main() {
 
 	log.Println("Server starting ;)")
 
 	/*-------------------------------------------
-	||              Dependencies
+	                Dependencies
 	/*------------------------------------------*/
+
+	d := &dependencies{}
 
 	/* Config & Logger
 	/*----------------*/
 
-	config := config.New()
-	common.SetConfig(config)
-	log.Println("Config OK!")
+	d.config = config.New()
+	d.logger = middleware.NewLogger(d.config.LogInfo)
 
-	logger := middleware.NewLogger(config.LogInfo)
-	common.SetLogger(logger)
-	logger.Logger.Info("Logger OK!", nil)
+	common.SetConfig(d.config)
+	common.SetLogger(d.logger)
+
+	log := func(msg string) { d.logger.Logger.Info(msg, nil) }
+	log("Config & Logger OK!")
 
 	/* Middlewares
 	/*------------*/
 
-	middlewares := []gin.HandlerFunc{
+	d.middlewares = []gin.HandlerFunc{
 		gin.Recovery(), // Panic recovery
-		//middleware.NewTimeoutMiddleware(config.Timeout),                               		 // Timeout TODO Fix 500
-		middleware.NewRateLimiterMiddleware(middleware.NewRateLimiter(200)),                     // Rate Limiter
-		middleware.NewCORSConfigMiddleware(),                                                    // CORS
-		middleware.NewNewRelicMiddleware(middleware.NewNewRelic(config.Monitoring, logger)),     // New Relic (monitoring)
-		middleware.NewPrometheusMiddleware(middleware.NewPrometheus(config.Monitoring, logger)), // Prometheus (metrics)
-		middleware.NewErrorHandlerMiddleware(logger),                                            // Error Handler
+		//middleware.NewTimeoutMiddleware(d.config.Timeout),                               		 // Timeout TODO Fix 500
+		middleware.NewRateLimiterMiddleware(middleware.NewRateLimiter(200)),                         // Rate Limiter
+		middleware.NewCORSConfigMiddleware(),                                                        // CORS
+		middleware.NewNewRelicMiddleware(middleware.NewNewRelic(d.config.Monitoring, d.logger)),     // New Relic (monitoring)
+		middleware.NewPrometheusMiddleware(middleware.NewPrometheus(d.config.Monitoring, d.logger)), // Prometheus (metrics)
+		middleware.NewErrorHandlerMiddleware(d.logger),                                              // Error Handler
 	}
-	logger.Logger.Info("Middlewares OK!", nil)
+	log("Middlewares OK!")
 
 	/* Database & Repository
 	/*----------------------*/
 
-	var repositoryLayer repository.RepositoryLayer
-	var mySQLDatabase *repository.Database
-	var mySQLDatabaseObject *sql.DB
-	var mongoDatabase *mongoRepository.Database
-
-	switch config.Database.Type {
+	switch d.config.Database.Type {
 	case "mysql":
-		mySQLDatabase = repository.NewDatabase()
-		mySQLDatabaseObject = mySQLDatabase.GetSQLDB()
-		repositoryLayer = repository.New(mySQLDatabase)
+		d.mySQLDatabase = repository.NewDatabase()
+		d.mySQLDatabaseObject = d.mySQLDatabase.GetSQLDB()
+		d.repositoryLayer = repository.New(d.mySQLDatabase)
 	case "mongodb":
-		mongoDatabase := mongoRepository.NewDatabase()
-		defer mongoDatabase.Disconnect(context.Background())
-		repositoryLayer = mongoRepository.New(mongoDatabase, config.Database.Mongo)
+		d.mongoDatabase = mongoRepository.NewDatabase()
+		defer d.mongoDatabase.Disconnect(context.Background())
+		d.repositoryLayer = mongoRepository.New(d.mongoDatabase, d.config.Database.Mongo)
 	default:
-		logger.Logger.Fatalf("Invalid database type: %s", config.Database.Type)
+		d.logger.Logger.Fatalf("Invalid Database type: %s", d.config.Database.Type)
 	}
-	logger.Logger.Info("Database & Repository Layer OK!", nil)
+	log("Database & Repository Layer OK!")
 
-	/* Service
-	/*---------*/
+	/* Service & Transport
+	/*--------------------*/
 
-	serviceLayer := service.New(repositoryLayer)
-	logger.Logger.Info("Service Layer OK!", nil)
+	d.serviceLayer = service.New(d.repositoryLayer)
+	log("Service Layer OK!")
 
-	/* Transport
-	/*----------*/
-
-	transportLayer := transport.New(serviceLayer, validator.New(), mySQLDatabaseObject, mongoDatabase.DB())
-	logger.Logger.Info("Transport Layer OK!", nil)
+	d.transportLayer = transport.New(d.serviceLayer, validator.New(), d.mySQLDatabaseObject, d.mongoDatabase.DB())
+	log("Transport Layer OK!")
 
 	/* Router
 	/*--------*/
 
-	router := transport.NewRouter(transportLayer, middlewares...)
-	logger.Logger.Info("Router & Endpoints OK!", nil)
+	d.router = transport.NewRouter(d.transportLayer, d.middlewares...)
+	log("Router & Endpoints OK!")
 
 	/*--------------------------------
-	||          Server Start
+	            Server Start
 	/*-------------------------------*/
 
-	port := config.Port
-	logger.Logger.Infof("Running Server on port %s!\n", port)
-
-	err := router.Run(":" + port)
-	if err != nil {
-		log.Fatalf("Failed to start Server: %v :(", err)
+	if err := d.router.Run(":" + d.config.Port); err != nil {
+		d.logger.Logger.Fatalf("Failed to start Server: %v :(", err)
 	}
 
 	// Have a great day! :)

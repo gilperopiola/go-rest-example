@@ -12,12 +12,12 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-type router struct {
+type Router struct {
 	*gin.Engine
 }
 
-func NewRouter(t TransportLayer, middlewares ...gin.HandlerFunc) router {
-	var router router
+func NewRouter(t TransportLayer, middlewares ...gin.HandlerFunc) Router {
+	var router Router
 	router.prepare(!common.Cfg.Debug)
 
 	for _, middleware := range middlewares {
@@ -29,7 +29,7 @@ func NewRouter(t TransportLayer, middlewares ...gin.HandlerFunc) router {
 	return router
 }
 
-func (router *router) prepare(isProd bool) {
+func (router *Router) prepare(isProd bool) {
 
 	// Set Prod / Debug mode
 	if isProd {
@@ -49,7 +49,7 @@ func (router *router) prepare(isProd bool) {
 //     Routes / Endpoints
 //---------------------------*/
 
-func (router *router) setEndpoints(transport TransportLayer) {
+func (router *Router) setEndpoints(transport TransportLayer) {
 
 	router.GET("/health", transport.healthCheck)
 
@@ -67,7 +67,7 @@ func (router *router) setEndpoints(transport TransportLayer) {
 	fmt.Println("")
 }
 
-func (router *router) setV1Endpoints(v1 *gin.RouterGroup, transport TransportLayer) {
+func (router *Router) setV1Endpoints(v1 *gin.RouterGroup, transport TransportLayer) {
 
 	v1.POST("/signup", transport.signup)
 	v1.POST("/login", transport.login)
@@ -96,7 +96,7 @@ func (router *router) setV1Endpoints(v1 *gin.RouterGroup, transport TransportLay
 }
 
 // Profiling, only called if the config is set to true
-func (r *router) profiling() {
+func (r *Router) profiling() {
 	pprofGroup := r.Group("/debug/pprof")
 	pprofGroup.GET("/", gin.WrapF(pprof.Index))
 	pprofGroup.GET("/cmdline", gin.WrapF(pprof.Cmdline))
