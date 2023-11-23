@@ -4,8 +4,8 @@ import (
 	"github.com/gilperopiola/go-rest-example/pkg/common"
 	"github.com/gilperopiola/go-rest-example/pkg/common/requests"
 	"github.com/gilperopiola/go-rest-example/pkg/common/responses"
-	mongoOptions "github.com/gilperopiola/go-rest-example/pkg/mongo_repository/options"
-	"github.com/gilperopiola/go-rest-example/pkg/sql_repository/options"
+	mongoOptions "github.com/gilperopiola/go-rest-example/pkg/repository/mongo_repository/options"
+	"github.com/gilperopiola/go-rest-example/pkg/repository/sql_repository/options"
 
 	"github.com/gin-gonic/gin"
 )

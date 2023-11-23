@@ -5,7 +5,7 @@ import (
 
 	"github.com/gilperopiola/go-rest-example/pkg/common"
 	"github.com/gilperopiola/go-rest-example/pkg/common/models"
-	mongoOptions "github.com/gilperopiola/go-rest-example/pkg/mongo_repository/options"
+	mongoOptions "github.com/gilperopiola/go-rest-example/pkg/repository/mongo_repository/options"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"

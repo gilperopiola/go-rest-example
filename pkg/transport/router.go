@@ -31,7 +31,7 @@ func NewRouter(t TransportLayer, middlewares ...gin.HandlerFunc) Router {
 
 func (router *Router) prepare(isProd bool) {
 
-	// Set Prod / Debug mode
+	// Set Prod
 	if isProd {
 		gin.SetMode(gin.ReleaseMode)
 	}

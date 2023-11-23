@@ -8,9 +8,9 @@ import (
 	"github.com/gilperopiola/go-rest-example/pkg/common"
 	"github.com/gilperopiola/go-rest-example/pkg/common/config"
 	"github.com/gilperopiola/go-rest-example/pkg/common/middleware"
-	mongoRepository "github.com/gilperopiola/go-rest-example/pkg/mongo_repository"
+	mongoRepository "github.com/gilperopiola/go-rest-example/pkg/repository/mongo_repository"
+	repository "github.com/gilperopiola/go-rest-example/pkg/repository/sql_repository"
 	"github.com/gilperopiola/go-rest-example/pkg/service"
-	repository "github.com/gilperopiola/go-rest-example/pkg/sql_repository"
 	"github.com/gilperopiola/go-rest-example/pkg/transport"
 
 	"github.com/gin-gonic/gin"
