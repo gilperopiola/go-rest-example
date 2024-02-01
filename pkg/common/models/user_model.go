@@ -13,38 +13,51 @@ func (u *User) GenerateTokenString() (string, error) {
 	return auth.GenerateToken(u.ID, u.Username, u.Email, u.GetRole(), u.Config.JWTSecret, u.Config.SessionDurationDays)
 }
 
-func (u *User) Create() (err error) {
-	if *u, err = u.Repository.CreateUser(*u); err != nil {
+// Create creates a new user record in the database
+func (u *User) Create() error {
+	createdUser, err := u.Repository.CreateUser(*u)
+	if err != nil {
 		return common.Wrap("u.Repository.CreateUser", err)
 	}
+	*u = createdUser
 	return nil
 }
 
-func (u *User) Get(opts ...any) (err error) {
-	if *u, err = u.Repository.GetUser(*u, opts...); err != nil {
+// Get retrieves a user from the database based on the current user's fields
+func (u *User) Get(opts ...any) error {
+	updatedUser, err := u.Repository.GetUser(*u, opts...)
+	if err != nil {
 		return common.Wrap("u.Repository.GetUser", err)
 	}
+	*u = updatedUser
 	return nil
 }
 
-func (u *User) Update() (err error) {
-	if *u, err = u.Repository.UpdateUser(*u); err != nil {
+// Update updates the user's information in the database
+func (u *User) Update() error {
+	updatedUser, err := u.Repository.UpdateUser(*u)
+	if err != nil {
 		return common.Wrap("u.Repository.UpdateUser", err)
 	}
+	*u = updatedUser
 	return nil
 }
 
-func (u *User) UpdatePassword() (err error) {
-	if err = u.Repository.UpdatePassword(u.ID, u.Password); err != nil {
+// UpdatePassword updates the user's password.
+func (u *User) UpdatePassword() error {
+	if err := u.Repository.UpdatePassword(u.ID, u.Password); err != nil {
 		return common.Wrap("u.Repository.UpdatePassword", err)
 	}
 	return nil
 }
 
-func (u *User) Delete() (err error) {
-	if *u, err = u.Repository.DeleteUser(*u); err != nil {
+// Delete marks the user as deleted in the database
+func (u *User) Delete() error {
+	deletedUser, err := u.Repository.DeleteUser(*u)
+	if err != nil {
 		return common.Wrap("u.Repository.DeleteUser", err)
 	}
+	*u = deletedUser
 	return nil
 }
 

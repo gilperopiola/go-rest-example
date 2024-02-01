@@ -45,7 +45,7 @@ func GenerateToken(id int, username, email string, role Role, secret string, ses
 		},
 	}
 
-	// Generate token (struct)
+	// Generate token (object)
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	// Generate token (string)

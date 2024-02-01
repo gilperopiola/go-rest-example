@@ -3,7 +3,7 @@ package service
 import (
 	"github.com/gilperopiola/go-rest-example/pkg/common/requests"
 	"github.com/gilperopiola/go-rest-example/pkg/common/responses"
-	repository "github.com/gilperopiola/go-rest-example/pkg/repository/sql_repository"
+	"github.com/gilperopiola/go-rest-example/pkg/repository"
 
 	"github.com/gin-gonic/gin"
 )

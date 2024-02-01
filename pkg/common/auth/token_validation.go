@@ -20,7 +20,7 @@ func ValidateToken(role Role, shouldMatchUserID bool, secret string) gin.Handler
 	return func(c *gin.Context) {
 
 		// Get token string and then convert it to a *jwt.Token
-		token, err := getTokenStructFromContext(c, secret)
+		token, err := getTokenFromAuthorizationHeader(c, secret)
 		if err != nil {
 			c.Error(common.Wrap("auth.getTokenStructFromContext", common.ErrUnauthorized))
 			c.Abort()
@@ -48,30 +48,23 @@ func ValidateToken(role Role, shouldMatchUserID bool, secret string) gin.Handler
 		}
 
 		// If OK, set UserID, Username and Email inside of context
-		userID, _ := strconv.Atoi(customClaims.ID)
-		addUserInfoToContext(c, userID, customClaims.Username, customClaims.Email)
+		addUserInfoToContext(c, customClaims)
 	}
 }
 
-func addUserInfoToContext(c *gin.Context, id int, username, email string) {
-	c.Set("UserID", id)
-	c.Set("Username", username)
-	c.Set("Email", email)
+func addUserInfoToContext(c *gin.Context, claims *CustomClaims) {
+	userID, _ := strconv.Atoi(claims.ID)
+	c.Set("UserID", userID)
+	c.Set("Username", claims.Username)
+	c.Set("Email", claims.Email)
 }
 
-func getTokenStructFromContext(c *gin.Context, secret string) (*jwt.Token, error) {
-
+func getTokenFromAuthorizationHeader(c *gin.Context, secret string) (*jwt.Token, error) {
 	// Get token string from headers
 	tokenString := strings.TrimPrefix(c.Request.Header.Get("Authorization"), "Bearer ")
 
 	// Decode string into actual *jwt.Token
-	token, err := decodeTokenString(tokenString, secret)
-	if err != nil {
-		return nil, err
-	}
-
-	// Token decoded OK
-	return token, nil
+	return decodeTokenString(tokenString, secret)
 }
 
 // decodeTokenString decodes a JWT token string into a *jwt.Token
@@ -82,10 +75,8 @@ func decodeTokenString(tokenString, secret string) (*jwt.Token, error) {
 		return &jwt.Token{}, common.ErrUnauthorized
 	}
 
-	// Make key function
+	// Make key function and return parsed token
 	keyFunc := func(token *jwt.Token) (interface{}, error) { return []byte(secret), nil }
-
-	// Parse
 	return jwt.ParseWithClaims(tokenString, &CustomClaims{}, keyFunc)
 }
 

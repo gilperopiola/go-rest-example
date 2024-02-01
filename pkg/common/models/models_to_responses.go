@@ -11,17 +11,17 @@ import (
 ------------------------*/
 
 func (u Users) ToResponseModel() []responses.User {
-	users := []responses.User{}
-	for _, user := range u {
-		users = append(users, user.ToResponseModel())
+	users := make([]responses.User, len(u))
+	for i, user := range u {
+		users[i] = user.ToResponseModel()
 	}
 	return users
 }
 
 func (p UserPosts) ToResponseModel() []responses.UserPost {
-	posts := []responses.UserPost{}
-	for _, post := range p {
-		posts = append(posts, post.ToResponseModel())
+	posts := make([]responses.UserPost, len(p))
+	for i, post := range p {
+		posts[i] = post.ToResponseModel()
 	}
 	return posts
 }

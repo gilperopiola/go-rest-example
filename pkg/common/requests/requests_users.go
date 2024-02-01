@@ -1,8 +1,6 @@
 package requests
 
 import (
-	"regexp"
-	"strconv"
 	"time"
 
 	"github.com/gilperopiola/go-rest-example/pkg/common"
@@ -63,11 +61,11 @@ func (req *LoginRequest) Build(c common.GinI) error {
 
 func (r *LoginRequest) ToUserModel(config *config.Config, repository models.RepositoryI) models.User {
 	out := models.User{
-		Password:          r.Password,
+		Password:          r.Password, // Unhashed
 		ModelDependencies: modelDeps(config, repository),
 	}
 
-	if !regexp.MustCompile(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`).MatchString(r.UsernameOrEmail) {
+	if !isEmail(r.UsernameOrEmail) {
 		out.Username = r.UsernameOrEmail
 	} else {
 		out.Email = r.UsernameOrEmail
@@ -199,23 +197,9 @@ type SearchUsersRequest struct {
 }
 
 func (req *SearchUsersRequest) Build(c common.GinI) error {
-	var (
-		err            = error(nil)
-		defaultPage    = "0"
-		defaultPerPage = "10"
-	)
-
+	defaultPage, defaultPerPage := 0, 10
 	req.Username = c.Query("username")
-
-	if req.Page, err = strconv.Atoi(c.DefaultQuery("page", defaultPage)); err != nil {
-		return common.ErrInvalidValue("page")
-	}
-
-	if req.PerPage, err = strconv.Atoi(c.DefaultQuery("per_page", defaultPerPage)); err != nil {
-		return common.ErrInvalidValue("per_page")
-	}
-
-	return nil
+	return parseAndValidatePagination(c, req, defaultPage, defaultPerPage)
 }
 
 func (r *SearchUsersRequest) ToUserModel(repository models.RepositoryI) models.User {
@@ -223,6 +207,14 @@ func (r *SearchUsersRequest) ToUserModel(repository models.RepositoryI) models.U
 		Username:          r.Username,
 		ModelDependencies: modelDeps(nil, repository),
 	}
+}
+
+func (req *SearchUsersRequest) SetPage(page int) {
+	req.Page = page
+}
+
+func (req *SearchUsersRequest) SetPerPage(perPage int) {
+	req.PerPage = perPage
 }
 
 /*-----------------------

@@ -1,6 +1,9 @@
 package requests
 
 import (
+	"regexp"
+	"strconv"
+
 	"github.com/gilperopiola/go-rest-example/pkg/common"
 	"github.com/gilperopiola/go-rest-example/pkg/common/config"
 	"github.com/gilperopiola/go-rest-example/pkg/common/models"
@@ -53,6 +56,34 @@ func makeRequest[req All](c *gin.Context, request req, validate *validator.Valid
 	return nil
 }
 
+/*---------------
+//  Pagination
+/--------------*/
+
+// PaginatedRequest defines the interface for requests that require pagination.
+type PaginatedRequest interface {
+	SetPage(page int)
+	SetPerPage(perPage int)
+}
+
+// parseAndValidatePagination handles the parsing and validation of pagination parameters.
+func parseAndValidatePagination(c common.GinI, req PaginatedRequest, defaultPage, defaultPerPage int) error {
+	page, err := getQueryInt(c, "page", defaultPage)
+	if err != nil {
+		return common.ErrInvalidValue("page")
+	}
+
+	perPage, err := getQueryInt(c, "per_page", defaultPerPage)
+	if err != nil {
+		return common.ErrInvalidValue("per_page")
+	}
+
+	req.SetPage(page)
+	req.SetPerPage(perPage)
+
+	return nil
+}
+
 /*--------------
 //   Helpers
 /-------------*/
@@ -70,6 +101,7 @@ func validateRequest(validate *validator.Validate, request Request) error {
 		return nil
 	}
 
+	// If we're here that means there have been errors
 	if validationErrs, ok := err.(validator.ValidationErrors); ok { // TODO Fully fledge error messages
 		firstErr := validationErrs[0]
 		return common.Wrap(err.Error(), common.ErrInvalidValue(firstErr.StructField()))
@@ -90,4 +122,16 @@ func getPtrStrValue(s *string) string {
 		return ""
 	}
 	return *s
+}
+
+// isEmail checks if the given string is an email.
+func isEmail(str string) bool {
+	emailRegex := regexp.MustCompile(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`)
+	return emailRegex.MatchString(str)
+}
+
+// getQueryInt parses an int value from query parameters with a default value.
+func getQueryInt(c common.GinI, key string, defaultValue int) (int, error) {
+	valueStr := c.DefaultQuery(key, strconv.Itoa(defaultValue))
+	return strconv.Atoi(valueStr)
 }

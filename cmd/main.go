@@ -8,8 +8,9 @@ import (
 	"github.com/gilperopiola/go-rest-example/pkg/common"
 	"github.com/gilperopiola/go-rest-example/pkg/common/config"
 	"github.com/gilperopiola/go-rest-example/pkg/common/middleware"
+	"github.com/gilperopiola/go-rest-example/pkg/repository"
 	mongoRepository "github.com/gilperopiola/go-rest-example/pkg/repository/mongo_repository"
-	repository "github.com/gilperopiola/go-rest-example/pkg/repository/sql_repository"
+	sqlRepository "github.com/gilperopiola/go-rest-example/pkg/repository/sql_repository"
 	"github.com/gilperopiola/go-rest-example/pkg/service"
 	"github.com/gilperopiola/go-rest-example/pkg/transport"
 
@@ -28,7 +29,7 @@ type dependencies struct {
 	logger      *middleware.LoggerAdapter
 	middlewares []gin.HandlerFunc
 
-	mySQLDatabase       *repository.Database
+	mySQLDatabase       *sqlRepository.Database
 	mySQLDatabaseObject *sql.DB
 	mongoDatabase       *mongoRepository.Database
 
@@ -80,9 +81,9 @@ func main() {
 
 	switch d.config.Database.Type {
 	case "mysql":
-		d.mySQLDatabase = repository.NewDatabase()
+		d.mySQLDatabase = sqlRepository.NewDatabase()
 		d.mySQLDatabaseObject = d.mySQLDatabase.GetSQLDB()
-		d.repositoryLayer = repository.New(d.mySQLDatabase)
+		d.repositoryLayer = sqlRepository.New(d.mySQLDatabase)
 	case "mongodb":
 		d.mongoDatabase = mongoRepository.NewDatabase()
 		defer d.mongoDatabase.Disconnect(context.Background())
