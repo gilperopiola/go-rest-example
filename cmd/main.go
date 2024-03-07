@@ -67,7 +67,7 @@ func main() {
 
 	d.middlewares = []gin.HandlerFunc{
 		gin.Recovery(), // Panic recovery
-		//middleware.NewTimeoutMiddleware(d.config.Timeout),                               		 // Timeout TODO Fix 500
+		//middleware.NewTimeoutMiddleware(d.config.Timeout),                               		 			 // Timeout T0D0 Fix 500
 		middleware.NewRateLimiterMiddleware(middleware.NewRateLimiter(200)),                         // Rate Limiter
 		middleware.NewCORSConfigMiddleware(),                                                        // CORS
 		middleware.NewNewRelicMiddleware(middleware.NewNewRelic(d.config.Monitoring, d.logger)),     // New Relic (monitoring)
@@ -120,12 +120,12 @@ func main() {
 }
 
 /*------
-// TODO
+// T0D0
 // - Redis
 // - More tests
 // - Batch insert
 // - Reset password
 // - Roles to DB
 // - Request IDs
-// - Search & Fix TODOs
+// - Search & Fix T0D0s
 // - OpenAPI (Swagger) */

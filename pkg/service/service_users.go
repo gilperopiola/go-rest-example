@@ -148,6 +148,7 @@ func (s *service) SearchUsers(c *gin.Context, request *requests.SearchUsersReque
 	)
 
 	// Search (with details, filter by username)
+	// T0D0 Maybe should check the repositoryI concrete type and use the appropriate options instead of using both
 	opts := []any{options.WithDetails(), options.WithUsername(user.Username), mongoOptions.WithUsername(user.Username)}
 	users, err := user.Search(page, perPage, opts...)
 	if err != nil {

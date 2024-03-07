@@ -9,9 +9,9 @@ import (
 	"testing"
 
 	"github.com/gilperopiola/go-rest-example/pkg/common"
-	"github.com/go-playground/validator/v10"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"github.com/stretchr/testify/assert"
 )
 

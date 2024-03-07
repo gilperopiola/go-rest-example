@@ -25,7 +25,7 @@ func NewErrorHandlerMiddleware(logger *LoggerAdapter) gin.HandlerFunc {
 			return
 		}
 
-		// If there are errors, get the last one
+		// Get the last error
 		err := c.Errors.Last()
 
 		// Get all the info we need
@@ -34,7 +34,7 @@ func NewErrorHandlerMiddleware(logger *LoggerAdapter) gin.HandlerFunc {
 		statusCode, humanReadable, stackTrace := getErrorInfo(err)
 
 		// Log the error
-		go logStackTrace(logger, statusCode, stackTrace, url, method)
+		logStackTrace(logger, statusCode, stackTrace, url, method)
 
 		c.JSON(statusCode, common.HTTPResponse{
 			Success: false,
@@ -44,33 +44,34 @@ func NewErrorHandlerMiddleware(logger *LoggerAdapter) gin.HandlerFunc {
 	}
 }
 
-func logStackTrace(logger *LoggerAdapter, status int, stackTrace, path, method string) {
-	logContext := logger.WithField("status", status).WithField("path", path).WithField("method", method)
-	logContext.Error(stackTrace)
+func logStackTrace(logger *LoggerAdapter, httpStatus int, stackTrace, path, method string) {
+	logger.WithFields(map[string]interface{}{
+		"status": httpStatus,
+		"path":   path,
+		"method": method,
+	}).Error(stackTrace)
 }
 
 // getErrorInfo returns the status, the human-readable string & the stack trace of the error
 func getErrorInfo(err error) (int, string, string) {
 	var (
-		stackTrace  = err.Error()
-		messages    []string
-		previousErr error
+		stackTrace      = err.Error()
+		messages        []string
+		secondToLastErr error
 	)
 
-	// Unwrap the error and get all the messages
+	// Keep unwrapping the error until you reach the last one. Append every message to the messages slice. Save the second-to-last error.
 	for err != nil {
 		messages = append(messages, err.Error())
-		previousErr = err
+		secondToLastErr = err
 		err = errors.Unwrap(err)
 	}
 
-	// Assert the type of the second-to-last error
-	customErr, ok := previousErr.(*common.Error)
+	customErr, ok := secondToLastErr.(*common.Error)
 	if !ok {
-		// Return 500 if not custom error
 		return http.StatusInternalServerError, err.Error(), stackTrace
 	}
 
-	// Return status, custom error msg (second-to-last one) and stack trace
+	// The second-to-last error on a chain is the one that contains the human-readable string
 	return customErr.Status(), messages[len(messages)-1], stackTrace
 }

@@ -6,6 +6,7 @@ import (
 
 type FilterOption func(filter bson.M) bson.M
 
+// GetFilterFromOptions returns a filter from the given FilterOptions.
 func GetFilterFromOptions(opts ...any) bson.M {
 	filter := bson.M{}
 	for _, opt := range opts {
