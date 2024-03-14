@@ -17,8 +17,6 @@ func GetFilterFromOptions(opts ...any) bson.M {
 	return filter
 }
 
-// WithoutDeleted adds a filter to exclude deleted documents
-
 // WithUsername adds a filter for username
 func WithUsername(username string) FilterOption {
 	return func(filter bson.M) bson.M {
